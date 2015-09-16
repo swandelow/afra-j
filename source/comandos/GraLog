@@ -39,7 +39,7 @@ filename="$1.$logExt"
 file="$logPath$filename"
 msgType=$3
 date=$(date)
-login="userName" ##preguntar que va aca!!
+login=$(whoami)
 
 #escribe en el archivo
 echo "$date-$login-$1-$msgType-$message" >> "$file"
