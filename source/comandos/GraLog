@@ -26,17 +26,23 @@ then
 	exit 1
 fi
 
+## TODO: sacar estas variables. se deben tomar del entorno
+logDir=
+logExt=".lg"
+
+
 #path de la carpeta de logueo
 logPath="$grupo/comandos/log/"
 message=$2
 sizeLimit=1048576
-filename="$1.log"
+filename="$1.$logExt"
 file="$logPath$filename"
-msg_type=$3
+msgType=$3
 date=$(date)
+login="userName" ##preguntar que va aca!!
 
 #escribe en el archivo
-echo "$date-$type-$message" >> "$file"
+echo "$date-$login-$1-$msgType-$message" >> "$file"
 
 #obtiene el tamanio del archivo
 filesize=$(stat -c%s "$file")
