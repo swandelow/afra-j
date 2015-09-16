@@ -4,7 +4,7 @@
 function printUsage {
 	echo "wrong usage"
 	echo "usage:"
-	echo "GraLog <command name> <type> <message>"
+	echo "GraLog <command name> <message> <type>"
 	echo "type can be:"
 	echo "INFO informative"
 	echo "WAR warning"
@@ -20,7 +20,7 @@ then
 fi
 
 #asegura que el tipo del mensaje este entre los mensajes soportados
-if [ $2 != "INFO" ] && [ $2 != "WAR" ] && [ $2 != "ERROR" ]
+if [ $3 != "INFO" ] && [ $3 != "WAR" ] && [ $3 != "ERROR" ]
 then
 	printUsage
 	exit 1
@@ -28,11 +28,11 @@ fi
 
 #path de la carpeta de logueo
 logPath="$grupo/comandos/log/"
-message=$3
+message=$2
 sizeLimit=1048576
 filename="$1.log"
 file="$logPath$filename"
-type=$2
+msg_type=$3
 date=$(date)
 
 #escribe en el archivo
@@ -43,7 +43,7 @@ filesize=$(stat -c%s "$file")
 
 if [ $filesize -gt $sizeLimit ]
 then
-	echo "log $filename excedido"
+	echo "log $filename excedido."
 fi
 
 exit 0
