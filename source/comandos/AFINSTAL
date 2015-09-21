@@ -1,0 +1,147 @@
+#!/bin/bash
+
+GRUPO=grupo06
+CONFDIR="$GRUPO"/conf
+BINDIR="$GRUPO"/bin
+MAEDIR="$GRUPO"/mae
+NOVEDIR="$GRUPO"/novedades
+ACEPDIR="$GRUPO"/aceptadas
+PROCDIR="$GRUPO"/sospechosas
+REPODIR="$GRUPO"/reportes
+LOGDIR="$GRUPO"/log
+RECHDIR="$GRUPO"/rechazadas
+DATASIZE=100
+LOGEXT=lg
+LOGSIZE=400
+
+if [ -d "$GRUPO" ]; then
+	echo Ya existe el directorio "$GRUPO"
+else
+	mkdir "$GRUPO"
+	echo Se creó el directorio "$GRUPO"
+fi
+
+if [ -d "$CONFDIR" ]; then
+	echo Ya existe el directorio "$CONFDIR"
+else
+	mkdir "$CONFDIR"
+	echo Se creó el directorio "$CONFDIR"
+fi
+
+echo Defina el directorio de instalación de los ejecutables \("$BINDIR"\):
+read bin_dir
+if [ ! -z "$bin_dir" ]; then
+	BINDIR="$GRUPO"/"$bin_dir"
+fi
+echo El directorio de ejecutables será "$BINDIR"
+
+echo Defina el directorio para maestros y tablas \("$MAEDIR"\):
+read mae_dir
+if [ ! -z "$mae_dir" ]; then
+	MAEDIR="$GRUPO"/"$mae_dir"
+fi
+echo El directorio para maestros y tablas será "$MAEDIR"
+
+echo Defina el directorio de recepción de archivos de llamadas \("$NOVEDIR"\):
+read nove_dir
+if [ ! -z "$nove_dir" ]; then
+	NOVEDIR="$GRUPO"/"$nove_dir"
+fi
+echo El directorio de recepción de archivos de llamadas será "$NOVEDIR"
+
+espacio_disponible=$(df -h -B M --output='avail' grupo06 | tail -1 | sed 's-\([0-9]*\)\(M\)-\1-g')
+
+echo Defina espacio mínimo libre para la recepción de archivos de llamadas en Mbytes \("$DATASIZE"\):
+read data_size
+if [ ! -z "$data_size" ]; then
+	DATASIZE="$data_size"
+fi
+
+while [[ ! $espacio_disponible > $DATASIZE ]];
+do
+	echo Insuficiente espacio en disco.
+	echo Espacio disponible: "$espacio_disponible" Mb.
+	echo Espacio requerido "$DATASIZE" Mb.
+	echo Inténtelo nuevamente.
+
+	echo Defina espacio mínimo libre para la recepción de archivos de llamadas en Mbytes \("$DATASIZE"\):
+	read data_size
+	if [ ! -z "$data_size" ]; then
+		DATASIZE="$data_size"
+	fi
+done
+echo El espacio mínimo libre para la recepción de archivos será "$DATASIZE"
+
+echo Defina el directorio de grabación de los archivos de llamadas aceptadas \("$ACEPDIR"\):
+read acep_dir
+if [ ! -z "$acep_dir" ]; then
+	ACEPDIR="$GRUPO"/"$acep_dir"
+fi
+echo El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"
+
+echo Defina el directorio de grabación de los registros de llamadas sospechosas \("$PROCDIR"\):
+read proc_dir
+if [ ! -z "$proc_dir" ]; then
+	PROCDIR="$GRUPO"/"$proc_dir"
+fi
+echo El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"
+
+echo Defina el directorio de grabación de los reportes \("$REPODIR"\):
+read repo_dir
+if [ ! -z "$repo_dir" ]; then
+	REPODIR="$GRUPO"/"$repo_dir"
+fi
+echo El directorio de grabación de los reportes será "$REPODIR"
+
+echo Defina el directorio para los archivos de log \("$LOGDIR"\):
+read log_dir
+if [ ! -z "$log_dir" ]; then
+	LOGDIR="$GRUPO"/"$log_dir"
+fi
+echo El directorio para los archivos de log será "$LOGDIR"
+
+echo Defina el nombre para la extensión de los archivos de log \("$LOGEXT"\):
+read log_ext
+if [ ! -z "$log_ext" ]; then
+	LOGEXT="$log_ext"
+fi
+
+while [ ${#LOGEXT} -gt 5 ];
+do
+	echo La extensión no puede ser mayor a 5 caracteres.
+	echo Defina el nombre para la extensión de los archivos de log \("$LOGEXT"\):
+	read log_ext
+	if [ ! -z "$log_ext" ]; then
+		LOGEXT="$log_ext"
+	fi
+done
+echo El nombre para la extensión de los archivos de log será "$LOGEXT"
+
+echo Defina el tamaño máximo para cada archivo de log en Kbytes \("$LOGSIZE"\):
+read log_size
+if [ ! -z "$log_size" ]; then
+	LOGSIZE="$log_size"
+fi
+echo El tamaño máximo para cada archivo de log será "$LOGSIZE"
+
+echo Defina el directorio de grabación de archivos rechazados \("$RECHDIR"\):
+read rech_dir
+if [ ! -z "$rech_dir" ]; then
+	RECHDIR="$GRUPO"/"$rech_dir"
+fi
+echo El directorio de grabación de archivos rechazados será "$RECHDIR"
+
+echo Directorio de Ejecutables: "$BINDIR" 
+echo Directorio de Maestros y Tablas: "$MAEDIR"
+echo Directorio de recepción de archivos y llamadas: "$NOVEDIR"
+echo Espacio mínimo libre para arribos: "$DATASIZE" Mb
+echo Directorio de Archivos de llamadas Aceptados: "$ACEPDIR"
+echo Directorio de Archivos de llamadas Sospechosas: "$PROCDIR"
+echo Directorio de Archivos de Reportes de llamadas: "$REPODIR"
+echo Directorio de Archivos de Log: "$LOGDIR"
+echo Extensión para los archivos de log: "$LOGEXT"
+echo Tamaño máximo para los archivos de log: "$LOGSIZE" Kb
+echo Directorio de Archivos Rechazados: "$RECHDIR"
+echo Estado de la instalación: LISTA
+echo Desea continuar con la instalación\? \(Si – No\)
+read continuar_instalacion
