@@ -28,28 +28,39 @@ fi
 
 ## TODO: sacar estas variables. se deben tomar del entorno
 logDir=
-logExt=".lg"
-
+logExt="lg"
 
 #path de la carpeta de logueo
-logPath="$grupo/comandos/log/"
+logPath="./log/"
 message=$2
 sizeLimit=1048576
 filename="$1.$logExt"
 file="$logPath$filename"
 msgType=$3
-date=$(date)
+date=$(date +"%F %T")
 login=$(whoami)
 
-#escribe en el archivo
-echo "$date-$login-$1-$msgType-$message" >> "$file"
+# AFINSTAL no loguea en logDir
+# la extension es "lg" en este caso
+if [[ $message == "AFINSTAL" ]]
+then
+	logPath="$grupo/conf"
+	logExt="lg"
+fi
 
 #obtiene el tamanio del archivo
 filesize=$(stat -c%s "$file")
 
 if [ $filesize -gt $sizeLimit ]
 then
-	echo "log $filename excedido."
+	# si se supera el limite trunca el archivo a las ultimas 50 lineas
+	echo "Log $filename excedido."
+	tail -n 50 "$file" > "$file.tmp"
+	cat "$file.tmp" > "$file" 
+	rm "$file.tmp"
 fi
+
+#escribe en el archivo
+echo "$date $login $1 $msgType : $message" >> "$file"
 
 exit 0
