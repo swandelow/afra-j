@@ -41,9 +41,11 @@ date=$(date +"%F %T")
 login=$(whoami)
 
 # AFINSTAL no loguea en logDir
+# la extension es "lg" en este caso
 if [[ $message == "AFINSTAL" ]]
 then
 	logPath="$grupo/conf"
+	logExt="lg"
 fi
 
 #obtiene el tamanio del archivo
