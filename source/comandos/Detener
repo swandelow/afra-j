@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Detener - detiene el demonio (AFUMB)
+# Detener - detiene el demonio (AFREC)
 
-afumbPid=`pgrep AFUMB`
+afrecPid=`pgrep AFREC`
 if [ $? -eq 0 ]; then
     #mata al demonio
-    kill -9 $afumbPid
+    kill -9 $afrecPid
     echo "Demonio detenido."
 else
     echo "El demonio no estaba ejecutandose."
