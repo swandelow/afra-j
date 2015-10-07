@@ -48,17 +48,21 @@ then
 	logExt="lg"
 fi
 
-#obtiene el tamanio del archivo
-filesize=$(stat -c%s "$file")
-
-if [ $filesize -gt $sizeLimit ]
+if [ -e $file ]
 then
-	# si se supera el limite trunca el archivo a las ultimas 50 lineas
-	echo "Log $filename excedido."
-	tail -n 50 "$file" > "$file.tmp"
-	cat "$file.tmp" > "$file" 
-	rm "$file.tmp"
+	# si existe, obtiene el tamanio del archivo
+	filesize=$(stat -c%s "$file")
+
+	if [ $filesize -gt $sizeLimit ]
+	then
+		# si se supera el limite trunca el archivo a las ultimas 50 lineas
+		echo "Log $filename excedido."
+		tail -n 50 "$file" > "$file.tmp"
+		cat "$file.tmp" > "$file" 
+		rm "$file.tmp"
+	fi
 fi
+
 
 #escribe en el archivo
 echo "$date $login $1 $msgType : $message" >> "$file"
