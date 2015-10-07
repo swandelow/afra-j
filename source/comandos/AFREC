@@ -1,0 +1,55 @@
+#!/bin/bash
+
+source util.sh
+source validadorArchivos.sh
+
+#funcion de logueo
+function log {
+	message=$1
+	type=$2
+	./GraLog AFREC "$message" "$type"
+}
+
+## ESTAS VARIABLES DEBEN TOMARSE DEL AMBIENTE ##
+GRUPO=grupo06
+NOVEDIR="$GRUPO"/novedades
+ACEPDIR="$GRUPO"/aceptadas
+RECHDIR="$GRUPO"/rechazadas
+DORMIR_DEMONIO=10
+################################################
+
+
+while [ 0 ]
+do
+	for i in `ls "$NOVEDIR"`
+	do
+		validarRegistroLlamados $i
+		if [ $? -eq 0 ]
+		then
+			./MoverA "$NOVEDIR/$i" "$ACEPDIR/"
+			log "archivo $i aceptado." "INFO"
+		else
+			./MoverA "$NOVEDIR/$i" "$RECHDIR/"
+			motivoRechazo=""
+			log "archivo $i rechazado. $motivoRechazo." "INFO"
+		fi	
+	done
+	
+	cantidadAceptados=`ls -1 "$ACEPDIR" | wc -l`
+	
+	if [ $cantidadAceptados != 0 ]
+	then
+		estaEjecutandose AFUMB
+			
+		if [ $? = 0 ]
+		then
+			pid=`pgrep AFUMB`
+			log "AFUMB aún corriendo pid $pid. Invocación pospuesta para el siguiente ciclo." "INFO"
+		else
+			./AFUMB &
+			log "AFUMB corriendo bajo el no.: $!" "INFO"
+		fi
+	fi
+	
+	sleep $DORMIR_DEMONIO 
+done
