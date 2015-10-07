@@ -1,0 +1,106 @@
+#!/bin/bash
+
+#
+# MoverA <path_archivo_origen> <path_directorio_destino> <comando>
+#
+# Ejemplo: MoverA directorioA/archivos.tab directorioB/ AFREC
+
+
+#funcion de logueo
+function log {
+	logFile=$1
+	message=$2
+	type=$3
+	if [ "$logFile" != "" ]
+	then
+	./GraLog "$logFile" "$message" "$type"
+	fi
+}
+
+#valida la cantidad de argumentos
+
+if [ $# -lt 2 ]
+then
+	echo "too few arguments"
+	exit 1
+fi
+
+if [ $# -gt 3 ]
+then
+	echo "too many arguments"
+	exit 1
+fi
+
+inputPath=$1
+outputPath=$2
+logFile=""
+
+duplicatePath="./duplicados"
+
+if [ $# -eq 3 ]
+then
+	logFile=$3
+fi
+
+
+movePath="$outputPath"
+
+inputFilename=`echo "$inputPath" | sed 's/^.*\/\(.*\)$/\1/'`
+fullMovePath="$movePath$inputFilename"
+
+#valida que la ruta de origen sea distinta de la ruta de destino
+if [ "$inputPath" == "$fullMovePath" ]
+then
+
+	log "$logFile" "mover: los archivos de origen y destino son el mismo archivo" "ERROR"
+	exit 1
+fi
+
+
+#valida la existencia de las rutas de destino y origen
+if [ ! -e "$inputPath" ]
+then
+	log "$logFile" "el archivo de origen $inputPath no existe" "ERROR"
+	exit 1
+fi
+
+if [ ! -d "$movePath" ]
+then
+	log "$logFile" "el directorio destino $movePath no existe" "ERROR"
+	exit 1
+fi
+
+
+#si ya existe el archivo a mover en la ruta de destino lo mueve a la subcarpeta dup
+if [ -e "$fullMovePath" ]
+then
+	#si no existe la carpeta dup la crea
+	if [ ! -d "$duplicatePath" ]
+	then
+	
+		mkdir "$duplicatePath" 
+	fi
+	
+	#obtiene el numero del ultimo archivo del mismo nombre que el que se esta tratando de mover a la carpeta duplicados
+	lastDuplicate=$(ls -1 "$duplicatePath" | grep -w "$inputFilename.[0-9]*" | sed 's/.*\/\(.*\)/\1/' | cut -d "~" -f 2 | sort | tail --lines=1)
+	
+	let duplicateNumber=$lastDuplicate+1
+	
+	duplicateFile="$inputFilename~$duplicateNumber"
+	#cambia la ruta de destino para que apunte a la carpeta duplicados
+	movePath="$duplicatePath/$duplicateFile"
+fi
+
+
+#mueve el archivo
+mv -f "$inputPath" "$movePath"
+
+#loguea si le entregaron un archivo de logueo
+if [ $? -eq 0 ]
+then
+	log "$logFile" "mover exitoso origen: $inputPath destino: $movePath" "INFO"
+else
+	log "$logFile" "mover fallo origen: $inputPath destino: $movePath" "ERROR"
+fi
+#program ended successfuly
+exit 0
