@@ -500,7 +500,6 @@ function complete_install {
 
 	declare -a missing_dirs
 	declare -a missing_files
-	#mae_filenames=(archivo_falso_1 archivo_falso_2 agentes.csv)
 	mae_filenames=(CdP.mae CdA.mae CdC.mae agentes.mae umbral.tab tllama.tab)
 	bin_filenames=()
 	
