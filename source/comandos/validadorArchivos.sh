@@ -15,7 +15,7 @@
 ## ESTAS VARIABLES DEBEN TOMARSE DEL AMBIENTE ##
 GRUPO=grupo06
 MAE="$GRUPO"/mae
-RUTAARCHIVOCENTRALES="$MAE"/"centrales.csv"
+RUTAARCHIVOCENTRALES="$MAE"/"CdC.mae"
 ################################################
 
 function validarRegistroLlamados(){
