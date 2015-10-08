@@ -23,16 +23,25 @@ while [ 0 ]
 do
 	for i in `ls "$NOVEDIR"`
 	do
-		validarRegistroLlamados $i
+		rutaArchivo="$NOVEDIR/$i"
+		validarRegistroLlamados $rutaArchivo
 		if [ $? -eq 0 ]
 		then
 			./MoverA "$NOVEDIR/$i" "$ACEPDIR/"
 			log "archivo $i aceptado." "INFO"
-		else
+		else 
 			./MoverA "$NOVEDIR/$i" "$RECHDIR/"
-			motivoRechazo=""
+				if [ $? -eq 1 ]; then
+					motivoRechazo="El tipo de archivo es invalido"
+				elif [ $? -eq 2 ]; then
+					motivoRechazo="La fecha del archivo es invalida"
+				elif [ $? -eq 3 ]; then
+					motivoRechazo="La fecha esta fuera del rango preestablecido"
+				else
+					motivoRechazo="La central es inexistente"
+				fi	
 			log "archivo $i rechazado. $motivoRechazo." "INFO"
-		fi	
+		fi
 	done
 	
 	cantidadAceptados=`ls -1 "$ACEPDIR" | wc -l`
