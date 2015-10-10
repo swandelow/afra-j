@@ -26,21 +26,23 @@ then
 	exit 1
 fi
 
-## TODO: sacar estas variables. se deben tomar del entorno
-logDir=
-logExt="lg"
+logExt="$LOGEXT"
 
 #path de la carpeta de logueo
-logPath="./log/"
+logPath="$LOGDIR"/
 message=$2
-sizeLimit=1048576
+sizeLimit="$LOGSIZE"
+if [ -z $sizeLimit ]; then
+	sizeLimit=400
+fi
+sizeLimit=$(($sizeLimit * 1024))
 filename="$1.$logExt"
 file="$logPath$filename"
 msgType=$3
 date=$(date +"%F %T")
 login=$(whoami)
 
-# AFINSTAL no loguea en logDir
+# AFINSTAL no loguea en LOGDIR
 # la extension es "lg" en este caso
 if [[ $message == "AFINSTAL" ]]
 then
@@ -57,10 +59,15 @@ then
 	then
 		# si se supera el limite trunca el archivo a las ultimas 50 lineas
 		echo "Log $filename excedido."
+		echo filesize: "$filesize"
+		echo sizeLimit: "$sizeLimit"
 		tail -n 50 "$file" > "$file.tmp"
 		cat "$file.tmp" > "$file" 
 		rm "$file.tmp"
 	fi
+else
+	touch $file
+	chmod +w+r $file
 fi
 
 

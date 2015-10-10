@@ -1,10 +1,19 @@
 #!/bin/bash
 
+#funcion de logueo
+function log {
+	message=$1
+	type=$2
+	./GraLog AFINI "$message" "$type"
+}
+
+LOG_INFO_TYPE=INFO
+LOG_ERROR_TYPE=ERROR
 GRUPO=grupo06
 CONFDIR="$GRUPO"/conf
-INSTALL_COMPLETE=1
-function check_install {
 
+function check_install {
+	INSTALL_COMPLETE=1
 	if [ ! -f "$CONFDIR"/AFINSTAL.cnfg ]; then
 		echo El programa no está instalado correctamente. Ejecute AFINSTAL.
 		INSTALL_COMPLETE=0
@@ -135,25 +144,38 @@ function init_environment {
 	LOGEXT=$(grep LOGEXT "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
 	LOGSIZE=$(grep LOGSIZE "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
 
-	export MAEDIR BINDIR NOVEDIR ACEPDIR PROCDIR REPODIR LOGDIR RECHDIR DATASIZE LOGEXT
+	export MAEDIR BINDIR NOVEDIR ACEPDIR PROCDIR REPODIR LOGDIR RECHDIR DATASIZE LOGEXT LOGSIZE
 	#Esta variable indica si el ambiente se encuentra inicializado
 	AFRAENV=1
 	export AFRAENV
 
 	echo Directorio de configuración: "$CONFDIR"
+	log "Directorio de configuración: "$CONFDIR"" "$LOG_INFO_TYPE"
 	echo $(ls "$CONFDIR")
+	log "$(ls -m "$CONFDIR")" "$LOG_INFO_TYPE"
 	echo Directorio de ejecutables: "$BINDIR"
-	echo $(ls "$BINDIR")
+	log "Directorio de ejecutables: "$BINDIR"" "$LOG_INFO_TYPE"
+	echo $(ls -m "$BINDIR")
+	log "$(ls -m "$BINDIR")" "$LOG_INFO_TYPE"
 	echo Directorio de maestros y tablas: "$MAEDIR"
-	echo $(ls "$MAEDIR")
+	log "Directorio de maestros y tablas: "$MAEDIR"" "$LOG_INFO_TYPE"
+	echo $(ls -m "$MAEDIR")
+	log "$(ls -m "$MAEDIR")" "$LOG_INFO_TYPE"
 	echo Directorio de recepción de archivos de llamadas: "$NOVEDIR"
+	log "Directorio de recepción de archivos de llamadas: "$NOVEDIR"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos de llamadas aceptadas: "$ACEPDIR"
+	log "Directorio de archivos de llamadas aceptadas: "$ACEPDIR"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos de llamadas sospechosas: "$PROCDIR"
+	log "Directorio de archivos de llamadas sospechosas: "$PROCDIR"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos de reportes de llamadas: "$REPODIR"
+	log "Directorio de archivos de reportes de llamadas: "$REPODIR"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos de log: "$LOGDIR"
+	log "Directorio de archivos de log: "$LOGDIR"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos rechazados: "$RECHDIR"
+	log "Directorio de archivos rechazados: "$RECHDIR"" "$LOG_INFO_TYPE"
 
-	echo Estado del Sistema: INICIALIZADO	
+	echo Estado del Sistema: INICIALIZADO
+	log "Estado del Sistema: INICIALIZADO" "$LOG_INFO_TYPE"
 }
 
 function start_afrec {
@@ -165,7 +187,13 @@ function start_afrec {
 		read afrec_choice
 	done
 	if [ "$afrec_choice" == Si ]; then
-		./Arrancar
+		if ! $(pgrep AFREC); then
+			./Arrancar
+			echo AFREC corriendo bajo el no.: Process Id de AFREC
+			log "AFREC corriendo bajo el no.: Process Id de AFREC" "$LOG_INFO_TYPE"
+		else
+			echo AFREC ya está corriendo. Puede detenerlo con el comando Detener.
+		fi
 	else
 		echo Puede activar AFREC cuando lo desee con el comando Arrancar.
 	fi	
@@ -175,6 +203,7 @@ check_install
 if [ $INSTALL_COMPLETE == 1 ]; then
 	if [ ! -z $AFRAENV ]; then
 		echo Ambiente ya inicializado, para reiniciar termine la sesión e ingrese nuevamente.
+		log "Ambiente ya inicializado, para reiniciar termine la sesión e ingrese nuevamente." "$LOG_ERROR_TYPE"
 	else 
 		init_environment
 		start_afrec
