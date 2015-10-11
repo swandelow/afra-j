@@ -302,9 +302,11 @@ function create_dirs {
 	mkdir -p "$NOVEDIR"
 	mkdir -p "$ACEPDIR"
 	mkdir -p "$PROCDIR"
+	mkdir -p "$PROCDIR"/proc
 	mkdir -p "$REPODIR"
 	mkdir -p "$LOGDIR"
 	mkdir -p "$RECHDIR"
+	mkdir -p "$RECHDIR"/llamadas
 	echo
 }
 
@@ -316,6 +318,10 @@ function copy_binaries {
 	cp Arrancar "$BINDIR"/Arrancar
 	cp Detener "$BINDIR"/Detener
 	cp MoverA "$BINDIR"/MoverA	
+	cp AFLIST.pl "$BINDIR"/AFLIST.pl
+	cp validadorArchivos.sh "$BINDIR"/validadorArchivos.sh
+	cp util.sh "$BINDIR"/util.sh
+
 	chmod -R +r+w+x "$BINDIR"
 }
 
@@ -387,7 +393,7 @@ function complete_install {
 	declare -a missing_dirs
 	declare -a missing_files
 	mae_filenames=(CdP.mae CdA.mae CdC.mae agentes.mae umbral.tab tllama.tab)
-	bin_filenames=(AFINI AFREC AFUMB GraLog Arrancar Detener MoverA)
+	bin_filenames=(AFINI AFREC AFUMB GraLog Arrancar Detener MoverA AFLIST.pl validadorArchivos.sh util.sh)
 	
 	index_dirs=0
 	index_files=0
