@@ -26,10 +26,10 @@ function logRechazados {
 }
 
 ## ESTAS VARIABLES DEBEN TOMARSE DEL AMBIENTE ##
-GRUPO=grupo06
-NOVEDIR="$GRUPO"/novedades
-ACEPDIR="$GRUPO"/aceptadas
-RECHDIR="$GRUPO"/rechazadas
+# GRUPO=grupo06
+# NOVEDIR="$GRUPO"/novedades
+# ACEPDIR="$GRUPO"/aceptadas
+# RECHDIR="$GRUPO"/rechazadas
 DORMIR_DEMONIO=10
 ################################################
 
@@ -44,6 +44,7 @@ do
 		rutaArchivo="$NOVEDIR/$i"
 		validarRegistroLlamados $rutaArchivo
 		resultado="$?"
+		log "Resultado validacion: $resultado"
 		if [ $resultado -eq 0 ]
 		then
 			./MoverA "$NOVEDIR/$i" "$ACEPDIR/"
