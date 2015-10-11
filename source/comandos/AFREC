@@ -7,7 +7,22 @@ source validadorArchivos.sh
 function log {
 	message=$1
 	type=$2
+	echo "$message" "$type"
 	./GraLog AFREC "$message" "$type"
+}
+
+# parametros 
+# $1 nombre de archivo
+# $2 resultado validación de archivo
+function logRechazados {
+	case "$2" in
+		1) motivoRechazo="El tipo de archivo es invalido" ;;
+		2) motivoRechazo="La fecha del archivo es invalida" ;;
+		3) motivoRechazo="La fecha esta fuera del rango preestablecido" ;;
+		4) motivoRechazo="La central es inexistente" ;;
+	esac
+		
+	log "Archivo $1 rechazado. $motivoRechazo." "INFO"
 }
 
 ## ESTAS VARIABLES DEBEN TOMARSE DEL AMBIENTE ##
@@ -18,29 +33,24 @@ RECHDIR="$GRUPO"/rechazadas
 DORMIR_DEMONIO=10
 ################################################
 
+ciclo=1
 
 while [ 0 ]
 do
+	log "Ejecutando ciclo nro. $ciclo." "INFO"
+	
 	for i in `ls "$NOVEDIR"`
 	do
 		rutaArchivo="$NOVEDIR/$i"
 		validarRegistroLlamados $rutaArchivo
-		if [ $? -eq 0 ]
+		resultado="$?"
+		if [ $resultado -eq 0 ]
 		then
 			./MoverA "$NOVEDIR/$i" "$ACEPDIR/"
-			log "archivo $i aceptado." "INFO"
+			log "Archivo $i aceptado." "INFO"
 		else 
 			./MoverA "$NOVEDIR/$i" "$RECHDIR/"
-				if [ $? -eq 1 ]; then
-					motivoRechazo="El tipo de archivo es invalido"
-				elif [ $? -eq 2 ]; then
-					motivoRechazo="La fecha del archivo es invalida"
-				elif [ $? -eq 3 ]; then
-					motivoRechazo="La fecha esta fuera del rango preestablecido"
-				else
-					motivoRechazo="La central es inexistente"
-				fi	
-			log "archivo $i rechazado. $motivoRechazo." "INFO"
+			logRechazados $i $resultado
 		fi
 	done
 	
@@ -60,5 +70,8 @@ do
 		fi
 	fi
 	
-	sleep $DORMIR_DEMONIO 
+	sleep $DORMIR_DEMONIO
+	# incremento contador de ciclos de ejecución.
+	((ciclo+=1))
+
 done
