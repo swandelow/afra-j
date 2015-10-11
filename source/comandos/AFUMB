@@ -11,13 +11,13 @@ function obtenerFecha {
 } 
 
 # SACAR ESTE HARCODEO Y TODOS 
-ACEPDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/ACEPDIR" 
-RECHDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/RECHDIR" #CAMBIAR POR EL DIRECTORIO GENERAL. 
-rutaDeArchivos="/home/nicolasdubiansky/Descargas/afra-j/archivos/carpeta" #ESTA RUTA TIENE QUE SER DONDE ESTAN LOS ARCHIVOS. 
+#ACEPDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/ACEPDIR" 
+#RECHDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/RECHDIR" #CAMBIAR POR EL DIRECTORIO GENERAL. 
+#rutaDeArchivos="/home/nicolasdubiansky/Descargas/afra-j/archivos/carpeta" #ESTA RUTA TIENE QUE SER DONDE ESTAN LOS ARCHIVOS. 
 
 # Recorro todos los archivos del directorio y me quedo con el minimo. 
 function obtenerArchivoFechaMasAntigua {        
-	cd $rutaDeArchivos 
+	cd $ACEPDIR 
 	dir=$(dir) 
 	obtenerFecha 
 	MINIMO=$fechaHoy 
@@ -37,8 +37,8 @@ function obtenerArchivoFechaMasAntigua {
 # Si no está, devuelve 1. 
 function verificarQueElArchivoHayaSidoProcesado { 
 	# Ahora hay que chequear que no este en el directorio PROCDIR. 
-	PROCDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/procdir" #CAMBIAR POR EL DIRECTORIO GENERAL.	 
-	cd "/home/nicolasdubiansky/Descargas/afra-j/archivos/procdir/proc"
+	#PROCDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/procdir" #CAMBIAR POR EL DIRECTORIO GENERAL.	 
+	cd "$PROCDIR/proc"
 	dir=$(dir) 
 	# Recorro todos los archivos procesados y me fijo si hay alguno con el mismo nombre. En ese caso muevo el archivo a RECHDIR. 
 	for file in $dir; 
@@ -65,11 +65,11 @@ function verificarCantidadDeCampos {
 		fi 
 		resultadoVerificarCampos=1
 		return 1 
-	done < $rutaDeArchivos/$nombreArchivoMinimo 
+	done < $ACEPDIR/$nombreArchivoMinimo 
 } 
 
 function obtenerCantidadArchivos { 
-	cd $rutaDeArchivos 
+	cd $ACEPDIR 
 	dir=$(dir) 
 	for file in $dir; 
 	do 
@@ -96,7 +96,7 @@ function rechazarRegistro(){
 function grabarLlamadaSospechosa(){
 	lineaAGrabar=$1
 	nombreArchivoAGenerarSospechoso=$oficina'_'$anioLlamadaMesLlamada
-	PROCDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/procdir" #CAMBIAR POR EL DIRECTORIO GENERAL.	 
+	#PROCDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/procdir" #CAMBIAR POR EL DIRECTORIO GENERAL.	 
 	cd $PROCDIR
 	echo "$lineaAGrabar" >> "$nombreArchivoAGenerarSospechoso" 
 }
@@ -107,7 +107,7 @@ function determinarTipoDeLlamada(){
 	numLineaB=$(echo "$1" | cut -d';' -f8)
 	if [ ! "$codPais" == "" ]; then #me fijo que se haya ingresado un codigo de pais (no es obligatorio)
 		codPaisExt="$codPais;" 
-		existecodPais=`grep "$codPaisExt" -c "/home/nicolasdubiansky/Descargas/afra-j/archivos/CdP.csv"` #me fijo si esta en el maestro de 																paises
+		existecodPais=`grep "$codPaisExt" -c "$MAEDIR/CdP.mae"` #me fijo si esta en el maestro de 																paises
 		if [[ "$?" -eq 1 ]] || [[ "$numLineaB" == "" ]] ; then ##la segunda condicion es porque dice que tiene que haber un numero en la 												consigna pero es medio al pedo
 			motivo="codigo de pais inexistente o no hay numero de linea"
 			tipoLLamada="error"
@@ -118,7 +118,7 @@ function determinarTipoDeLlamada(){
 	else 
 		codAreaA=$(echo "$1" | cut -d';' -f4)
 		codAreaB=$(echo "$1" | cut -d';' -f7)
-		existecodAreaB=`grep "$codAreaB" -c "/home/nicolasdubiansky/Descargas/afra-j/archivos/CdA.csv"` #me fijo si esta en el maestro de 																		área
+		existecodAreaB=`grep "$codAreaB" -c "$MAEDIR/CdA.mae"` #me fijo si esta en el maestro de 																		área
 		if [ "$?" -eq 1 ] ; then #No encontro el codigo de area.
 			motivo="area erronea"
 			return 1
@@ -147,7 +147,7 @@ function determinarTipoDeLlamada(){
 #Se fija si hay alguna llamada sospechosa y de ser así, la graba. Además setea los contadores.
 function verificarSiHayAlgunUmbralActivo {
 	regristroDelArchivoDeLLamadas=$line 
-	listaDeRegistrosDeNumeroOrigen=`grep $numLineaA  "/home/nicolasdubiansky/afra-j/archivos/umbrales.csv"`	
+	listaDeRegistrosDeNumeroOrigen=`grep $numLineaA  "$MAEDIR/umbral.tab"`	
 
 	for registro in $listaDeRegistrosDeNumeroOrigen
 	do 
@@ -170,7 +170,7 @@ function verificarSiHayAlgunUmbralActivo {
 						idUmbral=$(echo "$registro" | cut -d';' -f1) 
 						idAgente=$(echo "$regristroDelArchivoDeLLamadas" | cut -d';' -f1) 
 						#ESTA FALLANDO CON LOPEZ BAIOBRENDA PORQUE CUANDO HACE EL GREP POR APELLIDO COMPUESTO CON 											ESPACIO FALLA
-						registroDelAgente=`grep $idAgente "/home/nicolasdubiansky/Descargas/afra-j/archivos/agentes.csv"`
+						registroDelAgente=`grep $idAgente "$MAEDIR/agentes.mae"`
 						oficina=$(echo "$registroDelAgente" | cut -d';' -f4)
 						fechaHoraLLamada=$(echo "$regristroDelArchivoDeLLamadas" | cut -d';' -f2)
 						fechaSola=$(echo "$fechaHoraLLamada" | cut -d' ' -f1)
@@ -212,7 +212,7 @@ function validarRegistro { #funcion que valida registro por registro que se veri
 				let contadorDeLlamadas=contadorDeLlamadas+1				
 				agente=$(echo "$line" | cut -d';' -f1) #chequeo que el nombre de agente este en el maestro
 				agente="$agente;"  #agrego coma porque si pongo MARIO matchea con MARIORUIZ y esta mal
-				existeAgente=`grep "$agente" -c "/home/nicolasdubiansky/Descargas/afra-j/archivos/agentes.csv"` #chequeo que exista
+				existeAgente=`grep "$agente" -c "$MAEDIR/agentes.mae"` #chequeo que exista
 				if [ "$?" -eq 1 ]; then
 					motivo="agente erroneo"
 					echo $motivo
@@ -223,7 +223,7 @@ function validarRegistro { #funcion que valida registro por registro que se veri
 				#chequeo que el codigo de area A sea correcto
 				codArea=$(echo "$line" | cut -d';' -f4)
 				codAreaExt=";$codArea"
-				existeArea=`grep "$codAreaExt" -c "/home/nicolasdubiansky/Descargas/afra-j/archivos/CdA.csv"`
+				existeArea=`grep "$codAreaExt" -c "$MAEDIR/CdA.mae"`
 				
 				if [ "$?" -eq 1 ]; then
 					motivo="area erronea"
@@ -264,7 +264,7 @@ function validarRegistro { #funcion que valida registro por registro que se veri
 				# Si llegó hasta acá, el registro es válido.
 				
 				#Chequeo si existe algún umbral activo para el número de linea A (origen).
-				existeUmbral=`grep "$numLineaA" -c "/home/nicolasdubiansky/afra-j/archivos/umbrales.csv"` #chequeo que exista
+				existeUmbral=`grep "$numLineaA" -c "$MAEDIR/umbral.tab"` #chequeo que exista
 				if [ "$?" -eq 1 ]; then
 					motivo="no hay ningún umbral activo para el número de origen"
 					#LOGUEAR
@@ -273,17 +273,17 @@ function validarRegistro { #funcion que valida registro por registro que se veri
 				fi
 
 				verificarSiHayAlgunUmbralActivo
-			done < "$rutaDeArchivos/$nombreArchivoMinimo" 
+			done < "$ACEPDIR/$nombreArchivoMinimo" 
 }
 
 cantidadArchivosRechazados=0
 cantidadArchivosProcesados=0
 cantidadDeArchivosEnElDirectorio=0 
 obtenerCantidadArchivos 
-rutaComandoGraLog="/home/nicolasdubiansky/Descargas/afra-j/source/comandos"
-cd $rutaComandoGraLog
-bash ./GraLog.sh "AFUMB" "Inicio de AFUMB" "INFO"  
-bash ./GraLog.sh "AFUMB" "Cantidad de archivos a procesar:$cantidadDeArchivosEnElDirectorio" "INFO"  
+#rutaComandoGraLog="/home/nicolasdubiansky/Descargas/afra-j/source/comandos"
+cd $BINDIR
+bash ./GraLog "AFUMB" "Inicio de AFUMB" "INFO"  
+bash ./GraLog "AFUMB" "Cantidad de archivos a procesar:$cantidadDeArchivosEnElDirectorio" "INFO"  
 
 #Procesa todos los archivos del directorio.
 for (( i=0; i < $cantidadDeArchivosEnElDirectorio; i++ )); 
@@ -297,35 +297,33 @@ do
 	obtenerArchivoFechaMasAntigua 
 	verificarQueElArchivoHayaSidoProcesado
 	if [ $resultadoFuncionVerificarArchivoProcesado == 0 ]; then 
-		cd $rutaComandoGraLog
-		bash ./GraLog.sh "AFUMB" "Se rechaza el archivo por estar DUPLICADO" "ERROR" 
-		# Para poder ejecutar el comando move.sh. ACORDARSE DE CAMBIAR POR MOVERA.SH
+		cd $BINDIR
+		bash ./GraLog "AFUMB" "Se rechaza el archivo por estar DUPLICADO" "ERROR" 
 		let cantidadArchivosRechazados=cantidadArchivosRechazados+1
-		rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
-		cd $rutaComandoMove	 
-		bash ./move.sh "$rutaDeArchivos/$nombreArchivoMinimo" "$RECHDIR" 
+		#rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
+		cd $BINDIR	 
+		bash ./MoverA "$ACEPDIR/$nombreArchivoMinimo" "$RECHDIR" 
 	else 
 		verificarCantidadDeCampos
 		if [ $resultadoVerificarCampos == 0 ]; then 
-			cd $rutaComandoGraLog
-			bash ./GraLog.sh "AFUMB" "Se rechaza el archivo porque su estructura no se corresponde con el formato esperado" "ERROR"
+			cd $BINDIR
+			bash ./GraLog "AFUMB" "Se rechaza el archivo porque su estructura no se corresponde con el formato esperado" "ERROR"
  			let cantidadArchivosRechazados=cantidadArchivosRechazados+1
-			# Para poder ejecutar el comando move.sh. ACORDARSE DE CAMBIAR POR MOVERA.SH 
-			rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
-			cd $rutaComandoMove	 
-			bash ./move.sh "$rutaDeArchivos/$nombreArchivoMinimo" "$RECHDIR" 
+			#rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
+			cd $BINDIR	 
+			bash ./MoverA "$ACEPDIR/$nombreArchivoMinimo" "$RECHDIR" 
 		else 
-			cd $rutaComandoGraLog
-			bash ./GraLog.sh "AFUMB" "Archivo a procesar:$nombreArchivoMinimo" "INFO" 			
+			cd $BINDIR
+			bash ./GraLog "AFUMB" "Archivo a procesar:$nombreArchivoMinimo" "INFO" 			
 			cd "$RECHDIR/llamadas"
 
 			let cantidadArchivosProcesados=cantidadArchivosProcesados+1
 			nombreArchivoMinimoSinCsv=$(echo "$nombreArchivoMinimo" | cut -d'.' -f1) #le saco el .csv al nombre!
 			> "$nombreArchivoMinimoSinCsv.rech" 
 			validarRegistro #valido todo los registros del archivo
-			rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
-			cd $rutaComandoMove 
-			bash ./move.sh "$rutaDeArchivos/$nombreArchivoMinimo" "/home/nicolasdubiansky/Descargas/afra-j/archivos/procdir/proc" 
+			#rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
+			cd $BINDIR 
+			bash ./MoverA "$ACEPDIR/$nombreArchivoMinimo" "$PROCDIR/proc" 
 		fi 
 	fi 
 	echo "Llamadas totales: "$contadorDeLlamadas
@@ -336,7 +334,7 @@ do
 	echo "Llamadas no sospechosas: "$contadorDeLlamadasNoSospechosas	
 	echo " "
 done 
-			cd $rutaComandoGraLog
-			bash ./GraLog.sh "AFUMB" "Cantidad de archivos procesados:$cantidadArchivosProcesados" "INFO" 	
-			bash ./GraLog.sh "AFUMB" "Cantidad de archivos rechazados:$cantidadArchivosRechazados" "INFO" 	
-			bash ./GraLog.sh "AFUMB" "Fin de AFUMB" "INFO" 	
+			cd $BINDIR
+			bash ./GraLog "AFUMB" "Cantidad de archivos procesados:$cantidadArchivosProcesados" "INFO" 	
+			bash ./GraLog "AFUMB" "Cantidad de archivos rechazados:$cantidadArchivosRechazados" "INFO" 	
+			bash ./GraLog "AFUMB" "Fin de AFUMB" "INFO" 	
