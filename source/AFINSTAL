@@ -24,7 +24,7 @@ LOG_ERROR_TYPE=ERROR
 function log {
 	message=$1
 	type=$2
-	./GraLog "AFINSTAL" "$message" "$type"
+	./comandos/GraLog "AFINSTAL" "$message" "$type"
 }
 
 function log2 {
@@ -33,7 +33,7 @@ function log2 {
 	if [ -n "$3" ]; then
 		echo "$message"
 	fi
-	./GraLog "AFINSTAL" "$message" "$type"
+	./comandos/GraLog "AFINSTAL" "$message" "$type"
 }
 
 #Chequea que Perl esté instalado
@@ -311,26 +311,26 @@ function create_dirs {
 }
 
 function copy_binaries {
-	cp AFINI "$BINDIR"/AFINI
-	cp AFREC "$BINDIR"/AFREC
-	cp AFUMB "$BINDIR"/AFUMB
-	cp GraLog "$BINDIR"/GraLog
-	cp Arrancar "$BINDIR"/Arrancar
-	cp Detener "$BINDIR"/Detener
-	cp MoverA "$BINDIR"/MoverA	
-	cp AFLIST.pl "$BINDIR"/AFLIST.pl
-	cp validadorArchivos.sh "$BINDIR"/validadorArchivos.sh
-	cp util.sh "$BINDIR"/util.sh
+	cp comandos/AFINI "$BINDIR"/AFINI
+	cp comandos/AFREC "$BINDIR"/AFREC
+	cp comandos/AFUMB "$BINDIR"/AFUMB
+	cp comandos/GraLog "$BINDIR"/GraLog
+	cp comandos/Arrancar "$BINDIR"/Arrancar
+	cp comandos/Detener "$BINDIR"/Detener
+	cp comandos/MoverA "$BINDIR"/MoverA	
+	cp comandos/AFLIST.pl "$BINDIR"/AFLIST.pl
+	cp comandos/validadorArchivos.sh "$BINDIR"/validadorArchivos.sh
+	cp comandos/util.sh "$BINDIR"/util.sh
 
 	chmod -R +r+w+x "$BINDIR"
 }
 
 function copy_tables {
-	cp ../../archivos/CdP.csv "$MAEDIR"/CdP.mae	
-	cp ../../archivos/CdA.csv "$MAEDIR"/CdA.mae	
-	cp ../../archivos/centrales.csv "$MAEDIR"/CdC.mae	
-	cp ../../archivos/agentes.csv "$MAEDIR"/agentes.mae
-	cp ../../archivos/umbrales.csv "$MAEDIR"/umbral.tab
+	cp ../archivos/CdP.csv "$MAEDIR"/CdP.mae	
+	cp ../archivos/CdA.csv "$MAEDIR"/CdA.mae	
+	cp ../archivos/centrales.csv "$MAEDIR"/CdC.mae	
+	cp ../archivos/agentes.csv "$MAEDIR"/agentes.mae
+	cp ../archivos/umbrales.csv "$MAEDIR"/umbral.tab
 	touch "$MAEDIR"/tllama.tab
 	> "$MAEDIR"/tllama.tab
 	#Doy permisos a todos a todo el directorio
