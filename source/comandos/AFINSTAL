@@ -27,6 +27,15 @@ function log {
 	./GraLog "AFINSTAL" "$message" "$type"
 }
 
+function log2 {
+	message=$1
+	type=$2
+	if [ -n $3 ]; then
+		echo "$message"
+	fi
+	./GraLog "AFINSTAL" "$message" "$type"
+}
+
 #Chequea que Perl esté instalado
 function check_perl {
 	perl_version=$(dpkg-query -W perl | sed 's-\(perl\)\([[:blank:]]\)\(.*\)-\3-g')
@@ -74,80 +83,30 @@ function terms_and_conditions {
 	fi
 }
 
-#Ingreso de nombre de directorio de ejecutables
-function choose_bin_dir {
-	echo Defina el directorio de instalación de los ejecutables \("$BINDIR"\):
-	log "Defina el directorio de instalación de los ejecutables (""$BINDIR""):" "$LOG_INFO_TYPE"
 
-	read bin_dir
-	if [ ! -z "$bin_dir" ]; then
-		while ! [[ $bin_dir =~ $DIR_NAME_REGEX ]];
+function choose_dir {
+	# $1 Variable de directorio a settear.
+	# $2 Mensaje pidiendo ingreso del path.
+	# $3 Mensaje a mostrar una vez ingresado correctamente el path.
+	
+	log2 "$2" "$LOG_INFO_TYPE" "s"
+
+	read input_dir
+	if [ ! -z "$input_dir" ]; then
+		while ! [[ $input_dir =~ $DIR_NAME_REGEX ]];
 		do
 			echo "$MSG_INVALID_DIR_NAME"
-			read bin_dir
-			if [ -z "$bin_dir" ]; then
-				echo El directorio de ejecutables será "$BINDIR"
-				log "El directorio de ejecutables será "$BINDIR"" "$LOG_INFO_TYPE"
+			read input_dir
+			if [ -z "$input_dir" ]; then
+				log2 "$3 ${!1}" "$LOG_INFO_TYPE" "s"
 				echo
 				return
 			fi
 		done
-		BINDIR="$GRUPO"/"$bin_dir"
+		eval $1="$GRUPO"/"$input_dir"
 	fi
 	
-	echo El directorio de ejecutables será "$BINDIR"
-	log "El directorio de ejecutables será "$BINDIR"" "$LOG_INFO_TYPE"
-	echo
-}
-
-#Ingreso de nombre de directorio de maestros y tablas
-function choose_mae_dir {
-	echo Defina el directorio para maestros y tablas \("$MAEDIR"\):
-	log "Defina el directorio para maestros y tablas ("$MAEDIR"):" "$LOG_INFO_TYPE"
-
-	read mae_dir
-	if [ ! -z "$mae_dir" ]; then
-		while ! [[ $mae_dir =~ $DIR_NAME_REGEX ]];
-		do
-			echo "$MSG_INVALID_DIR_NAME"
-			read mae_dir
-			if [ -z "$mae_dir" ]; then
-				echo El directorio para maestros y tablas será "$MAEDIR"
-				log "El directorio para maestros y tablas será "$MAEDIR"" "$LOG_INFO_TYPE"
-				echo
-				return
-			fi
-		done
-		MAEDIR="$GRUPO"/"$mae_dir"
-	fi
-
-	echo El directorio para maestros y tablas será "$MAEDIR"
-	log "El directorio para maestros y tablas será "$MAEDIR"" "$LOG_INFO_TYPE"
-	echo
-}
-
-#Ingreso de nombre de directorio de recepción de archivos de llamadas
-function choose_nove_dir {
-	echo Defina el directorio de recepción de archivos de llamadas \("$NOVEDIR"\):
-	log "Defina el directorio de recepción de archivos de llamadas ("$NOVEDIR"):" "$LOG_INFO_TYPE"
-	read nove_dir
-	if [ ! -z "$nove_dir" ]; then
-		while ! [[ $nove_dir =~ $DIR_NAME_REGEX ]];
-		do
-			echo "$MSG_INVALID_DIR_NAME"
-			read nove_dir
-			if [ -z "$nove_dir" ]; then
-				echo El directorio de recepción de archivos de llamadas será "$NOVEDIR"
-				log "El directorio de recepción de archivos de llamadas será "$NOVEDIR"" "$LOG_INFO_TYPE"
-				echo
-				return
-			fi
-		done
-		NOVEDIR="$GRUPO"/"$nove_dir"
-	fi
-
-	echo El directorio de recepción de archivos de llamadas será "$NOVEDIR"
-	log "El directorio de recepción de archivos de llamadas será "$NOVEDIR"" "$LOG_INFO_TYPE"
+	log2 "$3 ${!1}" "$LOG_INFO_TYPE" "s"
 	echo
 }
 
@@ -215,106 +174,6 @@ function choose_nove_dir_space {
 	echo
 }
 
-#Ingreso de nombre de directorio de grabación de los archivos de llamadas aceptadas
-function choose_acep_dir {
-	echo Defina el directorio de grabación de los archivos de llamadas aceptadas \("$ACEPDIR"\):
-	log "Defina el directorio de grabación de los archivos de llamadas aceptadas ("$ACEPDIR"):" "$LOG_INFO_TYPE"
-	read acep_dir
-	if [ ! -z "$acep_dir" ]; then
-		while ! [[ $acep_dir =~ $DIR_NAME_REGEX ]];
-		do
-			echo "$MSG_INVALID_DIR_NAME"
-			read acep_dir
-			if [ -z "$acep_dir" ]; then
-				echo El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"
-				log "El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"" "$LOG_INFO_TYPE"
-				echo
-				return
-			fi
-		done
-		ACEPDIR="$GRUPO"/"$acep_dir"
-	fi
-
-	echo El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"
-	log "El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"" "$LOG_INFO_TYPE"
-	echo
-}
-
-#Ingreso de nombre de directorio de grabación de los registros de llamadas sospechosas
-function choose_proc_dir {
-	echo Defina el directorio de grabación de los registros de llamadas sospechosas \("$PROCDIR"\):
-	log "Defina el directorio de grabación de los registros de llamadas sospechosas ("$PROCDIR"):" "$LOG_INFO_TYPE"
-	read proc_dir
-	if [ ! -z "$proc_dir" ]; then
-		while ! [[ $proc_dir =~ $DIR_NAME_REGEX ]];
-		do
-			echo "$MSG_INVALID_DIR_NAME"
-			read proc_dir
-			if [ -z "$proc_dir" ]; then
-				echo El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"
-				log "El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"" "$LOG_INFO_TYPE"
-				echo
-				return
-			fi
-		done
-		PROCDIR="$GRUPO"/"$proc_dir"
-	fi
-
-	echo El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"
-	log "El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"" "$LOG_INFO_TYPE"
-	echo	
-}
-
-#Ingreso de nombre de directorio de grabación de los reportes
-function choose_repo_dir {
-	echo Defina el directorio de grabación de los reportes \("$REPODIR"\):
-	log "Defina el directorio de grabación de los reportes ("$REPODIR"):" "$LOG_INFO_TYPE"
-	read repo_dir
-	if [ ! -z "$repo_dir" ]; then
-		while ! [[ $repo_dir =~ $DIR_NAME_REGEX ]];
-		do
-			echo "$MSG_INVALID_DIR_NAME"
-			read repo_dir
-			if [ -z "$repo_dir" ]; then
-				echo El directorio de grabación de los reportes será "$REPODIR"
-				log "El directorio de grabación de los reportes será "$REPODIR"" "$LOG_INFO_TYPE"
-				echo
-				return
-			fi
-		done
-		REPODIR="$GRUPO"/"$repo_dir"
-	fi
-
-	echo El directorio de grabación de los reportes será "$REPODIR"
-	log "El directorio de grabación de los reportes será "$REPODIR"" "$LOG_INFO_TYPE"
-	echo
-}
-
-#Ingreso de nombre de directorio para los archivos de log
-function choose_log_dir {
-	echo Defina el directorio para los archivos de log \("$LOGDIR"\):
-	log "Defina el directorio para los archivos de log ("$LOGDIR"):" "$LOG_INFO_TYPE"
-	read log_dir
-	if [ ! -z "$log_dir" ]; then
-		while ! [[ $log_dir =~ $DIR_NAME_REGEX ]];
-		do
-			echo "$MSG_INVALID_DIR_NAME"
-			read log_dir
-			if [ -z "$log_dir" ]; then
-				echo El directorio para los archivos de log será "$LOGDIR"
-				log "El directorio para los archivos de log será "$LOGDIR"" "$LOG_INFO_TYPE"
-				echo
-				return
-			fi
-		done
-		LOGDIR="$GRUPO"/"$log_dir"
-	fi
-
-	echo El directorio para los archivos de log será "$LOGDIR"
-	log "El directorio para los archivos de log será "$LOGDIR"" "$LOG_INFO_TYPE"
-	echo
-}
-
 #Ingreso de nombre de extensión de archivos de log
 function choose_log_extension_name {
 	echo Defina el nombre para la extensión de los archivos de log \("$LOGEXT"\):
@@ -376,42 +235,26 @@ function choose_log_file_max_size {
 	echo
 }
 
-#Ingreso de nombre de directorio de grabación de archivos rechazados
-function choose_rech_dir {
-	echo Defina el directorio de grabación de archivos rechazados \("$RECHDIR"\):
-	log "Defina el directorio de grabación de archivos rechazados ("$RECHDIR"):" "$LOG_INFO_TYPE"
-	read rech_dir
-	if [ ! -z "$rech_dir" ]; then
-		while ! [[ $rech_dir =~ $DIR_NAME_REGEX ]];
-		do
-			echo "$MSG_INVALID_DIR_NAME"
-			read rech_dir
-			if [ -z "$rech_dir" ]; then
-				echo El directorio de grabación de archivos rechazados será "$RECHDIR"
-				log "El directorio de grabación de archivos rechazados será "$RECHDIR"" "$LOG_INFO_TYPE"
-				echo
-				return
-			fi
-		done
-		RECHDIR="$GRUPO"/"$rech_dir"
-	fi
-
-	echo El directorio de grabación de archivos rechazados será "$RECHDIR"
-	log "El directorio de grabación de archivos rechazados será "$RECHDIR"" "$LOG_INFO_TYPE"
-	echo
-}
-
 function choose_vars_values {
-	choose_bin_dir
-	choose_mae_dir
-	choose_nove_dir
+	#choose_bin_dir
+	choose_dir BINDIR "Defina el directorio de instalación de los ejecutables ($BINDIR):" "El directorio de ejecutables será"
+	#choose_mae_dir
+	choose_dir MAEDIR "Defina el directorio para maestros y tablas ($MAEDIR):" "El directorio para maestros y tablas será"
+	#choose_nove_dir
+	choose_dir NOVEDIR "Defina el directorio de recepción de archivos de llamadas ($NOVEDIR):" "El directorio de recepción de archivos de llamadas será"
 	choose_nove_dir_space
-	choose_acep_dir
-	choose_proc_dir
-	choose_repo_dir
+	#choose_acep_dir
+	choose_dir ACEPDIR "Defina el directorio de grabación de los archivos de llamadas aceptadas ($ACEPDIR):" "El directorio de grabación de los archivos de llamadas aceptadas será"
+	#choose_proc_dir
+	choose_dir PROCDIR "Defina el directorio de grabación de los registros de llamadas sospechosas ($PROCDIR):" "El directorio de grabación de los registros de llamadas sospechosas será"
+	#choose_repo_dir
+	choose_dir REPODIR "Defina el directorio de grabación de los reportes ($REPODIR):" "El directorio de grabación de los reportes será"
+	#choose_log_dir
+	choose_dir LOGDIR "Defina el directorio para los archivos de log ($LOGDIR):" "El directorio para los archivos de log será"
 	choose_log_extension_name
 	choose_log_file_max_size
-	choose_rech_dir
+	#choose_rech_dir
+	choose_dir RECHDIR "Defina el directorio de grabación de archivos rechazados ($RECHDIR):" "El directorio de grabación de archivos rechazados será"
 }
 
 #Muestra el nombre de las variables de configuración
