@@ -10,7 +10,7 @@ function log {
 LOG_INFO_TYPE=INFO
 LOG_ERROR_TYPE=ERROR
 GRUPO=grupo06
-CONFDIR="$GRUPO"/conf
+CONFDIR=../conf
 
 function check_install {
 	INSTALL_COMPLETE=1
@@ -23,7 +23,7 @@ function check_install {
 	declare -a missing_dirs
 	declare -a missing_files
 	mae_filenames=(CdP.mae CdA.mae CdC.mae agentes.mae umbral.tab tllama.tab)
-	bin_filenames=()
+	bin_filenames=(AFINI AFREC AFUMB GraLog Arrancar Detener MoverA)
 	
 	index_dirs=0
 	index_files=0

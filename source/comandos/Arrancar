@@ -2,7 +2,7 @@
 
 # Arrancar - lanza el demonio (AFREC)
 
-if [ -z $FEENV ]; then
+if [ -z $AFRAENV ]; then
     echo "ERROR: El entorno no ha sido inicializado. Ejecute el comando AFINI."
 else
     if $(pgrep AFREC); then
