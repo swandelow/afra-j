@@ -18,17 +18,30 @@ DATASIZE=100
 LOGEXT=lg
 LOGSIZE=400
 
+LOG_INFO_TYPE=INFO
+LOG_ERROR_TYPE=ERROR
+
+function log {
+	message=$1
+	type=$2
+	./GraLog "AFINSTAL" "$message" "$type"
+}
+
 #Chequea que Perl esté instalado
 function check_perl {
 	perl_version=$(dpkg-query -W perl | sed 's-\(perl\)\([[:blank:]]\)\(.*\)-\3-g')
 	if [ ! -z $perl_version ]; then
 		#GRABAR EN EL LOG
 		echo Perl version: "$perl_version"
+		log "Perl version: "$perl_version"" "$LOG_INFO_TYPE"
 	else
 		#Perl no instalado
 		echo Para ejecutar el sistema AFRA-J es necesario contar con Perl 5 o superior.
+		log "Para ejecutar el sistema AFRA-J es necesario contar con Perl 5 o superior." "$LOG_INFO_TYPE"
 		echo Efectúe su instalación e inténtelo nuevamente.
+		log "Efectúe su instalación e inténtelo nuevamente." "$LOG_INFO_TYPE"
 		echo Proceso de Instalación Cancelado
+		log "Proceso de Instalación Cancelado" "$LOG_INFO_TYPE"
 		exit
 	fi
 
@@ -38,11 +51,14 @@ function check_perl {
 function terms_and_conditions {
 	echo
 	echo "***************************************************"
-	echo \*  Proceso de Instalación de \"AFRA-J\"  \*
-	echo \*  Tema J Copyright © Grupo xx - Segundo Cuatrimestre 2015  \*
+	log "*  Proceso de Instalación de \"AFRA-J\"  *" "$LOG_INFO_TYPE"
+	echo \*  Tema J Copyright © Grupo 06 - Segundo Cuatrimestre 2015  \*
+	log "*  Tema J Copyright © Grupo 06 - Segundo Cuatrimestre 2015  *" "$LOG_INFO_TYPE"
 	echo "***************************************************"
 	echo A T E N C I O N: Al instalar UD. expresa aceptar los términos y condiciones del \"ACUERDO DE LICENCIA DE SOFTWARE\" incluido en este paquete.
+	log 'A T E N C I O N: Al instalar UD. expresa aceptar los términos y condiciones del "ACUERDO DE LICENCIA DE SOFTWARE" incluido en este paquete.' "$LOG_INFO_TYPE"
 	echo Acepta\? Si – No
+	log "Acepta? Si – No" "$LOG_INFO_TYPE"
 	read terms_choice
 
 	while [ "$terms_choice" != Si ] && [ "$terms_choice" != No ];
@@ -50,8 +66,10 @@ function terms_and_conditions {
 		echo Debe ingresar Si o No:
 		read terms_choice
 	done
+	log "$terms_choice" "$LOG_INFO_TYPE"
 	if [ "$terms_choice" == No ]; then
 		echo Instalación cancelada.
+		log "Instalación cancelada." "$LOG_INFO_TYPE"
 		exit
 	fi
 }
@@ -59,6 +77,7 @@ function terms_and_conditions {
 #Ingreso de nombre de directorio de ejecutables
 function choose_bin_dir {
 	echo Defina el directorio de instalación de los ejecutables \("$BINDIR"\):
+	log "Defina el directorio de instalación de los ejecutables (""$BINDIR""):" "$LOG_INFO_TYPE"
 
 	read bin_dir
 	if [ ! -z "$bin_dir" ]; then
@@ -68,6 +87,7 @@ function choose_bin_dir {
 			read bin_dir
 			if [ -z "$bin_dir" ]; then
 				echo El directorio de ejecutables será "$BINDIR"
+				log "El directorio de ejecutables será "$BINDIR"" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
@@ -76,12 +96,14 @@ function choose_bin_dir {
 	fi
 	
 	echo El directorio de ejecutables será "$BINDIR"
+	log "El directorio de ejecutables será "$BINDIR"" "$LOG_INFO_TYPE"
 	echo
 }
 
 #Ingreso de nombre de directorio de maestros y tablas
 function choose_mae_dir {
 	echo Defina el directorio para maestros y tablas \("$MAEDIR"\):
+	log "Defina el directorio para maestros y tablas ("$MAEDIR"):" "$LOG_INFO_TYPE"
 
 	read mae_dir
 	if [ ! -z "$mae_dir" ]; then
@@ -91,6 +113,7 @@ function choose_mae_dir {
 			read mae_dir
 			if [ -z "$mae_dir" ]; then
 				echo El directorio para maestros y tablas será "$MAEDIR"
+				log "El directorio para maestros y tablas será "$MAEDIR"" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
@@ -99,12 +122,14 @@ function choose_mae_dir {
 	fi
 
 	echo El directorio para maestros y tablas será "$MAEDIR"
+	log "El directorio para maestros y tablas será "$MAEDIR"" "$LOG_INFO_TYPE"
 	echo
 }
 
 #Ingreso de nombre de directorio de recepción de archivos de llamadas
 function choose_nove_dir {
 	echo Defina el directorio de recepción de archivos de llamadas \("$NOVEDIR"\):
+	log "Defina el directorio de recepción de archivos de llamadas ("$NOVEDIR"):" "$LOG_INFO_TYPE"
 	read nove_dir
 	if [ ! -z "$nove_dir" ]; then
 		while ! [[ $nove_dir =~ $DIR_NAME_REGEX ]];
@@ -112,7 +137,8 @@ function choose_nove_dir {
 			echo "$MSG_INVALID_DIR_NAME"
 			read nove_dir
 			if [ -z "$nove_dir" ]; then
-				echo El directorio de recepción de archivos de llamadas será "$NOVEDIR"	
+				echo El directorio de recepción de archivos de llamadas será "$NOVEDIR"
+				log "El directorio de recepción de archivos de llamadas será "$NOVEDIR"" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
@@ -120,7 +146,8 @@ function choose_nove_dir {
 		NOVEDIR="$GRUPO"/"$nove_dir"
 	fi
 
-	echo El directorio de recepción de archivos de llamadas será "$NOVEDIR"	
+	echo El directorio de recepción de archivos de llamadas será "$NOVEDIR"
+	log "El directorio de recepción de archivos de llamadas será "$NOVEDIR"" "$LOG_INFO_TYPE"
 	echo
 }
 
@@ -129,6 +156,7 @@ function choose_nove_dir_space {
 	espacio_disponible=$(df -h -B M --output='avail' grupo06 | tail -1 | sed 's-\([0-9]*\)\(M\)-\1-g')
 
 	echo Defina espacio mínimo libre para la recepción de archivos de llamadas en Mbytes \("$DATASIZE"\):
+	log "Defina espacio mínimo libre para la recepción de archivos de llamadas en Mbytes ("$DATASIZE"):" "$LOG_INFO_TYPE"
 	read data_size
 	if [ ! -z "$data_size" ]; then
 		while [[ ! $data_size =~ $INTEGER_REGEX ]];
@@ -137,12 +165,14 @@ function choose_nove_dir_space {
 			read data_size
 			if [ -z "$data_size" ]; then
 				echo El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb
+				log "El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
 		done
 	else
 		echo El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb
+		log "El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb" "$LOG_INFO_TYPE"
 		echo
 		return
 	fi
@@ -150,9 +180,13 @@ function choose_nove_dir_space {
 	while (( espacio_disponible < data_size ));
 	do
 		echo Insuficiente espacio en disco.
+		log "Insuficiente espacio en disco." "$LOG_INFO_TYPE"
 		echo Espacio disponible: "$espacio_disponible" Mb.
+		log "Espacio disponible: "$espacio_disponible" Mb." "$LOG_INFO_TYPE"
 		echo Espacio requerido "$data_size" Mb.
+		log "Espacio requerido "$data_size" Mb." "$LOG_INFO_TYPE"
 		echo Inténtelo nuevamente:
+		log "Inténtelo nuevamente:" "$LOG_INFO_TYPE"
 
 		read data_size
 		if [ ! -z "$data_size" ]; then
@@ -162,12 +196,14 @@ function choose_nove_dir_space {
 				read data_size
 				if [ -z "$data_size" ]; then
 					echo El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb
+					log "El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb" "$LOG_INFO_TYPE"
 					echo
 					return
 				fi
 			done
 		else
 			echo El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb
+			log "El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb" "$LOG_INFO_TYPE"
 			echo
 			return
 		fi
@@ -175,12 +211,14 @@ function choose_nove_dir_space {
 
 	DATASIZE="$data_size"
 	echo El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb
+	log "El espacio mínimo libre para la recepción de archivos será "$DATASIZE" Mb" "$LOG_INFO_TYPE"
 	echo
 }
 
 #Ingreso de nombre de directorio de grabación de los archivos de llamadas aceptadas
 function choose_acep_dir {
 	echo Defina el directorio de grabación de los archivos de llamadas aceptadas \("$ACEPDIR"\):
+	log "Defina el directorio de grabación de los archivos de llamadas aceptadas ("$ACEPDIR"):" "$LOG_INFO_TYPE"
 	read acep_dir
 	if [ ! -z "$acep_dir" ]; then
 		while ! [[ $acep_dir =~ $DIR_NAME_REGEX ]];
@@ -189,6 +227,7 @@ function choose_acep_dir {
 			read acep_dir
 			if [ -z "$acep_dir" ]; then
 				echo El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"
+				log "El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
@@ -197,12 +236,14 @@ function choose_acep_dir {
 	fi
 
 	echo El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"
+	log "El directorio de grabación de los archivos de llamadas aceptadas será "$ACEPDIR"" "$LOG_INFO_TYPE"
 	echo
 }
 
 #Ingreso de nombre de directorio de grabación de los registros de llamadas sospechosas
 function choose_proc_dir {
 	echo Defina el directorio de grabación de los registros de llamadas sospechosas \("$PROCDIR"\):
+	log "Defina el directorio de grabación de los registros de llamadas sospechosas ("$PROCDIR"):" "$LOG_INFO_TYPE"
 	read proc_dir
 	if [ ! -z "$proc_dir" ]; then
 		while ! [[ $proc_dir =~ $DIR_NAME_REGEX ]];
@@ -211,6 +252,7 @@ function choose_proc_dir {
 			read proc_dir
 			if [ -z "$proc_dir" ]; then
 				echo El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"
+				log "El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
@@ -219,12 +261,14 @@ function choose_proc_dir {
 	fi
 
 	echo El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"
+	log "El directorio de grabación de los registros de llamadas sospechosas será "$PROCDIR"" "$LOG_INFO_TYPE"
 	echo	
 }
 
 #Ingreso de nombre de directorio de grabación de los reportes
 function choose_repo_dir {
 	echo Defina el directorio de grabación de los reportes \("$REPODIR"\):
+	log "Defina el directorio de grabación de los reportes ("$REPODIR"):" "$LOG_INFO_TYPE"
 	read repo_dir
 	if [ ! -z "$repo_dir" ]; then
 		while ! [[ $repo_dir =~ $DIR_NAME_REGEX ]];
@@ -233,6 +277,7 @@ function choose_repo_dir {
 			read repo_dir
 			if [ -z "$repo_dir" ]; then
 				echo El directorio de grabación de los reportes será "$REPODIR"
+				log "El directorio de grabación de los reportes será "$REPODIR"" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
@@ -241,12 +286,14 @@ function choose_repo_dir {
 	fi
 
 	echo El directorio de grabación de los reportes será "$REPODIR"
+	log "El directorio de grabación de los reportes será "$REPODIR"" "$LOG_INFO_TYPE"
 	echo
 }
 
 #Ingreso de nombre de directorio para los archivos de log
 function choose_log_dir {
 	echo Defina el directorio para los archivos de log \("$LOGDIR"\):
+	log "Defina el directorio para los archivos de log ("$LOGDIR"):" "$LOG_INFO_TYPE"
 	read log_dir
 	if [ ! -z "$log_dir" ]; then
 		while ! [[ $log_dir =~ $DIR_NAME_REGEX ]];
@@ -255,6 +302,7 @@ function choose_log_dir {
 			read log_dir
 			if [ -z "$log_dir" ]; then
 				echo El directorio para los archivos de log será "$LOGDIR"
+				log "El directorio para los archivos de log será "$LOGDIR"" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
@@ -263,15 +311,18 @@ function choose_log_dir {
 	fi
 
 	echo El directorio para los archivos de log será "$LOGDIR"
+	log "El directorio para los archivos de log será "$LOGDIR"" "$LOG_INFO_TYPE"
 	echo
 }
 
 #Ingreso de nombre de extensión de archivos de log
 function choose_log_extension_name {
 	echo Defina el nombre para la extensión de los archivos de log \("$LOGEXT"\):
+	log "Defina el nombre para la extensión de los archivos de log ("$LOGEXT"):" "$LOG_INFO_TYPE"
 	read log_ext
 	if [ -z "$log_ext" ]; then
 		echo El nombre para la extensión de los archivos de log será "$LOGEXT"
+		log "El nombre para la extensión de los archivos de log será "$LOGEXT"" "$LOG_INFO_TYPE"
 		echo
 		return
 	fi
@@ -283,6 +334,7 @@ function choose_log_extension_name {
 		read log_ext
 		if [ -z "$log_ext" ]; then
 			echo El nombre para la extensión de los archivos de log será "$LOGEXT"
+			log "El nombre para la extensión de los archivos de log será "$LOGEXT"" "$LOG_INFO_TYPE"
 			echo
 			return
 		fi
@@ -290,15 +342,18 @@ function choose_log_extension_name {
 
 	LOGEXT="$log_ext"
 	echo El nombre para la extensión de los archivos de log será "$LOGEXT"
+	log "El nombre para la extensión de los archivos de log será "$LOGEXT"" "$LOG_INFO_TYPE"
 	echo
 }
 
 #Ingreso de tamaño máximo para archivos de log
 function choose_log_file_max_size {
 	echo Defina el tamaño máximo para cada archivo de log en Kbytes \("$LOGSIZE"\):
+	log "Defina el tamaño máximo para cada archivo de log en Kbytes ("$LOGSIZE"):" "$LOG_INFO_TYPE"
 	read log_size
 	if [ -z "$log_size" ]; then
 		echo El tamaño máximo para cada archivo de log será "$LOGSIZE" Kb
+		log "El tamaño máximo para cada archivo de log será "$LOGSIZE" Kb" "$LOG_INFO_TYPE"
 		echo
 		return
 	fi
@@ -309,6 +364,7 @@ function choose_log_file_max_size {
 		read log_size
 		if [ -z "$log_size" ]; then
 			echo El tamaño máximo para cada archivo de log será "$LOGSIZE" Kb
+			log "El tamaño máximo para cada archivo de log será "$LOGSIZE" Kb" "$LOG_INFO_TYPE"
 			echo
 		return
 	fi
@@ -316,12 +372,14 @@ function choose_log_file_max_size {
 
 	LOGSIZE="$log_size"
 	echo El tamaño máximo para cada archivo de log será "$LOGSIZE" Kb
+	log "El tamaño máximo para cada archivo de log será "$LOGSIZE" Kb" "$LOG_INFO_TYPE"
 	echo
 }
 
 #Ingreso de nombre de directorio de grabación de archivos rechazados
 function choose_rech_dir {
 	echo Defina el directorio de grabación de archivos rechazados \("$RECHDIR"\):
+	log "Defina el directorio de grabación de archivos rechazados ("$RECHDIR"):" "$LOG_INFO_TYPE"
 	read rech_dir
 	if [ ! -z "$rech_dir" ]; then
 		while ! [[ $rech_dir =~ $DIR_NAME_REGEX ]];
@@ -330,6 +388,7 @@ function choose_rech_dir {
 			read rech_dir
 			if [ -z "$rech_dir" ]; then
 				echo El directorio de grabación de archivos rechazados será "$RECHDIR"
+				log "El directorio de grabación de archivos rechazados será "$RECHDIR"" "$LOG_INFO_TYPE"
 				echo
 				return
 			fi
@@ -338,6 +397,7 @@ function choose_rech_dir {
 	fi
 
 	echo El directorio de grabación de archivos rechazados será "$RECHDIR"
+	log "El directorio de grabación de archivos rechazados será "$RECHDIR"" "$LOG_INFO_TYPE"
 	echo
 }
 
@@ -356,30 +416,44 @@ function choose_vars_values {
 
 #Muestra el nombre de las variables de configuración
 function show_vars_values {
-	echo Directorio de Ejecutables: "$BINDIR" 
+	echo Directorio de Ejecutables: "$BINDIR"
+	log "Directorio de Ejecutables: "$BINDIR"" "$LOG_INFO_TYPE"
 	echo Directorio de Maestros y Tablas: "$MAEDIR"
+	log "Directorio de Maestros y Tablas: "$MAEDIR"" "$LOG_INFO_TYPE"
 	echo Directorio de recepción de archivos y llamadas: "$NOVEDIR"
+	log "Directorio de recepción de archivos y llamadas: "$NOVEDIR"" "$LOG_INFO_TYPE"
 	echo Espacio mínimo libre para arribos: "$DATASIZE" Mb
+	log "Espacio mínimo libre para arribos: "$DATASIZE" Mb" "$LOG_INFO_TYPE"
 	echo Directorio de Archivos de llamadas Aceptados: "$ACEPDIR"
+	log "Directorio de Archivos de llamadas Aceptados: "$ACEPDIR"" "$LOG_INFO_TYPE"
 	echo Directorio de Archivos de llamadas Sospechosas: "$PROCDIR"
+	log "Directorio de Archivos de llamadas Sospechosas: "$PROCDIR"" "$LOG_INFO_TYPE"
 	echo Directorio de Archivos de Reportes de llamadas: "$REPODIR"
+	log "Directorio de Archivos de Reportes de llamadas: "$REPODIR"" "$LOG_INFO_TYPE"
 	echo Directorio de Archivos de Log: "$LOGDIR"
+	log "Directorio de Archivos de Log: "$LOGDIR"" "$LOG_INFO_TYPE"
 	echo Extensión para los archivos de log: "$LOGEXT"
+	log "Extensión para los archivos de log: "$LOGEXT"" "$LOG_INFO_TYPE"
 	echo Tamaño máximo para los archivos de log: "$LOGSIZE" Kb
+	log "Tamaño máximo para los archivos de log: "$LOGSIZE" Kb" "$LOG_INFO_TYPE"
 	echo Directorio de Archivos Rechazados: "$RECHDIR"
+	log "Directorio de Archivos Rechazados: "$RECHDIR"" "$LOG_INFO_TYPE"
 }
 
 function continue_install {
 	show_vars_values
 	echo Estado de la instalación: LISTA
+	log "Estado de la instalación: LISTA" "$LOG_INFO_TYPE"
 	#Continuar instalación?
 	echo Desea continuar con la instalación\? \(Si – No\)
+	log "Desea continuar con la instalación? (Si – No)" "$LOG_INFO_TYPE"
 	read continue_choice
 	while [ "$continue_choice" != Si ] && [ "$continue_choice" != No ];
 	do
 		echo Debe ingresar Si o No:
 		read continue_choice
 	done
+	log "$continue_choice" "$LOG_INFO_TYPE"
 	if [ "$continue_choice" == Si ]; then
 		return
 	fi
@@ -389,14 +463,17 @@ function continue_install {
 		choose_vars_values
 		show_vars_values
 		echo Estado de la instalación: LISTA
+		log "Estado de la instalación: LISTA" "$LOG_INFO_TYPE"
 		#Continuar instalación?
 		echo Desea continuar con la instalación\? \(Si – No\)
+		log "Desea continuar con la instalación? (Si – No)" "$LOG_INFO_TYPE"
 		read continue_choice
 		while [ "$continue_choice" != Si ] && [ "$continue_choice" != No ];
 		do
 			echo Debe ingresar Si o No:
 			read continue_choice
 		done
+		log "$continue_choice" "$LOG_INFO_TYPE"
 		if [ "$continue_choice" == Si ]; then
 			return
 		fi
@@ -405,14 +482,17 @@ function continue_install {
 
 function confirm_install {
 	echo Iniciando Instalación. Esta Ud. seguro\? \(Si - No\)
+	log "Iniciando Instalación. Esta Ud. seguro? (Si - No)" "$LOG_INFO_TYPE"
 	read install_choice
 	while [ "$install_choice" != Si ] && [ "$install_choice" != No ];
 	do
 		echo Debe ingresar Si o No:
 		read install_choice
 	done
+	log "$install_choice" "$LOG_INFO_TYPE"
 	if [ "$continue_choice" == No ]; then
 		echo Instalación cancelada.
+		log "Instalación cancelada." "$LOG_INFO_TYPE"
 		exit
 	fi	
 }
@@ -430,8 +510,14 @@ function create_dirs {
 }
 
 function copy_binaries {
-	echo
-	#MOVER EJECUTABLES Y FUNCIONES A BINDIR
+	cp AFINI "$BINDIR"/AFINI
+	cp AFREC "$BINDIR"/AFREC
+	cp AFUMB "$BINDIR"/AFUMB
+	cp GraLog "$BINDIR"/GraLog
+	cp Arrancar "$BINDIR"/Arrancar
+	cp Detener "$BINDIR"/Detener
+	cp MoverA "$BINDIR"/MoverA	
+	chmod -R +r+w+x "$BINDIR"
 }
 
 function copy_tables {
@@ -451,22 +537,23 @@ function copy_tables {
 
 function update_config_file {
 	echo Actualizando la configuración del sistema
+	log "Actualizando la configuración del sistema" "$LOG_INFO_TYPE"
 	touch "$CONFDIR"/AFINSTAL.cnfg
 	#De esta manera borro lo que haya:
 	> "$CONFDIR"/AFINSTAL.cnfg
 	#Doy permisos a todos a todo el directorio de configuración
 	chmod -R +r+w "$CONFDIR"
 	#Copio los registros al archivo de configuración
-	echo GRUPO="$GRUPO"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo CONFDIR="$CONFDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo BINDIR="$BINDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo MAEDIR="$MAEDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo NOVEDIR="$NOVEDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo ACEPDIR="$ACEPDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo PROCDIR="$PROCDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo REPODIR="$REPODIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo LOGDIR="$LOGDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
-	echo RECHDIR="$RECHDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo GRUPO=$(pwd)/"$GRUPO"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo CONFDIR=$(pwd)/"$CONFDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo BINDIR=$(pwd)/"$BINDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo MAEDIR=$(pwd)/"$MAEDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo NOVEDIR=$(pwd)/"$NOVEDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo ACEPDIR=$(pwd)/"$ACEPDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo PROCDIR=$(pwd)/"$PROCDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo REPODIR=$(pwd)/"$REPODIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo LOGDIR=$(pwd)/"$LOGDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
+	echo RECHDIR=$(pwd)/"$RECHDIR"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
 	echo DATASIZE="$DATASIZE"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
 	echo LOGEXT="$LOGEXT"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
 	echo LOGSIZE="$LOGSIZE"="$USER"=$(date) >> "$CONFDIR"/AFINSTAL.cnfg
@@ -474,21 +561,33 @@ function update_config_file {
 
 function do_install {
 	echo Creando Estructuras de directorio. . . .
+	log "Actualizando la configuración del sistema" "$LOG_INFO_TYPE"
 	echo "$BINDIR"
+	log "$BINDIR" "$LOG_INFO_TYPE"
 	echo "$MAEDIR"
+	log "$MAEDIR" "$LOG_INFO_TYPE"
 	echo "$NOVEDIR"
+	log "$NOVEDIR" "$LOG_INFO_TYPE"
 	echo "$ACEPDIR"
+	log "$ACEPDIR" "$LOG_INFO_TYPE"
 	echo "$PROCDIR"
+	log "$PROCDIR" "$LOG_INFO_TYPE"
 	echo "$REPODIR"
+	log "$REPODIR" "$LOG_INFO_TYPE"
 	echo "$LOGDIR"
+	log "$LOGDIR" "$LOG_INFO_TYPE"
 	echo "$RECHDIR"
+	log "$RECHDIR" "$LOG_INFO_TYPE"
 	create_dirs
 	echo Instalando Programas y Funciones
+	log "Instalando Programas y Funciones" "$LOG_INFO_TYPE"
 	copy_binaries
 	echo Instalando Archivos Maestros y Tablas
+	log "Instalando Archivos Maestros y Tablas" "$LOG_INFO_TYPE"
 	copy_tables
 	update_config_file
-	echo Instalación CONCLUIDA.	
+	echo Instalación CONCLUIDA.
+	log "Instalación CONCLUIDA." "$LOG_INFO_TYPE"
 }
 
 #Se encarga de completar la instalacion de ser necesario
@@ -501,7 +600,7 @@ function complete_install {
 	declare -a missing_dirs
 	declare -a missing_files
 	mae_filenames=(CdP.mae CdA.mae CdC.mae agentes.mae umbral.tab tllama.tab)
-	bin_filenames=()
+	bin_filenames=(AFINI AFREC AFUMB GraLog Arrancar Detener MoverA)
 	
 	index_dirs=0
 	index_files=0
@@ -585,30 +684,49 @@ function complete_install {
 
 	#Esto tambien hay que loguearlo:
 	echo Directorio de configuración: "$conf_path"
-	echo $(ls "$conf_path")
+	log 'Directorio de configuración: "$conf_path"' "$LOG_INFO_TYPE"
+	echo $(ls -m "$conf_path")
+	log "$(ls -m "$conf_path")" "$LOG_INFO_TYPE"
 	echo Directorio de ejecutables: "$bin_path"
-	echo $(ls "$bin_path")
+	log 'Directorio de ejecutables: "$bin_path"' "$LOG_INFO_TYPE"
+	echo $(ls -m "$bin_path")
+	log "$(ls -m "$bin_path")" "$LOG_INFO_TYPE"
 	echo Directorio de maestros y tablas: "$mae_path"
-	echo $(ls "$mae_path")
+	log 'Directorio de maestros y tablas: "$mae_path"' "$LOG_INFO_TYPE"
+	echo $(ls -m "$mae_path")
+	log "$(ls -m "$mae_path")" "$LOG_INFO_TYPE"
 	echo Directorio de recepción de archivos de llamadas: "$nove_path"
+	log 'Directorio de recepción de archivos de llamadas: "$nove_path"' "$LOG_INFO_TYPE"
 	echo Directorio de archivos de llamadas aceptadas: "$acep_path"
+	log 'Directorio de archivos de llamadas aceptadas: "$acep_path"' "$LOG_INFO_TYPE"
 	echo Directorio de archivos de llamadas sospechosas: "$proc_path"
+	log 'Directorio de archivos de llamadas sospechosas: "$proc_path"' "$LOG_INFO_TYPE"
 	echo Directorio de archivos de reportes de llamadas: "$repo_path"
+	log 'Directorio de archivos de reportes de llamadas: "$repo_path"' "$LOG_INFO_TYPE"
 	echo Directorio de archivos de log: "$log_path"
+	log 'Directorio de archivos de log: "$log_path"' "$LOG_INFO_TYPE"
 	echo Directorio de archivos rechazados: "$rech_path"
+	log 'Directorio de archivos rechazados: "$rech_path"' "$LOG_INFO_TYPE"
 
 	if [ ${#missing_dirs[@]} == 0 ] && [ ${#missing_files[@]} == 0 ]; then
 		echo Estado de la instalación: COMPLETA
+		log "Estado de la instalación: COMPLETA" "$LOG_INFO_TYPE"
 		echo Proceso de Instalación Finalizado
+		log "Proceso de Instalación Finalizado" "$LOG_INFO_TYPE"
 		exit
 	fi
 
 	echo Directorios faltantes:
+	log "Directorios faltantes:" "$LOG_INFO_TYPE"
 	echo "${missing_dirs[*]}"
+	log "${missing_dirs[*]}" "$LOG_INFO_TYPE"
 	echo Archivos faltantes:
+	log "Archivos faltantes:" "$LOG_INFO_TYPE"
 	echo "${missing_files[*]}"
+	log "${missing_files[*]}" "$LOG_INFO_TYPE"
 
 	echo Desea completar la instalación\? \(Si – No\)
+	log "Desea completar la instalación? (Si – No)" "$LOG_INFO_TYPE"
 	read complete_choice
 	while [ "$complete_choice" != Si ] && [ "$complete_choice" != No ];
 	do
@@ -617,6 +735,7 @@ function complete_install {
 	done
 	if [ "$complete_choice" == No ]; then
 		echo Instalación cancelada.
+		log "Instalación cancelada." "$LOG_INFO_TYPE"
 		exit
 	fi
 
@@ -636,19 +755,33 @@ function complete_install {
 
 	#Esto tambien hay que loguearlo:
 	echo Directorio de configuración: "$conf_path"
-	echo $(ls "$conf_path")
+	log "Directorio de configuración: "$conf_path"" "$LOG_INFO_TYPE"
+	echo $(ls -m "$conf_path")
+	log "$(ls -m "$conf_path")" "$LOG_INFO_TYPE"
 	echo Directorio de ejecutables: "$bin_path"
-	echo $(ls "$bin_path")
+	log "Directorio de ejecutables: "$bin_path"" "$LOG_INFO_TYPE"
+	echo $(ls -m "$bin_path")
+	log "$(ls -m "$bin_path")" "$LOG_INFO_TYPE"
 	echo Directorio de maestros y tablas: "$mae_path"
-	echo $(ls "$mae_path")
+	log "Directorio de maestros y tablas: "$mae_path"" "$LOG_INFO_TYPE"
+	echo $(ls -m "$mae_path")
+	log "$(ls -m "$mae_path")" "$LOG_INFO_TYPE"
 	echo Directorio de recepción de archivos de llamadas: "$nove_path"
+	log "Directorio de recepción de archivos de llamadas: "$nove_path"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos de llamadas aceptadas: "$acep_path"
+	log "Directorio de archivos de llamadas aceptadas: "$acep_path"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos de llamadas sospechosas: "$proc_path"
+	log "Directorio de archivos de llamadas sospechosas: "$proc_path"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos de reportes de llamadas: "$repo_path"
+	log "Directorio de archivos de reportes de llamadas: "$repo_path"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos de log: "$log_path"
+	log "Directorio de archivos de log: "$log_path"" "$LOG_INFO_TYPE"
 	echo Directorio de archivos rechazados: "$rech_path"
+	log "Directorio de archivos rechazados: "$rech_path"" "$LOG_INFO_TYPE"
 	echo Estado de la instalación: COMPLETA
+	log "Estado de la instalación: COMPLETA" "$LOG_INFO_TYPE"
 	echo Proceso de Instalación Finalizado
+	log "Proceso de Instalación Finalizado" "$LOG_INFO_TYPE"
 	exit
 }
 

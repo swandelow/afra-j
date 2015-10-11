@@ -36,19 +36,20 @@ if [ -z $sizeLimit ]; then
 	sizeLimit=400
 fi
 sizeLimit=$(($sizeLimit * 1024))
-filename="$1.$logExt"
-file="$logPath$filename"
 msgType=$3
 date=$(date +"%F %T")
 login=$(whoami)
 
 # AFINSTAL no loguea en LOGDIR
 # la extension es "lg" en este caso
-if [[ $message == "AFINSTAL" ]]
+if [[ $1 == "AFINSTAL" ]]
 then
-	logPath="$grupo/conf"
+	logPath=grupo06/conf/
 	logExt="lg"
 fi
+
+filename="$1.$logExt"
+file="$logPath$filename"
 
 if [ -e $file ]
 then
