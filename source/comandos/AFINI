@@ -189,8 +189,9 @@ function start_afrec {
 	if [ "$afrec_choice" == Si ]; then
 		if ! $(pgrep AFREC); then
 			./Arrancar
-			echo AFREC corriendo bajo el no.: Process Id de AFREC
-			log "AFREC corriendo bajo el no.: Process Id de AFREC" "$LOG_INFO_TYPE"
+			pid_afrec=$(pgrep AFREC)
+			echo AFREC corriendo bajo el no.: "$pid_afrec"
+			log "AFREC corriendo bajo el no.: "$pid_afrec"" "$LOG_INFO_TYPE"
 		else
 			echo AFREC ya está corriendo. Puede detenerlo con el comando Detener.
 		fi
