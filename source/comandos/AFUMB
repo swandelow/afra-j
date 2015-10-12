@@ -86,10 +86,9 @@ function validarLongitudNumeroDeLinea (){
 }
 #grabo en RECHDIR/LLAMADAS el registro rechazado (en su respectivo archivo)
 function rechazarRegistro(){
-	fuente=$nombreArchivoMinimoSinCsv  # PARA QUE SIRVE ESTO????
 	linea="$nombreArchivoMinimo;$motivo;$1"
 	cd "$RECHDIR/llamadas"
-	echo "$linea" >> "$nombreArchivoMinimoSinCsv.rech" 
+	echo "$linea" >> "$nombreArchivoCodigoCentral.rech"
 }	
 
 #el parametro que recibe es la linea que se quiere escribir en el archivo de llamada sospechosa
@@ -186,7 +185,7 @@ function verificarSiHayAlgunUmbralActivo {
 						numeroLineaB=$(echo "$line" | cut -d';' -f8)
 						fechaFormatoArchivoInput=$(echo "$nombreArchivoMinimoSinCsv" | cut -d'_' -f2)
 						#separamos la fecha de la hora con una comilla porque si queremos separar con espacio 							concatena todo hasta el espacio, y todo lo que venia despues lo pierde.
-						primerRenglon="$idCentral;$idAgente;$idUmbral;$tipoDeLlamadaUmbral;$fechaSola'$horaSola"
+						primerRenglon="$idCentral;$idAgente;$idUmbral;$tipoDeLlamadaUmbral;$fechaSola' '$horaSola"
 						segundoRenglon=";$tiempoDeConversacion;$codAreaDeLaLlamada;$numLineaA"
 						tercerRengln=";$codPaisNumeroB;$codAreaNumeroB;$numeroLineaB;$fechaFormatoArchivoInput"	
 						registroAEscribir="$primerRenglon$segundoRenglon$tercerRengln"
@@ -318,8 +317,9 @@ do
 			cd "$RECHDIR/llamadas"
 
 			let cantidadArchivosProcesados=cantidadArchivosProcesados+1
-			nombreArchivoMinimoSinCsv=$(echo "$nombreArchivoMinimo" | cut -d'.' -f1) #le saco el .csv al nombre!
-			> "$nombreArchivoMinimoSinCsv.rech" 
+			nombreArchivoMinimoSinCsv=$(echo "$nombreArchivoMinimo" | cut -d'.' -f1) #Le saco el .csv.
+			nombreArchivoCodigoCentral=$(echo "$nombreArchivoMinimo" | cut -d'_' -f1) #Me quedo con el código de la central.
+			#> "$nombreArchivoMinimoSinCsv.rech" 
 			validarRegistro #valido todo los registros del archivo
 			#rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
 			cd $BINDIR 
