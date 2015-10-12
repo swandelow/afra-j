@@ -7,13 +7,20 @@ function log {
 	./GraLog AFINI "$message" "$type"
 }
 
+function printUsage(){
+    echo "Modo de uso: . AFINI <DIRECTORIO>"
+    echo "Inicializa el sistema de factura electronica."; echo
+    echo "  <DIRECTORIO> Permite especificar el directorio base."
+}
+
+
 LOG_INFO_TYPE=INFO
 LOG_ERROR_TYPE=ERROR
-GRUPO=grupo06
-CONFDIR=../conf
+
 
 function check_install {
 	INSTALL_COMPLETE=1
+	echo "$CONFDIR"
 	if [ ! -f "$CONFDIR"/AFINSTAL.cnfg ]; then
 		echo El programa no está instalado correctamente. Ejecute AFINSTAL.
 		INSTALL_COMPLETE=0
@@ -200,7 +207,24 @@ function start_afrec {
 	fi	
 }
 
+# asegura que tenga el parametro requerido
+if [ $# -ne 1 ]
+then
+	printUsage
+	exit 1
+else 
+	if [ ! -d $1 ]; then
+   		echo "ERROR: El directorio especificado ($1) no existe."; echo
+    	printUsage
+    	exit 1
+	fi
+fi
+# setteo el path al directorio base grupo06
+GRUPO="$1"
+CONFDIR="$GRUPO"/conf
+
 check_install
+
 if [ $INSTALL_COMPLETE == 1 ]; then
 	if [ ! -z $AFRAENV ]; then
 		echo Ambiente ya inicializado, para reiniciar termine la sesión e ingrese nuevamente.
