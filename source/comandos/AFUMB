@@ -1,19 +1,12 @@
-#!/bin/bash 
+#!/bin/bash
 
-# ACORDARSE DE HACER LO DE LOG Y EL FOR QUE ENGLOBE A TODOS LOS ARCHIVOS. 
- 
-# Esta función tiene como fin procesar todos los archivos del directorio ACEPDIR. 
+# Esta función tiene como fin procesar todos los archivos del directorio ACEPDIR.
 
 # Función para obtener la fecha actual. 
 # Deja el resultado en $fechaHoy para que sea utilizada despues. 
 function obtenerFecha { 
 	fechaHoy=`date +%Y%m%d` 
 } 
-
-# SACAR ESTE HARCODEO Y TODOS 
-#ACEPDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/ACEPDIR" 
-#RECHDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/RECHDIR" #CAMBIAR POR EL DIRECTORIO GENERAL. 
-#rutaDeArchivos="/home/nicolasdubiansky/Descargas/afra-j/archivos/carpeta" #ESTA RUTA TIENE QUE SER DONDE ESTAN LOS ARCHIVOS. 
 
 # Recorro todos los archivos del directorio y me quedo con el minimo. 
 function obtenerArchivoFechaMasAntigua {        
@@ -36,8 +29,6 @@ function obtenerArchivoFechaMasAntigua {
 # Si está, devuelve 0. 
 # Si no está, devuelve 1. 
 function verificarQueElArchivoHayaSidoProcesado { 
-	# Ahora hay que chequear que no este en el directorio PROCDIR. 
-	#PROCDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/procdir" #CAMBIAR POR EL DIRECTORIO GENERAL.	 
 	cd "$PROCDIR/proc"
 	dir=$(dir) 
 	# Recorro todos los archivos procesados y me fijo si hay alguno con el mismo nombre. En ese caso muevo el archivo a RECHDIR. 
@@ -95,7 +86,6 @@ function rechazarRegistro(){
 function grabarLlamadaSospechosa(){
 	lineaAGrabar=$1
 	nombreArchivoAGenerarSospechoso=$oficina'_'$anioLlamadaMesLlamada
-	#PROCDIR="/home/nicolasdubiansky/Descargas/afra-j/archivos/procdir" #CAMBIAR POR EL DIRECTORIO GENERAL.	 
 	cd $PROCDIR
 	echo "$lineaAGrabar" >> "$nombreArchivoAGenerarSospechoso" 
 }
@@ -140,8 +130,6 @@ function determinarTipoDeLlamada(){
 		
 	fi
 }
-
-#HIPOTESIS: Al detectar más de un umbral aplicable a la llamada, se ha decidido considerar solo el primero (sea o no una llamada sospechosa).
 
 #Se fija si hay alguna llamada sospechosa y de ser así, la graba. Además setea los contadores.
 function verificarSiHayAlgunUmbralActivo {
@@ -206,80 +194,73 @@ function verificarSiHayAlgunUmbralActivo {
 }
 
 function validarRegistro { #funcion que valida registro por registro que se verifiquen las especificaciones
-			while read line 
-			do
-				let contadorDeLlamadas=contadorDeLlamadas+1				
-				agente=$(echo "$line" | cut -d';' -f1) #chequeo que el nombre de agente este en el maestro
-				agente="$agente;"  #agrego coma porque si pongo MARIO matchea con MARIORUIZ y esta mal
-				existeAgente=`grep "$agente" -c "$MAEDIR/agentes.mae"` #chequeo que exista
-				if [ "$?" -eq 1 ]; then
-					motivo="agente erroneo"
-					echo $motivo
-					let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
-					rechazarRegistro "$line" #lo escribo en rechazados
-					continue
-				fi
-				#chequeo que el codigo de area A sea correcto
-				codArea=$(echo "$line" | cut -d';' -f4)
-				codAreaExt=";$codArea"
-				existeArea=`grep "$codAreaExt" -c "$MAEDIR/CdA.mae"`
-				
-				if [ "$?" -eq 1 ]; then
-					motivo="area erronea"
-					#FALTA EL LOG.
-					let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
-					#grabo el reg en llamadas rechazadas
-					rechazarRegistro "$line"
-					continue
-				fi
-				#me fijo que la longitud de codigo de area y de la linea de telefono sean validos
-				longCodAreaA=${#codArea} #esta funcion da la longitud
-				numLineaA=$(echo "$line" | cut -d';' -f5)
-				longNumLineaA=${#numLineaA}
-				resultadoValidacionA= validarLongitudNumeroDeLinea "$longCodAreaA" "$longNumLineaA"
-				if [[ $resultadoValidacionA -eq 1 ]]; then
-					motivo="la suma de las longitudes del código de área y del número de linea A no es la esperada"
-					#FALTA EL LOG
-					let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
-					rechazarRegistro "$line"
-					continue
-				fi
-				resultadoFuncion= determinarTipoDeLlamada "$line" #devuelve el nombre del tipo de llamada en una variable, esto 												lo vamos a usar para grabar sospechosas	
-				if [[ $resultadoFuncion -eq 1 ]]; then #Quiere decir que hubo algun error al determinar el tipo de llamada
-					#LOGUEAR, EL MOTIVO YA ESTA SETEADO.
-					let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
-					rechazarRegistro "$line"
-					continue
-				fi
-				tiempoDeConversacion=$(echo "$line" | cut -d';' -f3)
-				if [[ $tiempoDeConversacion -lt 0 ]]; then
-					motivo="tiempo de conversacion menor a cero"
-					let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
-					#LOGUEAR
-					rechazarRegistro "$line"
-					continue
-				fi
+	while read line 
+	do
+		let contadorDeLlamadas=contadorDeLlamadas+1				
+		agente=$(echo "$line" | cut -d';' -f1) #chequeo que el nombre de agente este en el maestro
+		agente="$agente;"  #agrego coma porque si pongo MARIO matchea con MARIORUIZ y esta mal
+		existeAgente=`grep "$agente" -c "$MAEDIR/agentes.mae"` #chequeo que exista
+		if [ "$?" -eq 1 ]; then
+			motivo="agente erroneo"
+			echo $motivo
+			let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
+			rechazarRegistro "$line" #lo escribo en rechazados
+			continue
+		fi
+		#chequeo que el codigo de area A sea correcto
+		codArea=$(echo "$line" | cut -d';' -f4)
+		codAreaExt=";$codArea"
+		existeArea=`grep "$codAreaExt" -c "$MAEDIR/CdA.mae"`
+	
+		if [ "$?" -eq 1 ]; then
+			motivo="area erronea"
+			let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
+			rechazarRegistro "$line"
+			continue
+		fi
+		#me fijo que la longitud de codigo de area y de la linea de telefono sean validos
+		longCodAreaA=${#codArea} #esta funcion da la longitud
+		numLineaA=$(echo "$line" | cut -d';' -f5)
+		longNumLineaA=${#numLineaA}
+		resultadoValidacionA= validarLongitudNumeroDeLinea "$longCodAreaA" "$longNumLineaA"
+		if [[ $resultadoValidacionA -eq 1 ]]; then
+			motivo="la suma de las longitudes del código de área y del número de linea A no es la esperada"
+			let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
+			rechazarRegistro "$line"
+			continue
+		fi
+		resultadoFuncion= determinarTipoDeLlamada "$line" #devuelve el nombre del tipo de llamada en una variable, esto 												lo vamos a usar para grabar sospechosas	
+		if [[ $resultadoFuncion -eq 1 ]]; then #Quiere decir que hubo algun error al determinar el tipo de llamada
+			let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
+			rechazarRegistro "$line"
+			continue
+		fi
+		tiempoDeConversacion=$(echo "$line" | cut -d';' -f3)
+		if [[ $tiempoDeConversacion -lt 0 ]]; then
+			motivo="tiempo de conversacion menor a cero"
+			let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
+			rechazarRegistro "$line"
+			continue
+		fi
 
-				# Si llegó hasta acá, el registro es válido.
-				
-				#Chequeo si existe algún umbral activo para el número de linea A (origen).
-				existeUmbral=`grep "$numLineaA" -c "$MAEDIR/umbral.tab"` #chequeo que exista
-				if [ "$?" -eq 1 ]; then
-					motivo="no hay ningún umbral activo para el número de origen"
-					#LOGUEAR
-					let contadorDeLlamadasSinUmbral=contadorDeLlamadasSinUmbral+1
-					continue
-				fi
+		# Si llegó hasta acá, el registro es válido.
+	
+		#Chequeo si existe algún umbral activo para el número de linea A (origen).
+		existeUmbral=`grep "$numLineaA" -c "$MAEDIR/umbral.tab"` #chequeo que exista
+		if [ "$?" -eq 1 ]; then
+			motivo="no hay ningún umbral activo para el número de origen"
+			let contadorDeLlamadasSinUmbral=contadorDeLlamadasSinUmbral+1
+			continue
+		fi
 
-				verificarSiHayAlgunUmbralActivo
-			done < "$ACEPDIR/$nombreArchivoMinimo" 
+		verificarSiHayAlgunUmbralActivo
+	done < "$ACEPDIR/$nombreArchivoMinimo" 
 }
 
 cantidadArchivosRechazados=0
 cantidadArchivosProcesados=0
 cantidadDeArchivosEnElDirectorio=0 
 obtenerCantidadArchivos 
-#rutaComandoGraLog="/home/nicolasdubiansky/Descargas/afra-j/source/comandos"
 cd $BINDIR
 bash ./GraLog "AFUMB" "Inicio de AFUMB" "INFO"  
 bash ./GraLog "AFUMB" "Cantidad de archivos a procesar:$cantidadDeArchivosEnElDirectorio" "INFO"  
@@ -299,7 +280,6 @@ do
 		cd $BINDIR
 		bash ./GraLog "AFUMB" "Se rechaza el archivo por estar DUPLICADO" "ERROR" 
 		let cantidadArchivosRechazados=cantidadArchivosRechazados+1
-		#rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
 		cd $BINDIR	 
 		bash ./MoverA "$ACEPDIR/$nombreArchivoMinimo" "$RECHDIR" 
 	else 
@@ -308,7 +288,6 @@ do
 			cd $BINDIR
 			bash ./GraLog "AFUMB" "Se rechaza el archivo porque su estructura no se corresponde con el formato esperado" "ERROR"
  			let cantidadArchivosRechazados=cantidadArchivosRechazados+1
-			#rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
 			cd $BINDIR	 
 			bash ./MoverA "$ACEPDIR/$nombreArchivoMinimo" "$RECHDIR" 
 		else 
@@ -321,7 +300,6 @@ do
 			nombreArchivoCodigoCentral=$(echo "$nombreArchivoMinimo" | cut -d'_' -f1) #Me quedo con el código de la central.
 			#> "$nombreArchivoMinimoSinCsv.rech" 
 			validarRegistro #valido todo los registros del archivo
-			#rutaComandoMove="/home/nicolasdubiansky/Descargas/afra-j/source/comandos" 
 			cd $BINDIR 
 			bash ./MoverA "$ACEPDIR/$nombreArchivoMinimo" "$PROCDIR/proc" 
 		fi 
