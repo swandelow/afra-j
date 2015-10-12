@@ -1,0 +1,212 @@
+#!/bin/bash
+
+#funcion de logueo
+function log {
+	message=$1
+	type=$2
+	./GraLog AFINI "$message" "$type"
+}
+
+LOG_INFO_TYPE=INFO
+LOG_ERROR_TYPE=ERROR
+GRUPO=grupo06
+CONFDIR=../conf
+
+function check_install {
+	INSTALL_COMPLETE=1
+	if [ ! -f "$CONFDIR"/AFINSTAL.cnfg ]; then
+		echo El programa no está instalado correctamente. Ejecute AFINSTAL.
+		INSTALL_COMPLETE=0
+		return
+	fi
+
+	declare -a missing_dirs
+	declare -a missing_files
+	mae_filenames=(CdP.mae CdA.mae CdC.mae agentes.mae umbral.tab tllama.tab)
+	bin_filenames=(AFINI AFREC AFUMB GraLog Arrancar Detener MoverA)
+	
+	index_dirs=0
+	index_files=0
+
+	#CONFDIR
+	conf_path=$(grep CONFDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$conf_path" ]; then
+		missing_dirs[index_dirs]="$conf_path"
+		((index_dirs++))
+	fi
+
+	#MAEDIR
+	mae_path=$(grep MAEDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$mae_path" ]; then
+		missing_dirs[index_dirs]="$mae_path"
+		((index_dirs++))
+	else
+		chmod +r -R "$mae_path"
+	fi
+	for mae_file in "${mae_filenames[@]}"
+	do
+		if [ ! -f "$mae_path"/"$mae_file" ]; then
+			missing_files[index_files]="$mae_path"/"$mae_file"
+			((index_files++))
+		fi
+	done
+
+	#BINDIR
+	bin_path=$(grep BINDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$bin_path" ]; then
+		missing_dirs[index_dirs]="$bin_path"
+		((index_dirs++))
+	else
+		chmod +r -R "$bin_path"
+	fi
+	for bin_file in "${bin_filenames[@]}"
+	do
+		if [ ! -f "$bin_path"/"$bin_file" ]; then
+			missing_files[index_files]="$bin_path"/"$bin_file"
+			((index_files++))
+		fi
+	done
+
+	#NOVEDIR
+	nove_path=$(grep NOVEDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$nove_path" ]; then
+		missing_dirs[index_dirs]="$nove_path"
+		((index_dirs++))
+	else
+		chmod +r+w -R "$nove_path"
+	fi
+
+	#ACEPDIR
+	acep_path=$(grep ACEPDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$acep_path" ]; then
+		missing_dirs[index_dirs]="$acep_path"
+		((index_dirs++))
+	else
+		chmod +r+w -R "$acep_path"
+	fi
+
+	#PROCDIR
+	proc_path=$(grep PROCDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$proc_path" ]; then
+		missing_dirs[index_dirs]="$proc_path"
+		((index_dirs++))
+	else
+		chmod +r+w -R "$proc_path"
+	fi
+
+	#REPODIR
+	repo_path=$(grep REPODIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$repo_path" ]; then
+		missing_dirs[index_dirs]="$repo_path"
+		((index_dirs++))
+	else
+		chmod +r+w -R "$repo_path"
+	fi
+
+	#LOGDIR
+	log_path=$(grep LOGDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$log_path" ]; then
+		missing_dirs[index_dirs]="$log_path"
+		((index_dirs++))
+	else
+		chmod +r+w -R "$log_path"
+	fi
+
+	#RECHDIR
+	rech_path=$(grep RECHDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	if [ ! -d "$rech_path" ]; then
+		missing_dirs[index_dirs]="$rech_path"
+		((index_dirs++))
+	else
+		chmod +r+w -R "$rech_path"
+	fi
+
+	if [ ! ${#missing_dirs[@]} == 0 ] || [ ! ${#missing_files[@]} == 0 ]; then
+		echo Directorios faltantes:
+		echo "${missing_dirs[*]}"
+		echo Archivos faltantes:
+		echo "${missing_files[*]}"
+		echo La instalación está incompleta. Ejecute AFINSTAL.
+		INSTALL_COMPLETE=0
+	fi
+}
+
+function init_environment {
+	MAEDIR=$(grep MAEDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	BINDIR=$(grep BINDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	NOVEDIR=$(grep NOVEDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	ACEPDIR=$(grep ACEPDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	PROCDIR=$(grep PROCDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	REPODIR=$(grep REPODIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	LOGDIR=$(grep LOGDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	RECHDIR=$(grep RECHDIR "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	DATASIZE=$(grep DATASIZE "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	LOGEXT=$(grep LOGEXT "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+	LOGSIZE=$(grep LOGSIZE "$CONFDIR"/AFINSTAL.cnfg | sed 's-^\([^=]*\)=\([^=]*\)=\(.*\)$-\2-g')
+
+	export MAEDIR BINDIR NOVEDIR ACEPDIR PROCDIR REPODIR LOGDIR RECHDIR DATASIZE LOGEXT LOGSIZE
+	#Esta variable indica si el ambiente se encuentra inicializado
+	AFRAENV=1
+	export AFRAENV
+
+	echo Directorio de configuración: "$CONFDIR"
+	log "Directorio de configuración: "$CONFDIR"" "$LOG_INFO_TYPE"
+	echo $(ls "$CONFDIR")
+	log "$(ls -m "$CONFDIR")" "$LOG_INFO_TYPE"
+	echo Directorio de ejecutables: "$BINDIR"
+	log "Directorio de ejecutables: "$BINDIR"" "$LOG_INFO_TYPE"
+	echo $(ls -m "$BINDIR")
+	log "$(ls -m "$BINDIR")" "$LOG_INFO_TYPE"
+	echo Directorio de maestros y tablas: "$MAEDIR"
+	log "Directorio de maestros y tablas: "$MAEDIR"" "$LOG_INFO_TYPE"
+	echo $(ls -m "$MAEDIR")
+	log "$(ls -m "$MAEDIR")" "$LOG_INFO_TYPE"
+	echo Directorio de recepción de archivos de llamadas: "$NOVEDIR"
+	log "Directorio de recepción de archivos de llamadas: "$NOVEDIR"" "$LOG_INFO_TYPE"
+	echo Directorio de archivos de llamadas aceptadas: "$ACEPDIR"
+	log "Directorio de archivos de llamadas aceptadas: "$ACEPDIR"" "$LOG_INFO_TYPE"
+	echo Directorio de archivos de llamadas sospechosas: "$PROCDIR"
+	log "Directorio de archivos de llamadas sospechosas: "$PROCDIR"" "$LOG_INFO_TYPE"
+	echo Directorio de archivos de reportes de llamadas: "$REPODIR"
+	log "Directorio de archivos de reportes de llamadas: "$REPODIR"" "$LOG_INFO_TYPE"
+	echo Directorio de archivos de log: "$LOGDIR"
+	log "Directorio de archivos de log: "$LOGDIR"" "$LOG_INFO_TYPE"
+	echo Directorio de archivos rechazados: "$RECHDIR"
+	log "Directorio de archivos rechazados: "$RECHDIR"" "$LOG_INFO_TYPE"
+
+	echo Estado del Sistema: INICIALIZADO
+	log "Estado del Sistema: INICIALIZADO" "$LOG_INFO_TYPE"
+}
+
+function start_afrec {
+	echo ¿Desea efectuar la activación de AFREC\? Si – No
+	read afrec_choice
+	while [ "$afrec_choice" != Si ] && [ "$afrec_choice" != No ];
+	do
+		echo Debe ingresar Si o No:
+		read afrec_choice
+	done
+	if [ "$afrec_choice" == Si ]; then
+		if ! $(pgrep AFREC); then
+			./Arrancar
+			pid_afrec=$(pgrep AFREC)
+			echo AFREC corriendo bajo el no.: "$pid_afrec"
+			log "AFREC corriendo bajo el no.: "$pid_afrec"" "$LOG_INFO_TYPE"
+		else
+			echo AFREC ya está corriendo. Puede detenerlo con el comando Detener.
+		fi
+	else
+		echo Puede activar AFREC cuando lo desee con el comando Arrancar.
+	fi	
+}
+
+check_install
+if [ $INSTALL_COMPLETE == 1 ]; then
+	if [ ! -z $AFRAENV ]; then
+		echo Ambiente ya inicializado, para reiniciar termine la sesión e ingrese nuevamente.
+		log "Ambiente ya inicializado, para reiniciar termine la sesión e ingrese nuevamente." "$LOG_ERROR_TYPE"
+	else 
+		init_environment
+		start_afrec
+	fi
+fi

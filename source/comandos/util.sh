@@ -69,14 +69,84 @@ function fechaHoy {
 	hoy=`date +%Y-%m-%d`
 }
 
-# Valida una fecha usando el comando date.
-# Devuelve:
-#	0 Si es una fecha valida.
-#	1 Si es una fecha invalida.
+# Esta funcion va a recibir un string "doble" por parametro y va a decir si la fecha
+# es valida o no.
+# El formato de las fechas a utilizarse es el siguiente
+# dd/mm/YYYY hh:mm:ss+p.m.
+
+# IMPORTANTE: las fechas se pasan asi
+# NOTAR QUE NO SE PASA EL PARAMETRO ENTRE COMILLAS
+
+# if validarFecha $fecha; then
+#  	echo Es una fecha valida
+# else
+# 	echo es una fecha invalida.
+# fi
+
 function validarFecha(){
-	res=$(date +"%Y-%m-%d" --date=$1)
-	return $?
-}
+
+	#Primero validar que haya recibido si o si 3 parametros.
+	if [ ! "$#" -eq 2 ]; then
+		return 1
+	fi
+
+	primeraParte=$1
+	segundaParte=$2
+
+		#el primer parametro es la fecha. Deberia tener exactamente 10 caracteres
+	if [ ! ${#primeraParte} -eq 10 ]; then
+		return 1
+	fi
+
+	# para empezar me fijo que hayan 2 "/" para evitar problemas mayores.
+	cantOcurrencias=$(grep -o "/" <<< "$primeraParte" |wc -l)
+	if [ ! "$cantOcurrencias" -eq 2 ]; then
+		return 1
+	fi
+	
+	# ahora debemos intercambiar el orden de los dias con los meses
+	# viene como dd/mm/YYYY
+	# y lo necesito como mm/dd/YYYY para usar la funcion de bash.
+	mes=`echo "$primeraParte" | cut -d'/' -f1`
+	dia=`echo "$primeraParte" | cut -d'/' -f2`
+	anio=`echo "$primeraParte" | cut -d'/' -f3`
+
+	fechaParseada="$dia/$mes/$anio"
+
+	# Si la funcion date devuelve errores, la fecha no era valida.
+	aux=$(date +"%d/%m/%Y" --date=$fechaParseada)
+	if [ "$?" -eq 1 ]; then
+		return 1
+	fi
+
+
+
+
+	# La segunda parte esta compuesta por la hora y el am/pm
+	# hh:mm:ss+a.m.  = 12 caracteres 
+	if [ ! ${#segundaParte} -eq 12 ]; then
+		return 1
+	fi
+
+	# Ahora nos fijamos que los ultimos 4 caracteres tengan la finalizacion de am o pm
+	amOpm=${segundaParte: -4}
+	regexAmPm='[ap].m.'
+	if [[ ! "$amOpm" =~ $regexAmPm ]]; then
+		return 1
+	fi
+
+	# Ya sabemos que termina en am o pm si llegamos aca.
+	# para obtener el horario, le achuramos los ultimos 4 caracteres
+	# que corresponden al am o pm
+	horario=${segundaParte::-4}
+
+	# de nuevo usamos la funcion date para que nos valide la hora.
+	# Si la funcion date devuelve errores, la fecha no era valida.
+	aux=$(date +"%d/%m/%Y" --date=$horario)
+	return "$?"
+
+} 2> /dev/null
+# "hack" para que muestre el error de invalid date por consola
 
 # Función para sumar días a una fecha.
 # Coloca el resultado en la variable $fecha.

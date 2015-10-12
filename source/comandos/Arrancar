@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Arrancar - lanza el demonio (AFREC)
+
+#AFRAENV=1
+
+if [ -z $AFRAENV ]; then
+    echo "ERROR: El entorno no ha sido inicializado. Ejecute el comando AFINI."
+else
+    if $(pgrep AFREC); then
+        echo "WARNING: AFREC ya se esta ejecutando."
+    else
+    	#si todas las condiciones estan dadas lanza el demonio
+    	echo "Arrancando demonio AFREC."
+    	nohup ./AFREC > /dev/null 2>&1 &
+    	exit 0
+    fi
+fi
+exit 1
