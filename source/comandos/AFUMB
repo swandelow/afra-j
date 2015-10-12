@@ -156,8 +156,7 @@ function verificarSiHayAlgunUmbralActivo {
 						let contadorDeLlamadasSospechosas=contadorDeLlamadasSospechosas+1
 						idUmbral=$(echo "$registro" | cut -d';' -f1) 
 						idAgente=$(echo "$regristroDelArchivoDeLLamadas" | cut -d';' -f1) 
-						#ESTA FALLANDO CON LOPEZ BAIOBRENDA PORQUE CUANDO HACE EL GREP POR APELLIDO COMPUESTO CON 											ESPACIO FALLA
-						registroDelAgente=`grep $idAgente "$MAEDIR/agentes.mae"`
+						registroDelAgente=`grep "$idAgente" "$MAEDIR/agentes.mae"`
 						oficina=$(echo "$registroDelAgente" | cut -d';' -f4)
 						fechaHoraLLamada=$(echo "$regristroDelArchivoDeLLamadas" | cut -d';' -f2)
 						fechaSola=$(echo "$fechaHoraLLamada" | cut -d' ' -f1)
@@ -172,12 +171,13 @@ function verificarSiHayAlgunUmbralActivo {
 						codAreaNumeroB=$(echo "$line" | cut -d';' -f7)
 						numeroLineaB=$(echo "$line" | cut -d';' -f8)
 						fechaFormatoArchivoInput=$(echo "$nombreArchivoMinimoSinCsv" | cut -d'_' -f2)
-						#separamos la fecha de la hora con una comilla porque si queremos separar con espacio 							concatena todo hasta el espacio, y todo lo que venia despues lo pierde.
-						primerRenglon="$idCentral;$idAgente;$idUmbral;$tipoDeLlamadaUmbral;$fechaSola' '$horaSola"
+						# separamos la fecha de la hora con un guion porque si queremos separar con espacio 
+						# concatena todo hasta el espacio, y todo lo que venia despues lo pierde.
+						primerRenglon="$idCentral;$idAgente;$idUmbral;$tipoDeLlamadaUmbral;$fechaSola-$horaSola"
 						segundoRenglon=";$tiempoDeConversacion;$codAreaDeLaLlamada;$numLineaA"
 						tercerRengln=";$codPaisNumeroB;$codAreaNumeroB;$numeroLineaB;$fechaFormatoArchivoInput"	
 						registroAEscribir="$primerRenglon$segundoRenglon$tercerRengln"
-						grabarLlamadaSospechosa $registroAEscribir
+						grabarLlamadaSospechosa "$registroAEscribir"
 						return 1
 				else
 					let contadorDeLlamadasNoSospechosas=contadorDeLlamadasNoSospechosas+1
