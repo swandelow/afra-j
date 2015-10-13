@@ -143,6 +143,8 @@ function check_install {
 		echo Archivos faltantes:
 		echo "${missing_files[*]}"
 		echo La instalación está incompleta. Ejecute AFINSTAL.
+		AFRAENV=
+		export AFRAENV
 		INSTALL_COMPLETE=0
 	fi
 }
