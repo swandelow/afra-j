@@ -71,8 +71,10 @@ function obtenerCantidadArchivos {
 #se le pasa dos parametros. EL primero es la longitud del codigo de area, y el segundo es la longitud del numero de linea. Despues se mira el numero de resultado para ver si salio todo bien
 function validarLongitudNumeroDeLinea (){
 	if ( [[ $1 -eq 2 ]] && [[ ! $2 -eq 8 ]] ) || ( [[ $1 -eq 3 ]] && [[ ! $2 -eq 7 ]] ) || ( [[ $1 -eq 4 ]] && [[ ! $2 -eq 6 ]] ) ; then 
+		resultadoValidacionLongitud=1	
 		return 1
 	fi
+	resultadoValidacionLongitud=0
 	return 0		
 }
 #grabo en RECHDIR/LLAMADAS el registro rechazado (en su respectivo archivo)
@@ -100,9 +102,11 @@ function determinarTipoDeLlamada(){
 		if [[ "$?" -eq 1 ]] || [[ "$numLineaB" == "" ]] ; then ##la segunda condicion es porque dice que tiene que haber un numero en la 												consigna pero es medio al pedo
 			motivo="codigo de pais inexistente o no hay numero de linea"
 			tipoLLamada="error"
+			resultadoDeterminarTipoDeLlamada=1
 			return 1
 		fi
 		tipoLLamada="DDI" #guardo tipo de llamada
+		resultadoDeterminarTipoDeLlamada=0
 		return 0
 	else 
 		codAreaA=$(echo "$1" | cut -d';' -f4)
@@ -110,20 +114,24 @@ function determinarTipoDeLlamada(){
 		existecodAreaB=`grep "$codAreaB" -c "$MAEDIR/CdA.mae"` #me fijo si esta en el maestro de 																		área
 		if [ "$?" -eq 1 ] ; then #No encontro el codigo de area.
 			motivo="area erronea"
+			resultadoDeterminarTipoDeLlamada=1
 			return 1
 		else
 			longCodAreaB=${#codAreaB} 
 			longNumLineaB=${#numLineaB}
-			resultadoValidacion= validarLongitudNumeroDeLinea "$longCodAreaB" "$longNumLineaB" #llamo a la funcion que valida el 													numero de linea contra el codigo de area
-			if [[ $resultadoValidacion -eq 1 ]]; then
+			validarLongitudNumeroDeLinea "$longCodAreaB" "$longNumLineaB" #llamo a la funcion que valida el 													numero de linea contra el codigo de area
+			if [[ $resultadoValidacionLongitud -eq 1 ]]; then
 				motivo="la suma de las longitudes del código de área y del número de linea B no es la esperada"
+				resultadoDeterminarTipoDeLlamada=1
 				return 1 #esto lo chequeo afuera pero tengo que salir de aca para no grabar el tipo de llamada
 			fi
 			if [ "$codAreaA" -eq "$codAreaB" ]; then
 				tipoLLamada="LOC"
+				resultadoDeterminarTipoDeLlamada=0	
 				return 0
 			else
 				tipoLLamada="DDN"
+				resultadoDeterminarTipoDeLlamada=0
 				return 0
 			fi
 		fi
@@ -222,15 +230,15 @@ function validarRegistro { #funcion que valida registro por registro que se veri
 		longCodAreaA=${#codArea} #esta funcion da la longitud
 		numLineaA=$(echo "$line" | cut -d';' -f5)
 		longNumLineaA=${#numLineaA}
-		resultadoValidacionA= validarLongitudNumeroDeLinea "$longCodAreaA" "$longNumLineaA"
-		if [[ $resultadoValidacionA -eq 1 ]]; then
+		validarLongitudNumeroDeLinea "$longCodAreaA" "$longNumLineaA"
+		if [[ $resultadoValidacionLongitud -eq 1 ]]; then
 			motivo="la suma de las longitudes del código de área y del número de linea A no es la esperada"
 			let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
 			rechazarRegistro "$line"
 			continue
 		fi
-		resultadoFuncion= determinarTipoDeLlamada "$line" #devuelve el nombre del tipo de llamada en una variable, esto 												lo vamos a usar para grabar sospechosas	
-		if [[ $resultadoFuncion -eq 1 ]]; then #Quiere decir que hubo algun error al determinar el tipo de llamada
+		determinarTipoDeLlamada "$line" #devuelve el nombre del tipo de llamada en una variable, esto 												lo vamos a usar para grabar sospechosas	
+		if [[ $resultadoDeterminarTipoDeLlamada -eq 1 ]]; then #Quiere decir que hubo algun error al determinar el tipo de llamada
 			let contadorDeLlamadasRechazadas=contadorDeLlamadasRechazadas+1
 			rechazarRegistro "$line"
 			continue
