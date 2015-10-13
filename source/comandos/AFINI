@@ -13,7 +13,7 @@ function log2 {
 	if [ -n "$3" ]; then
 		echo "$message"
 	fi
-	./GraLog AFINI "$message" "$type"
+	bash "$PATH_SCRIPTS/GraLog" "AFINI" "$message" "$type"
 }
 
 function printUsage(){
@@ -195,7 +195,8 @@ function start_afrec {
 	done
 	if [ "$afrec_choice" == Si ]; then
 		if ! $(pgrep AFREC); then
-			./Arrancar
+			#./Arrancar
+			Arrancar
 			pid_afrec=$(pgrep AFREC)
 			log2 "AFREC corriendo bajo el no.: $pid_afrec" "$LOG_INFO_TYPE" "s"
 		else
@@ -205,6 +206,9 @@ function start_afrec {
 		echo Puede activar AFREC cuando lo desee con el comando Arrancar.
 	fi	
 }
+
+# obtengo el path del directorio donde se instalarons los scripts del sistema
+PATH_SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # asegura que tenga el parametro requerido
 if [ $# -ne 1 ]
@@ -219,7 +223,7 @@ else
 	fi
 fi
 # setteo el path al directorio base grupo06
-GRUPO="$1"
+GRUPO=$(cd $1; pwd)
 CONFDIR="$GRUPO"/conf
 
 check_install

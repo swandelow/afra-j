@@ -8,7 +8,7 @@ function log {
 	message=$1
 	type=$2
 	echo "$message" "$type"
-	./GraLog AFREC "$message" "$type"
+	GraLog "AFREC" "$message" "$type"
 }
 
 # parametros 
@@ -42,10 +42,10 @@ do
 		#log "Resultado validacion: $resultado"
 		if [ $resultado -eq 0 ]
 		then
-			./MoverA "$NOVEDIR/$i" "$ACEPDIR/"
+			MoverA "$NOVEDIR/$i" "$ACEPDIR/"
 			log "Archivo $i aceptado." "INFO"
 		else 
-			./MoverA "$NOVEDIR/$i" "$RECHDIR/"
+			MoverA "$NOVEDIR/$i" "$RECHDIR/"
 			logRechazados $i $resultado
 		fi
 	done
@@ -54,14 +54,14 @@ do
 	
 	if [ $cantidadAceptados != 0 ]
 	then
-		estaEjecutandose AFUMB
+		estaEjecutandose "AFUMB"
 			
 		if [ $? = 0 ]
 		then
 			pid=`pgrep AFUMB`
 			log "AFUMB aún corriendo pid $pid. Invocación pospuesta para el siguiente ciclo." "INFO"
 		else
-			./AFUMB &
+			AFUMB &
 			log "AFUMB corriendo bajo el no.: $!" "INFO"
 		fi
 	fi

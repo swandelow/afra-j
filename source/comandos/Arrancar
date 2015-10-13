@@ -10,7 +10,7 @@ else
     else
     	#si todas las condiciones estan dadas lanza el demonio
     	echo "Arrancando demonio AFREC."
-    	nohup ./AFREC > /dev/null 2>&1 &
+    	nohup AFREC > /dev/null 2>&1 &
     	exit 0
     fi
 fi
