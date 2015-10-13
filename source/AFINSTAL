@@ -209,24 +209,16 @@ function choose_log_file_max_size {
 }
 
 function choose_vars_values {
-	#choose_bin_dir
 	choose_dir BINDIR "Defina el directorio de instalación de los ejecutables ($BINDIR):" "El directorio de ejecutables será"
-	#choose_mae_dir
 	choose_dir MAEDIR "Defina el directorio para maestros y tablas ($MAEDIR):" "El directorio para maestros y tablas será"
-	#choose_nove_dir
 	choose_dir NOVEDIR "Defina el directorio de recepción de archivos de llamadas ($NOVEDIR):" "El directorio de recepción de archivos de llamadas será"
 	choose_nove_dir_space
-	#choose_acep_dir
 	choose_dir ACEPDIR "Defina el directorio de grabación de los archivos de llamadas aceptadas ($ACEPDIR):" "El directorio de grabación de los archivos de llamadas aceptadas será"
-	#choose_proc_dir
 	choose_dir PROCDIR "Defina el directorio de grabación de los registros de llamadas sospechosas ($PROCDIR):" "El directorio de grabación de los registros de llamadas sospechosas será"
-	#choose_repo_dir
 	choose_dir REPODIR "Defina el directorio de grabación de los reportes ($REPODIR):" "El directorio de grabación de los reportes será"
-	#choose_log_dir
 	choose_dir LOGDIR "Defina el directorio para los archivos de log ($LOGDIR):" "El directorio para los archivos de log será"
 	choose_log_extension_name
 	choose_log_file_max_size
-	#choose_rech_dir
 	choose_dir RECHDIR "Defina el directorio de grabación de archivos rechazados ($RECHDIR):" "El directorio de grabación de archivos rechazados será"
 }
 
