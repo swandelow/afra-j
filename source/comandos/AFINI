@@ -18,8 +18,8 @@ function log2 {
 
 function printUsage(){
     echo "Modo de uso: . AFINI <DIRECTORIO>"
-    echo "Inicializa el sistema de factura electronica."; echo
-    echo "  <DIRECTORIO> Permite especificar el directorio base."
+    echo "Inicializa el sistema de AFRA-J."; echo
+    echo "<DIRECTORIO> Permite especificar el directorio base."
 }
 
 
@@ -209,12 +209,12 @@ function start_afrec {
 if [ $# -ne 1 ]
 then
 	printUsage
-	exit 1
+	return
 else 
 	if [ ! -d $1 ]; then
    		echo "ERROR: El directorio especificado ($1) no existe."; echo
     	printUsage
-    	exit 1
+    	return
 	fi
 fi
 # setteo el path al directorio base grupo06
