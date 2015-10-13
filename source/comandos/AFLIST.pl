@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use warnings;
+# use warnings;
 
 use Scalar::Util qw(looks_like_number);
 
@@ -29,14 +29,17 @@ my $FECHA_ARCHIVO = 11;
 
 
 
+my $PROCDIR = $ENV{'PROCDIR'};
 
 #Setear la ruta a los archivos de sospechas.
-my $RUTA_REPODIR = "$REPODIR";
-my $RUTA_CENTRALES = "$MAEDIR/CdC.mae";
-my $RUTA_AGENTES = "$MAEDIR/agentes.mae";
-my $RUTA_CIUDADES = "$MAEDIR/CdA.mae";
-my $RUTA_PAISES = "$MAEDIR/CdP.mae";
-my $RUTA_UMBRALES = "$MAEDIR/umbral.tab";
+my $PATH_MAEDIR = $ENV{'MAEDIR'};
+
+my $RUTA_REPODIR = $ENV{'REPODIR'};
+my $RUTA_CENTRALES = "$PATH_MAEDIR" . "/CdC.mae";
+my $RUTA_AGENTES = "$PATH_MAEDIR" . "/agentes.mae";
+my $RUTA_CIUDADES = "$PATH_MAEDIR" . "/CdA.mae";
+my $RUTA_PAISES = "$PATH_MAEDIR" . "/CdP.mae";
+my $RUTA_UMBRALES = "$PATH_MAEDIR" . "/umbral.tab";
 
 my $extensionArchivo = "000";
 my $archivoAGuardar = "$RUTA_REPODIR/$extensionArchivo";
@@ -47,22 +50,24 @@ my $randEstadisticas = int(rand(1000000));
 my $rutaConsulta = "$RUTA_REPODIR/subllamadas.$rand1";
 my $rutaEstadistica = "$RUTA_REPODIR/subllamadas.$randEstadisticas";
 
-unless(open FILE, '>'.$rutaConsulta) {
-    # Die with error message 
-    # if we can't open it.
-    die "\nError escribiendo archivo $rutaConsulta\n";
 
-    close $rutaConsulta;
-}
 
-unless(open FILE, '>'.$rutaEstadistica) {
-    # Die with error message 
-    # if we can't open it.
-    die "\nError escribiendo archivo $rutaEstadistica\n";
 
-    close $rutaEstadistica;
-}
+# 	unless(open FILE, '>'.$rutaConsulta) {
+#     	# Die with error message 
+#     	# if we can't open it.
+#     	die "\nError escribiendo archivo $rutaConsulta\n";
 
+#     	close $rutaConsulta;
+# 	}
+
+# 	unless(open FILE, '>'.$rutaEstadistica) {
+#     	# Die with error message 
+#     	# if we can't open it.
+#     	die "\nError escribiendo archivo $rutaEstadistica\n";
+
+#     	close $rutaEstadistica;
+# }
 sub grabarEstadisticaEnArchivo{
 	my ($entry) = @_;
 	open(my $fh, '>', $rutaEstadistica);
@@ -117,11 +122,11 @@ sub mostrarCentralMasSospechosas{
 	my %hashCentrales;
 
 	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR/$archivos[$a]";
+  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
 
-  		eko("RUTA SOSPECHOSA $rutaSospecha" );
+  		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
-		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 			$idCentral = obtenerCampo2("$linea", "$ID_CENTRAL");
@@ -167,10 +172,10 @@ sub mostrarRankingDeUmbrales{
 	my %hashUmbrales;
 
 	for my $a (0..$#archivos){
-  		$rutaSospecha = "$RUTA_SOSPECHAS/$archivos[$a]";
+  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
 
-  		eko("RUTA SOSPECHOSA $rutaSospecha" );
-		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+  	 	# eko("RUTA SOSPECHOSA $rutaSospecha" );
+		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 			$idUmbral = obtenerCampo2("$linea", "$ID_UMBRAL");
@@ -215,11 +220,11 @@ sub mostrarAgentesMasSospechosos{
 	my %hashAgentes;
 
 	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR/$archivos[$a]";
+  		$rutaSospecha = "$PROCDIR" . "/archivos[$a]";
 
-  		eko("RUTA SOSPECHOSA $rutaSospecha" );
+  		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
-		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 			$idAgente = obtenerCampo2("$linea", "$ID_AGENTE");
@@ -270,9 +275,9 @@ my %hashAgentes;
 for my $a (0..$#archivos){
 	$rutaSospecha = "$PROCDIR/$archivos[$a]";
 
-	eko("RUTA SOSPECHOSA $rutaSospecha" );
+	# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
-	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 	while($linea = <ENT>){
 		chomp($linea);
 		$idAgente = obtenerCampo2("$linea", "$ID_AGENTE");
@@ -330,12 +335,12 @@ my %hashCodigoPais;
 my %hashCodigoArea;
 
 		for my $a (0..$#archivos){
-  			$rutaSospecha = "$PROCDIR/$archivos[$a]";
+  			$rutaSospecha = "$PROCDIR/" . "$archivos[$a]";
 
-  			eko("RUTA SOSPECHOSA $rutaSospecha" );
-			open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+  			# eko("RUTA SOSPECHOSA $rutaSospecha" );
+			open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 			while($linea = <ENT>){
-				eko("$a en el for");
+				# eko("$a en el for");
 				chomp($linea);
 				$destinoSospechoso = obtenerCampo2("$linea", "$NUMERO_DESTINO");
 				$codigoArea = obtenerCampo2("$linea", "$COD_AREA_B");
@@ -367,7 +372,7 @@ my %hashCodigoArea;
 			close(ENT);
 	}
 	
-	eko("despjes del for");
+	# eko("despjes del for");
 
 
 	# Despues del while ya voy a tener en el hash todas las ocurrencias de cada destino
@@ -489,7 +494,7 @@ sub comparadorHashes{
 	$duracionA = $camposA[2];
 	$duracionB = $camposB[2];
 
-	eko($duracionA <=> $duracionB);
+	# eko($duracionA <=> $duracionB);
 	return ($duracionA <=> $duracionB);
 }
 
@@ -597,14 +602,14 @@ sub setearFiltros{
 # y muestra los registros.
 sub mostrarResultadosHash{
 
-	eko("mostrar clave hash");
+	#eko("mostrar clave hash");
 	my (%resultados) = @_;
 
 	@keys = sort { comparadorHashes($resultados{$a}, $resultados{$b}) } keys%resultados;
 	@values = @resultados{@keys};
 
-	eko("Long del array $#keys");
-	eko("Long del values $#values");
+	#eko("Long del array $#keys");
+	#eko("Long del values $#values");
 
 	if ($#keys < 0){
 		mostrarQueryVacia;
@@ -642,7 +647,7 @@ sub pedirFiltroCentral{
 	my @resultados;
   	# eko($array[1]);
 
-  	open(ENT,"<$RUTA_SOSPECHAS")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 	while($linea = <ENT>){
 		chomp($linea);
 
@@ -668,7 +673,7 @@ sub pedirFiltroCentral{
 	close(ENT);
 
 	mostrarResultados(@resultados);
-	eko("Afuera");
+	#eko("Afuera");
 
   	# Me devuelve la leng mas 1.
   	# eko("La long del array es $#array")
@@ -687,12 +692,12 @@ sub pedirFiltroCentralHash{
   	# eko($array[1]);
 
   	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR/$archivos[$a]";
+  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
 
-  		eko("RUTA SOSPECHOSA $rutaSospecha" );
+  		#eko("RUTA SOSPECHOSA $rutaSospecha" );
 
 
-  		open(ENT,"<$RUTA_SOSPECHAS")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+  		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 
@@ -712,9 +717,7 @@ sub pedirFiltroCentralHash{
 			}
 
 			if ($esValido == 1){
-				eko("valido");
 				$claveHash = obtenerClaveHash($linea);
-				eko("$claveHash");
 				$resultados{$claveHash} = $linea;
 			}
 		}
@@ -723,7 +726,7 @@ sub pedirFiltroCentralHash{
 
 
   	mostrarResultadosHash(%resultados);
-	eko("Afuera");
+	# eko("Afuera");
 
   	
   	# Me devuelve la leng mas 1.
@@ -745,13 +748,13 @@ sub pedirFiltroAgentes{
   	# eko($array[1]);
 
   	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR/$archivos[$a]";
+  		$rutaSospecha = "$PROCDIR/" . "$archivos[$a]";
 
   		eko("RUTA SOSPECHOSA $rutaSospecha" );
 
 
 
-	  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+	  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 
@@ -797,14 +800,14 @@ sub pedirFiltroUmbral{
 	my %resultados;
   	# eko($array[1]);
 
-  	eko(@filtrosArray);
+  	# eko(@filtrosArray);
 
   	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR/$archivos[$a]";
+  		$rutaSospecha = "$PROCDIR/" . "$archivos[$a]";
 
-  		eko("RUTA SOSPECHOSA $rutaSospecha" );
+  		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
-	  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+	  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 
@@ -870,14 +873,14 @@ sub pedirFiltroTipoLlamada{
 	my %resultados;
   	# eko($array[1]);
 
-  	eko(@filtrosArray);
+  	# eko(@filtrosArray);
 
   	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR/$archivos[$a]";
+  		$rutaSospecha = "$PROCDIR/" . "$archivos[$a]";
 
-  		eko("RUTA SOSPECHOSA $rutaSospecha" );
+  		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
-	  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+	  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 
@@ -931,14 +934,14 @@ sub pedirFiltroPorTiempoDeDuracion{
 
 		@intervalo = split( /\s+/, $filtros);
 
-		eko("@intervalo");
+		# eko("@intervalo");
 		# si no tiene 2 parametros es invalido
 		if ($#intervalo eq 1){
-			eko("cantidad erronea de parametros");
+			# eko("cantidad erronea de parametros");
 			if ( looks_like_number($intervalo[0]) && looks_like_number($intervalo[1]) ){
 				# si los 2 son numeros vamos bien.
 
-				eko("Los 2 parecen numeros");
+				# eko("Los 2 parecen numeros");
 
 				# ahora vemos que sea un intervalo valido.
 				if( ($intervalo[1] - $intervalo[0]) > 0){
@@ -954,11 +957,11 @@ sub pedirFiltroPorTiempoDeDuracion{
 	for my $a (0..$#archivos){
   		$rutaSospecha = "$PROCDIR/$archivos[$a]";
 
-  		eko("RUTA SOSPECHOSA $rutaSospecha" );
+  		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
 
 
-		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 
@@ -997,10 +1000,10 @@ sub pedirFiltroNumeroA{
   	for my $a (0..$#archivos){
   		$rutaSospecha = "$PROCDIR/$archivos[$a]";
 
-  		eko("RUTA SOSPECHOSA $rutaSospecha" );
+  		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
 
-	  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+	  	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 
@@ -1037,32 +1040,32 @@ sub mostrarOpcionesDeFiltros{
 	# Si no se recibieron parametros es porque va a usar todos los archivos.
 	$numParams = @_;
 
-	eko("se recibieron $numParams parametros");
+	# eko("se recibieron $numParams parametros");
 
 	my (@archivosRecibidos) = @_;
 
 	$opcion = mostrarOpciones;
 
 	if ($opcion eq "a"){
-		eko("opc a");
+		# eko("opc a");
 		pedirFiltroCentralHash(@archivosRecibidos);
 	} elsif ($opcion eq "b"){
-		eko("opc b");
+		# eko("opc b");
 		pedirFiltroAgentes(@archivosRecibidos)	;
 	} elsif ($opcion eq "c"){
-		eko("opc c");
+		# eko("opc c");
 		pedirFiltroUmbral(@archivosRecibidos);
 	} elsif ($opcion eq "d"){
-		eko("opc d");
+		# eko("opc d");
 		pedirFiltroTipoLlamada(@archivosRecibidos);
 	} elsif ($opcion eq "e"){
-		eko("opc e");
+		# eko("opc e");
 		pedirFiltroPorTiempoDeDuracion(@archivosRecibidos);
 	} elsif ($opcion eq "f"){
-		eko("opc f");
+		# eko("opc f");
 		pedirFiltroNumeroA(@archivosRecibidos);
 	} elsif ($opcion eq "g"){
-		eko("opc g");
+		# eko("opc g");
 	}
 }
 
@@ -1071,7 +1074,7 @@ sub mostrarOpcionesDeFiltrosEstadisticas{
 	# Si no se recibieron parametros es porque va a usar todos los archivos.
 	$numParams = @_;
 
-	eko("se recibieron $numParams parametros");
+	# eko("se recibieron $numParams parametros");
 
 	my (@archivosRecibidos) = @_;
 
@@ -1089,19 +1092,19 @@ sub mostrarOpcionesDeFiltrosEstadisticas{
 # mostrarRankingDeUmbrales;
 
 	if ($opcion eq "a"){
-		eko("opc a");
+		# eko("opc a");
 		mostrarCentralMasSospechosas(@archivosRecibidos);
 	} elsif ($opcion eq "b"){
-		eko("opc b");
+		# eko("opc b");
 		mostrarAgentesMasSospechosos(@archivosRecibidos)	;
 	} elsif ($opcion eq "c"){
-		eko("opc c");
+		# eko("opc c");
 		mostrarOficinaMasSospechosa(@archivosRecibidos);
 	} elsif ($opcion eq "d"){
-		eko("opc d");
+		# eko("opc d");
 		mostrardDestinoMasSospechoso(@archivosRecibidos);
 	} elsif ($opcion eq "e"){
-		eko("opc e");
+		# eko("opc e");
 		mostrarRankingDeUmbrales(@archivosRecibidos);
 	}
 }
@@ -1163,6 +1166,8 @@ sub mostrarOpcionesDeFiltrosEstadisticas{
 # y viceversa
 sub manejarEstadoDeGrabacion{
 	if ($ESTADO_GRABACION == 0){
+
+		#aca estoy activando la grabacion.
 		$ESTADO_GRABACION = 1;
 	} else {
 		$ESTADO_GRABACION = 0;
@@ -1233,11 +1238,11 @@ sub mostrarMenuYPedirOpcion{
 sub obtenerArchivosAProcesar{
 
 	eko("obteniendo archivos a procesar");
-	@archivosParaConsultar;
+	my @archivosParaConsultar;
 	my ($tipoFiltro, @arrayFiltros) = @_;
 
 
-  		$rutaSospecha = "$PROCDIR/$archivos[$a]";
+  	# $rutaSospecha = "$PROCDIR/$archivos[$a]";
 	my $dir = "$PROCDIR/";
     opendir(DIR, $dir) or die $!;
 
@@ -1302,7 +1307,7 @@ sub mostrarFormasDeConsultarLlamadasSospechosas(){
 		}
 	}
 
-	eko("La salida es $salidaElegida");
+	#eko("La salida es $salidaElegida");
 	# el usuario por fin eligio una opcion valida.
 	# felicitarlo.
 	return $salidaElegida;
@@ -1317,7 +1322,7 @@ sub pedirAnioMes{
 	my @aniomeses = split( /\s+/, $aniomes);
 
 	
-	@archivosAProcesar = obtenerArchivosAProcesar("ANIOMES", @anioMeses);
+	@archivosAProcesar = obtenerArchivosAProcesar("ANIOMES", @aniomeses);
 
 	mostrarOpcionesDeFiltros(@archivosAProcesar);
 }
@@ -1331,7 +1336,7 @@ sub pedirAnioMesEstadisticas{
 	my @aniomeses = split( /\s+/, $aniomes);
 
 	
-	@archivosAProcesar = obtenerArchivosAProcesar("ANIOMES", @anioMeses);
+	@archivosAProcesar = obtenerArchivosAProcesar("ANIOMES", @aniomeses);
 
 	mostrarOpcionesDeFiltrosEstadisticas(@archivosAProcesar);
 }
@@ -1394,7 +1399,7 @@ sub pedirOficinasEstadisticas{
 sub mostrarMenuEstadisticas{
 	$opcionElegida = mostrarFormasDeConsultarLlamadasSospechosas;
 
-	eko("ACA LA OPCION ES $opcionElegida");
+	#eko("ACA LA OPCION ES $opcionElegida");
 	if ($opcionElegida eq "1"){
 		#va a la parte de las querys con todos los achivos
 		obtenerTodosLosArchivosDeSospechas(0);
@@ -1410,10 +1415,10 @@ sub mostrarMenuEstadisticas{
 }
 
 sub mostrarMenuConsultas{
-	eko("Mostrando menu consltas");
+	# eko("Mostrando menu consltas");
 	$opcionElegida = mostrarFormasDeConsultarLlamadasSospechosas;
 
-	eko("ACA LA OPCION ES $opcionElegida");
+	# eko("ACA LA OPCION ES $opcionElegida");
 	if ($opcionElegida eq "1"){
 
 		obtenerTodosLosArchivosDeSospechas(1);
@@ -1455,12 +1460,11 @@ sub menuMain{
 		}elsif ($opcion eq "w"){
 			manejarEstadoDeGrabacion;
 		}elsif ($opcion eq "r"){
-			eko("r elegida perro");
 			mostrarMenuConsultas;
 		}elsif ($opcion eq "s"){
 			mostrarMenuEstadisticas;
 		} elsif ($opcion eq "q"){
-			eko("Ejecucion terminada");
+			#eko("Ejecucion terminada");
 			$deberiaEjecutarme = 0;
 		} else{
 			mostrarMsgInstr();
@@ -1471,7 +1475,6 @@ sub menuMain{
 sub chequearCantidadArgumentos{
 	$numArgs = @ARGV;
 
-	eko ("$numArgs");
 
 	#Si no recibo exactamente un parametro le muestro el mensaje de -h
 	if ( $numArgs != 1) {
@@ -1482,7 +1485,7 @@ sub chequearCantidadArgumentos{
 		if ($primerArgumento eq "-h"){
 			mostrarAyuda();
 		}elsif ($primerArgumento eq "-w"){
-			eko ("-w seleccionada");
+			# eko ("-w selecionada");
 			menuMain;
 		}elsif ($primerArgumento eq "-r"){
 			mostrarMenuConsultas;
@@ -1496,5 +1499,23 @@ sub chequearCantidadArgumentos{
 	}
 }
 
-chequearCantidadArgumentos;
+
+my $AFRAENV = $ENV{'AFRAENV'};
+
+if (! $AFRAENV eq ''){
+	# inicializado
+
+	#eko(`pgrep AFUMB`);
+
+#	if(`ps -aef | grep -v grep $process_name`) {
+#    print "Process is running!\n";
+
+    chequearCantidadArgumentos;
+} else{
+	# no inicIALIzado
+	eko("El ambiente no esta inicializado, ejecutar AFINI");
+}
+
+
+
 
