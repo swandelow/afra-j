@@ -7,6 +7,15 @@ function log {
 	./GraLog AFINI "$message" "$type"
 }
 
+function log2 {
+	message=$1
+	type=$2
+	if [ -n "$3" ]; then
+		echo "$message"
+	fi
+	./GraLog AFINI "$message" "$type"
+}
+
 function printUsage(){
     echo "Modo de uso: . AFINI <DIRECTORIO>"
     echo "Inicializa el sistema de factura electronica."; echo
@@ -156,33 +165,20 @@ function init_environment {
 	AFRAENV=1
 	export AFRAENV
 
-	echo Directorio de configuración: "$CONFDIR"
-	log "Directorio de configuración: "$CONFDIR"" "$LOG_INFO_TYPE"
-	echo $(ls "$CONFDIR")
-	log "$(ls -m "$CONFDIR")" "$LOG_INFO_TYPE"
-	echo Directorio de ejecutables: "$BINDIR"
-	log "Directorio de ejecutables: "$BINDIR"" "$LOG_INFO_TYPE"
-	echo $(ls -m "$BINDIR")
-	log "$(ls -m "$BINDIR")" "$LOG_INFO_TYPE"
-	echo Directorio de maestros y tablas: "$MAEDIR"
-	log "Directorio de maestros y tablas: "$MAEDIR"" "$LOG_INFO_TYPE"
-	echo $(ls -m "$MAEDIR")
-	log "$(ls -m "$MAEDIR")" "$LOG_INFO_TYPE"
-	echo Directorio de recepción de archivos de llamadas: "$NOVEDIR"
-	log "Directorio de recepción de archivos de llamadas: "$NOVEDIR"" "$LOG_INFO_TYPE"
-	echo Directorio de archivos de llamadas aceptadas: "$ACEPDIR"
-	log "Directorio de archivos de llamadas aceptadas: "$ACEPDIR"" "$LOG_INFO_TYPE"
-	echo Directorio de archivos de llamadas sospechosas: "$PROCDIR"
-	log "Directorio de archivos de llamadas sospechosas: "$PROCDIR"" "$LOG_INFO_TYPE"
-	echo Directorio de archivos de reportes de llamadas: "$REPODIR"
-	log "Directorio de archivos de reportes de llamadas: "$REPODIR"" "$LOG_INFO_TYPE"
-	echo Directorio de archivos de log: "$LOGDIR"
-	log "Directorio de archivos de log: "$LOGDIR"" "$LOG_INFO_TYPE"
-	echo Directorio de archivos rechazados: "$RECHDIR"
-	log "Directorio de archivos rechazados: "$RECHDIR"" "$LOG_INFO_TYPE"
+	log2 "Directorio de configuración: $CONFDIR" "$LOG_INFO_TYPE" "s"
+	log2 "$(ls -m $CONFDIR)" "$LOG_INFO_TYPE" "s"
+	log2 "Directorio de ejecutables: $BINDIR" "$LOG_INFO_TYPE" "s"
+	log2 "$(ls -m $BINDIR)" "$LOG_INFO_TYPE" "s"
+	log2 "Directorio de maestros y tablas: $MAEDIR" "$LOG_INFO_TYPE" "s"
+	log2 "$(ls -m $MAEDIR)" "$LOG_INFO_TYPE" "s"
+	log2 "Directorio de recepción de archivos de llamadas: $NOVEDIR" "$LOG_INFO_TYPE" "s"
+	log2 "Directorio de archivos de llamadas aceptadas: $ACEPDIR" "$LOG_INFO_TYPE" "s"
+	log2 "Directorio de archivos de llamadas sospechosas: $PROCDIR" "$LOG_INFO_TYPE" "s"
+	log2 "Directorio de archivos de reportes de llamadas: $REPODIR" "$LOG_INFO_TYPE" "s"
+	log2 "Directorio de archivos de log: $LOGDIR" "$LOG_INFO_TYPE" "s"
+	log2 "Directorio de archivos rechazados: $RECHDIR" "$LOG_INFO_TYPE" "s"
 
-	echo Estado del Sistema: INICIALIZADO
-	log "Estado del Sistema: INICIALIZADO" "$LOG_INFO_TYPE"
+	log2 "Estado del Sistema: INICIALIZADO" "$LOG_INFO_TYPE" "s"
 }
 
 function start_afrec {
@@ -197,8 +193,8 @@ function start_afrec {
 		if ! $(pgrep AFREC); then
 			./Arrancar
 			pid_afrec=$(pgrep AFREC)
-			echo AFREC corriendo bajo el no.: "$pid_afrec"
-			log "AFREC corriendo bajo el no.: "$pid_afrec"" "$LOG_INFO_TYPE"
+			#echo AFREC corriendo bajo el no.: "$pid_afrec"
+			log2 "AFREC corriendo bajo el no.: $pid_afrec" "$LOG_INFO_TYPE" "s"
 		else
 			echo AFREC ya está corriendo. Puede detenerlo con el comando Detener.
 		fi
@@ -227,8 +223,7 @@ check_install
 
 if [ $INSTALL_COMPLETE == 1 ]; then
 	if [ ! -z $AFRAENV ]; then
-		echo Ambiente ya inicializado, para reiniciar termine la sesión e ingrese nuevamente.
-		log "Ambiente ya inicializado, para reiniciar termine la sesión e ingrese nuevamente." "$LOG_ERROR_TYPE"
+		log2 "Ambiente ya inicializado, para reiniciar termine la sesión e ingrese nuevamente." "$LOG_ERROR_TYPE" "s"
 	else 
 		init_environment
 		start_afrec
