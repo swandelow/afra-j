@@ -4,21 +4,37 @@ use warnings;
 
 # Hace un print del mensaje recibido por parametro.
 # Le agrega el \n al final para que sea mas facil.
-sub imprimir{
 
-	#veo la cantidad de parametros recibidos
-	my $n = scalar(@_);
+$ESTADO_GRABACION = 0;
 
-	#esto me agarra solo el primer parametro.
-	my ($name) = @_;
+	# sub imprimir{
 
-	# esto me deja los 2 primeros parametros en el asunto
-	my ($name, $frase) = @_;
+	# 	#veo la cantidad de parametros recibidos
+	# 	my $n = scalar(@_);
+
+	# 	#esto me agarra solo el primer parametro.
+	# 	my ($name) = @_;
+
+	# 	# esto me deja los 2 primeros parametros en el asunto
+	# 	my ($name, $frase) = @_;
 
 
-	print "Se pasaron $n parametros \n";
-	print "$name \n";
-	print "$frase \n"
+	# 	print "Se pasaron $n parametros \n";
+	# 	print "$name \n";
+	# 	print "$frase \n";
+	# }
+
+
+# si esta activado, lo desactivo.
+# y viceversa
+sub manejarEstadoDeGrabacion{
+	if ($ESTADO_GRABACION == 0){
+		$ESTADO_GRABACION = 1;
+		eko("GRABACION DESACTIVADA");
+	} else {
+		$ESTADO_GRABACION = 0;
+		eko("GRABACION ACTIVADA");
+	}
 }
 
 # Hace un print del primer parametro.
@@ -48,6 +64,37 @@ sub mostrarAyuda(){
 	eko("==========================================================");
 	eko("==========================================================");
 	eko("==========================================================");
+}
+
+sub mostrarMenuYPedirOpcion{
+	eko("==========================================================");
+	eko("=======================AFLIST=============================");
+	eko("==========================================================");
+	eko("=  w  para activar/desactivar la grabacion de consultas ==");
+	eko("=  r  para realizar consultas sobre llamadas sospechosas =");
+	eko("=  s  para visualizar estadisticas                       =");
+	eko("=  h  para acceder a este menu                           =");
+	eko("==========================================================");
+	eko("==========================================================");
+	eko("==========================================================");
+
+	$opcionValida = 0;
+	while ($opcionValida == 0){
+		$salidaElegida = <STDIN>;
+		chomp($salidaElegida);	
+		if($salidaElegida eq "w" || $salidaElegida eq "r" ||
+			$salidaElegida eq "s" || $salidaElegida eq "h"){
+			$opcionValida = 1;			
+		}
+		else{
+			informarComandoErroneo();
+			
+		}
+	}
+
+	# el usuario por fin eligio una opcion valida.
+	# felicitarlo.
+	return $salidaElegida;
 }
 
 # me devuelve la opcion de la salida elegida.
@@ -99,7 +146,6 @@ sub chequearCantidadArgumentos{
 	if ( $numArgs != 1) {
 		mostrarMsgInstr();
 	} else {
-		eko ("no hay 1 argumento");
 		# vamos a ver si es un argumento valido.
 		$primerArgumento = "$ARGV[0]";
 		if ($primerArgumento eq "-h"){
@@ -120,5 +166,25 @@ sub chequearCantidadArgumentos{
 # y sino le vamos a decir que use el -h para pedir ayuda.
 
 chequearCantidadArgumentos();
+
+
+eko("post chequeo");
+
+$opcion = mostrarMenuYPedirOpcion;
+
+if ($opcion eq "h"){
+	mostrarAyuda();
+}elsif ($opcion eq "w"){
+	eko ("-w seleccionada");
+	manejarEstadoDeGrabacion;
+}elsif ($opcion eq "r"){
+	mostrarFormasDeConsultarLlamadasSospechosas();
+}elsif ($opcion eq "s"){
+	mostrarEstadisticas();
+} else{
+	mostrarMsgInstr();
+}
+
+
 
 
