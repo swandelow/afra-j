@@ -13,9 +13,9 @@
 # Devuelve 4 si la central es inexistente.
 
 ## ESTAS VARIABLES DEBEN TOMARSE DEL AMBIENTE ##
-GRUPO=grupo06
-MAE="$GRUPO"/mae
-RUTAARCHIVOCENTRALES="$MAE"/"CdC.mae"
+#GRUPO=grupo06
+#MAE="$GRUPO"/mae
+RUTAARCHIVOCENTRALES="$MAEDIR/CdC.mae"
 ################################################
 
 function validarRegistroLlamados(){
