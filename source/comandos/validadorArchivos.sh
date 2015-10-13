@@ -2,9 +2,6 @@
 
 # Esta funcion tiene como fin verificar que el archivo recibido como parametro
 # cumpla con los requisitos para ser un archivo de llamados valido
-#==========================================================================
-#= OJO, ESTOY HARDCODEANDO LA RUTA AL ARCHIVO DE RUTA ARCHIVO CENTRALES   =
-#==========================================================================
 
 # Devuelve 0 si el archivo cumple con el formato establecido
 # Devuelve 1 si el tipo de archivo es invalido
@@ -12,9 +9,6 @@
 # Devuelve 3 Si la fecha esta fuera de rango
 # Devuelve 4 si la central es inexistente.
 
-## ESTAS VARIABLES DEBEN TOMARSE DEL AMBIENTE ##
-#GRUPO=grupo06
-#MAE="$GRUPO"/mae
 RUTAARCHIVOCENTRALES="$MAEDIR/CdC.mae"
 ################################################
 
@@ -145,16 +139,3 @@ function esUnNumero(){
 		return 1
 	fi
 }
-
-
-# TESTEO: 
-# ruta="$GRUPO/novedades/SIS_20150703.csv"
-# echo $ruta
-
-# obtenerFecha
-# if validarRegistroLlamados $ruta; then
-#  	echo Es un archivo valido
-# else
-# 	echo es un archivo invalido.
-#   chequear la razon.
-# fi
