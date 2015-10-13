@@ -1,6 +1,6 @@
 #!/bin/bash
 
-grupo=./grupo06
+grupo="$1"
 
 rm -r "$grupo/bin"
 rm -r "$grupo/aceptadas"
