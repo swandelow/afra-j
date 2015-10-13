@@ -1,0 +1,44 @@
+Colocar pendrive e indicar como dispositivo de arranque el puerto USB.
+
+Ingresar usuario y contraseña para loguearse.
+
+Abrir una terminal y posicionarse en el directorio donde se haya colocado el archivo afra-j.tgz.
+
+Descomprimir el paquete con el siguiente comando:
+
+$tar xzvf afra-j.tgz
+
+Para efectuar la instalación ejecutar el script AFINSTAL:
+
+$./AFINSTAL
+
+La instalación dejará donde se haya descomprimido el paquete la siguiente estructura por default:
+grupo06/
+	- bin/
+	- conf/
+	- mae/
+	- novedades/
+	- aceptadas/
+	- rechazadas/
+	- sospechosas/
+	- reportes/
+
+Para inicializar el ambiente del sistema AFRA-J se debe ejecutar el comando AFINI, posicionado en el directorio donde se hayan dejado los scripts (grupo06/bin):
+
+$cd grupo06/bin
+$. AFINI <path_dir_grupo06> 
+
+AFINI dará la opción de ejecutar el sistema. En caso negativo, se puede comenzar la ejecución con el comando Arrancar:
+
+$./Arrancar 
+
+Para detener la ejecución del sistema ejecutar el comando Detener:
+
+$./Detener
+
+Para realizar consultas sobre los archivos de llamadas sospechosas utilizar el comando AFLIST.pl. Puede recibir los siguientes parámetros:
+	-h (ayuda)
+	-w (grabar)
+	-r (consulta)
+	-s (estadística)
+
