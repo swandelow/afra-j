@@ -1,8 +1,8 @@
 #!/bin/bash
 
-MSG_INVALID_DIR_NAME="El nombre del directorio sólo puede contener letras y debe tener de 1 a 15 caracteres. Intente nuevamente:"
+MSG_INVALID_DIR_NAME="El nombre del directorio sólo puede contener letras. Intente nuevamente:"
 MSG_INVALID_INTEGER="Tiene que ingresar un número entero. Intente nuevamente:"
-DIR_NAME_REGEX=^[a-zA-Z]{1,15}\(/[a-zA-Z]{1,15}\){0,}$
+DIR_NAME_REGEX=^[a-zA-Z]{1,}\(/[a-zA-Z]{1,}\){0,}$
 INTEGER_REGEX=^[0-9]+$
 GRUPO=grupo06
 CONFDIR="$GRUPO"/conf
