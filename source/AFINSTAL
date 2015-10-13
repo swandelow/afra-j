@@ -311,18 +311,7 @@ function create_dirs {
 }
 
 function copy_binaries {
-	cp comandos/AFINI "$BINDIR"/AFINI
-	cp comandos/AFREC "$BINDIR"/AFREC
-	cp comandos/AFUMB "$BINDIR"/AFUMB
-	cp comandos/GraLog "$BINDIR"/GraLog
-	cp comandos/Arrancar "$BINDIR"/Arrancar
-	cp comandos/Detener "$BINDIR"/Detener
-	cp comandos/MoverA "$BINDIR"/MoverA	
-	cp comandos/AFLIST.pl "$BINDIR"/AFLIST.pl
-	cp comandos/estadisticas.pl "$BINDIR"/estadisticas.pl
-	cp comandos/validadorArchivos.sh "$BINDIR"/validadorArchivos.sh
-	cp comandos/util.sh "$BINDIR"/util.sh
-
+	cp comandos/* "$BINDIR"
 	chmod -R +r+w+x "$BINDIR"
 }
 
