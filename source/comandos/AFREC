@@ -22,7 +22,7 @@ function logRechazados {
 		4) motivoRechazo="La central es inexistente" ;;
 	esac
 		
-	log "Archivo $1 rechazado. $motivoRechazo." "INFO"
+	log "Archivo $1 rechazado. $motivoRechazo." "WAR"
 }
 
 
@@ -39,7 +39,7 @@ do
 		rutaArchivo="$NOVEDIR/$i"
 		validarRegistroLlamados $rutaArchivo
 		resultado="$?"
-		log "Resultado validacion: $resultado"
+		#log "Resultado validacion: $resultado"
 		if [ $resultado -eq 0 ]
 		then
 			./MoverA "$NOVEDIR/$i" "$ACEPDIR/"
