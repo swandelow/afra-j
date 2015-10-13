@@ -17,14 +17,6 @@ function estoyEjecutandome(){
 	fi
 }
 
-#funcion general para logueo
-function log {
-	if [ $1 != "" ]
-	then
-	./Glog.sh "$1" "$2" "$3"
-	fi
-}
-
 
 #Devuelve la cantidad de archivos de un directorio
 function cantidadArchivos(){

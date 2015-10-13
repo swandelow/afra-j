@@ -2,8 +2,6 @@
 
 # Arrancar - lanza el demonio (AFREC)
 
-#AFRAENV=1
-
 if [ -z $AFRAENV ]; then
     echo "ERROR: El entorno no ha sido inicializado. Ejecute el comando AFINI."
 else

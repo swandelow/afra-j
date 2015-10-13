@@ -25,13 +25,8 @@ function logRechazados {
 	log "Archivo $1 rechazado. $motivoRechazo." "INFO"
 }
 
-## ESTAS VARIABLES DEBEN TOMARSE DEL AMBIENTE ##
-# GRUPO=grupo06
-# NOVEDIR="$GRUPO"/novedades
-# ACEPDIR="$GRUPO"/aceptadas
-# RECHDIR="$GRUPO"/rechazadas
+
 DORMIR_DEMONIO=10
-################################################
 
 ciclo=1
 
