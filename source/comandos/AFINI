@@ -166,6 +166,8 @@ function init_environment {
 	#Esta variable indica si el ambiente se encuentra inicializado
 	AFRAENV=1
 	export AFRAENV
+	PATH="$PATH:$BINDIR"
+	export PATH
 
 	log2 "Directorio de configuración: $CONFDIR" "$LOG_INFO_TYPE" "s"
 	log2 "$(ls -m $CONFDIR)" "$LOG_INFO_TYPE" "s"
@@ -195,7 +197,6 @@ function start_afrec {
 		if ! $(pgrep AFREC); then
 			./Arrancar
 			pid_afrec=$(pgrep AFREC)
-			#echo AFREC corriendo bajo el no.: "$pid_afrec"
 			log2 "AFREC corriendo bajo el no.: $pid_afrec" "$LOG_INFO_TYPE" "s"
 		else
 			echo AFREC ya está corriendo. Puede detenerlo con el comando Detener.
