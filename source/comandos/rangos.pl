@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use warnings;
+use Scalar::Util qw(looks_like_number);
 
 # se pueden realizar consultas sobre un archivo, extender esto de uno hasta muchos.
 # FORMATO DE LOS REGISTROS:
@@ -74,6 +75,10 @@ sub informarComandoErroneo{
 	eko("Error! Seleccionar una opcion valida.");
 }
 
+sub mostrarQueryVacia{
+	eko("La query no devolvio registros validos");
+}
+
 sub obtenerCampo{
 	my ($registro, $campo) = @_;
 	@campos = split(";",$registro);
@@ -96,6 +101,10 @@ sub setearFiltros{
 sub mostrarResultados{
 	my (@resultados) = @_;
 
+	if ($#resultados < 0){
+		mostrarQueryVacia;
+		return 0;
+	}
 	for my $i (0..$#resultados){
 		eko("$resultados[$i]");
 	}
@@ -143,26 +152,156 @@ sub pedirFiltroCentral{
   	# eko("La long del array es $#array")
 }
 
-sub pedirFiltroAgente{
-	eko("Introducir ID(s) del agente:");
+sub pedirFiltroAgentes{
+	eko("Introducir ID(s) de agente(s):");
+
+	$filtros = <STDIN>;
+	chomp($filtros);	
+
+	my @filtrosArray = split( /\s+/, $filtros);
+	my @resultados;
+  	# eko($array[1]);
+
+  	open(ENT,"<$RUTA_SOSPECHAS")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+	while($linea = <ENT>){
+		chomp($linea);
+
+		#todas las lineas son invalidas hasta que se demuestre lo contrario.
+		$esValido = 0;
+
+		$idAgente = obtenerCampo("$linea", "$ID_AGENTE");
+
+		# viendo si el registro cae dentro de la query.
+		for my $i (0..$#filtrosArray){
+			if ($idAgente eq $filtrosArray[$i]){
+				$esValido = 1;
+
+				#este seria el break de Perl.
+				last;
+			}
+		}
+
+		if ($esValido == 1){
+			push @resultados, $linea;
+		}
+	}
+	close(ENT);
+
+	mostrarResultados(@resultados);
+
+  	# Me devuelve la leng mas 1.
+  	# eko("La long del array es $#array")
 }
 
+
+# TODO:
 sub pedirFiltroUmbral{
 	eko("Introducir umbral(es):");
 }
 
+# TODO:
 sub pedirFiltroTipoLlamada{
 	eko("Introducir filtro(s) de tipos de llamada:");
 }
 
+sub mostrarMensajeRangoInvalido{
+	eko("Rango invalido! Intentar nuevamente");
+}
+
 # vamos a tener que validar 
 sub pedirFiltroPorTiempoDeDuracion{
-	eko("Introducir rango de duracion: ej: [0 10]");
+
+	#primero hay que ver que sea valido el intervalo, o no?
+	my @resultados;
+
+	eko("Introducir el intervalo separado por espacio:");
+
+	$opcionValida = 0;
+	while ($opcionValida == 0){
+		$filtros = <STDIN>;
+		chomp($filtros);	
+
+		@intervalo = split( /\s+/, $filtros);
+
+		eko("@intervalo");
+		# si no tiene 2 parametros es invalido
+		if ($#intervalo eq 1){
+			eko("cantidad erronea de parametros");
+			if ( looks_like_number($intervalo[0]) && looks_like_number($intervalo[1]) ){
+				# si los 2 son numeros vamos bien.
+
+				eko("Los 2 parecen numeros");
+
+				# ahora vemos que sea un intervalo valido.
+				if( ($intervalo[1] - $intervalo[0]) > 0){
+					eko($intervalo[1] - $intervalo[0]);
+					$opcionValida = 1;
+				}
+			}
+		}
+	}
+
+	# el input es valido, hacer la query.
+
+	open(ENT,"<$RUTA_SOSPECHAS")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+	while($linea = <ENT>){
+		chomp($linea);
+
+		#todas las lineas son invalidas hasta que se demuestre lo contrario.
+		$esValido = 0;
+
+		$tiempoLlamada = obtenerCampo("$linea", "$TIEMPO_CONV");
+
+		# viendo si el registro cae dentro de la query.
+		if ($tiempoLlamada > $intervalo[0] && $tiempoLlamada < $intervalo[1]){
+			push @resultados, $linea;
+			#este seria el break de Perl.
+		}
+	}
+	close(ENT);
+
+	mostrarResultados(@resultados);
 }
 
 
 sub pedirFiltroNumeroA{
 	eko("Introducir numero(s) A: ");
+
+	$filtros = <STDIN>;
+	chomp($filtros);	
+
+	my @filtrosArray = split( /\s+/, $filtros);
+	my @resultados;
+  	# eko($array[1]);
+
+  	open(ENT,"<$RUTA_SOSPECHAS")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $RUTA_SOSPECHAS \n";
+	while($linea = <ENT>){
+		chomp($linea);
+
+		#todas las lineas son invalidas hasta que se demuestre lo contrario.
+		$esValido = 0;
+
+		$codArea = obtenerCampo("$linea", "$AREA_NUM_A");
+		$numeroOrigen = obtenerCampo("$linea", "$NUMERO_ORIGEN");
+		$numeroA = $codArea.$numeroOrigen;
+
+		# viendo si el registro cae dentro de la query.
+		for my $i (0..$#filtrosArray){
+			if ($numeroA == $filtrosArray[$i]){
+				$esValido = 1;
+
+				#este seria el break de Perl.
+				last;
+			}
+		}
+
+		if ($esValido == 1){
+			push @resultados, $linea;
+		}
+	}
+	close(ENT);
+
+	mostrarResultados(@resultados);
 }
 
 
@@ -174,14 +313,19 @@ if ($opcion eq "a"){
 	pedirFiltroCentral;
 } elsif ($opcion eq "b"){
 	eko("opc b");
+	pedirFiltroAgentes	;
 } elsif ($opcion eq "c"){
+	pedirFiltroUmbral;
 	eko("opc c");
 } elsif ($opcion eq "d"){
 	eko("opc d");
+	pedirFiltroTipoLlamada;
 } elsif ($opcion eq "e"){
 	eko("opc e");
+	pedirFiltroPorTiempoDeDuracion;
 } elsif ($opcion eq "f"){
 	eko("opc f");
+	pedirFiltroNumeroA;
 } elsif ($opcion eq "g"){
 	eko("opc g");
 }

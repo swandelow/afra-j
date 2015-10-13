@@ -9,15 +9,6 @@ use warnings;
 
 
 # FORMATO DE LOS REGISTROS:
-# [0] Id central
-# [1] Id agente.
-# [2] ID del umbral.
-# [3] Tipo de llamada.
-# [4] Inicio de llamada.
-# [5] Tiempo de conversacion.
-# [6] Numero A (origen llamada)
-# [7] Numbero B destino de la llamada.
-# [8] Fecha del archivo.
 my $ID_CENTRAL = 0;
 my $ID_AGENTE = 1;
 my $ID_UMBRAL = 2;
