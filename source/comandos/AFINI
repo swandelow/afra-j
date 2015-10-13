@@ -30,7 +30,7 @@ function check_install {
 	declare -a missing_dirs
 	declare -a missing_files
 	mae_filenames=(CdP.mae CdA.mae CdC.mae agentes.mae umbral.tab tllama.tab)
-	bin_filenames=(AFINI AFREC AFUMB GraLog Arrancar Detener MoverA AFLIST.pl validadorArchivos.sh util.sh)
+	bin_filenames=(AFINI AFREC AFUMB GraLog Arrancar Detener MoverA AFLIST.pl validadorArchivos.sh util.sh estadisticas.pl)
 	
 	index_dirs=0
 	index_files=0

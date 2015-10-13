@@ -319,6 +319,7 @@ function copy_binaries {
 	cp comandos/Detener "$BINDIR"/Detener
 	cp comandos/MoverA "$BINDIR"/MoverA	
 	cp comandos/AFLIST.pl "$BINDIR"/AFLIST.pl
+	cp comandos/estadisticas.pl "$BINDIR"/estadisticas.pl
 	cp comandos/validadorArchivos.sh "$BINDIR"/validadorArchivos.sh
 	cp comandos/util.sh "$BINDIR"/util.sh
 
