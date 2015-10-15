@@ -157,9 +157,11 @@ function verificarSiHayAlgunUmbralActivo {
 			if ([[ $tope < $tiempoDeConversacion ]]) && 
 			   ([ $codigoArea == $codArea ]) &&
 			   ([ $numeroDeLineaOrigen == $numLineaA ]) ; then
-				if ( [[ $tipoDeLlamadaUmbral == "DDI" ]] && ([[ $codigoDestino == $codPais ]] || 
+			   #PREGUNTAR  SI EL TIPO DE LLAMADA DEL UMBRAL ES EL MISMO AL TIPO DE LLAMADA.
+			   #LUEGO VER LAS OTRAS VERIFICACIONES
+				if ( [[ $tipoDeLlamadaUmbral == $tipoLLamada ]] && ([[ $codigoDestino == $codPais ]] || 
 					[[ $codigoDestino == "" ]]) ) ||
-				   ( ([[ $tipoDeLlamadaUmbral == "DDN" ]] || [[ $tipoDeLlamadaUmbral == "LOC" ]]) &&			 					     ([[ $codigoDestino == $codAreaB ]] || 
+				   ( ([[ $tipoDeLlamadaUmbral == $tipoLLamada ]] || [[ $tipoDeLlamadaUmbral == $tipoLLamada ]]) &&			 					     ([[ $codigoDestino == $codAreaB ]] || 
 					[[ $codigoDestino == "" ]]) ) ; then
 						let contadorDeLlamadasSospechosas=contadorDeLlamadasSospechosas+1
 						idUmbral=$(echo "$registro" | cut -d';' -f1) 
