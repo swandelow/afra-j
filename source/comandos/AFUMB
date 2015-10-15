@@ -316,12 +316,13 @@ do
 			bash ./MoverA "$ACEPDIR/$nombreArchivoMinimo" "$PROCDIR/proc" 
 		fi 
 	fi 
-	echo "Llamadas totales: "$contadorDeLlamadas
-	echo "Llamadas rechazadas: "$contadorDeLlamadasRechazadas
-	echo "Llamadas con umbral: "$contadorDeLlamadasConUmbral 
-	echo "Llamadas sin umbral: "$contadorDeLlamadasSinUmbral
-	echo "Llamadas sospechosas: "$contadorDeLlamadasSospechosas
-	echo "Llamadas no sospechosas: "$contadorDeLlamadasNoSospechosas	
+	cd $BINDIR
+	bash ./GraLog "AFUMB" "Cantidad de llamadas:$contadorDeLlamadas" "INFO" 	
+	bash ./GraLog "AFUMB" "Cantidad de llamadas rechazadas:$contadorDeLlamadasRechazadas" "INFO" 	
+	bash ./GraLog "AFUMB" "Cantidad de llamadas con umbral:$contadorDeLlamadasConUmbral" "INFO" 	
+	bash ./GraLog "AFUMB" "Cantidad de llamadas sin umbral:$contadorDeLlamadasSinUmbral" "INFO" 	
+	bash ./GraLog "AFUMB" "Cantidad de llamadas sospechosas:$contadorDeLlamadasSospechosas" "INFO" 	
+	bash ./GraLog "AFUMB" "Cantidad de llamadas no sospechosas:$contadorDeLlamadasNoSospechosas" "INFO" 	
 	echo " "
 done 
 			cd $BINDIR
