@@ -157,8 +157,6 @@ function verificarSiHayAlgunUmbralActivo {
 			if ([[ $tope < $tiempoDeConversacion ]]) && 
 			   ([ $codigoArea == $codArea ]) &&
 			   ([ $numeroDeLineaOrigen == $numLineaA ]) ; then
-			   #PREGUNTAR  SI EL TIPO DE LLAMADA DEL UMBRAL ES EL MISMO AL TIPO DE LLAMADA.
-			   #LUEGO VER LAS OTRAS VERIFICACIONES
 				if [[ $tipoDeLlamadaUmbral == $tipoLLamada ]]; then
 					if ( [[ $tipoDeLlamadaUmbral == "DDI" ]] && ( [[ $codigoDestino == $codPais ]] || [[ $codigoDestino == "" ]] ) ) ||
 				   	   ( ( [[ $tipoDeLlamadaUmbral == "DDN" ]] || [[ $tipoDeLlamadaUmbral == "LOC" ]] ) &&			 					     
