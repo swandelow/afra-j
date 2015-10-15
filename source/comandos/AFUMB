@@ -159,10 +159,10 @@ function verificarSiHayAlgunUmbralActivo {
 			   ([ $numeroDeLineaOrigen == $numLineaA ]) ; then
 			   #PREGUNTAR  SI EL TIPO DE LLAMADA DEL UMBRAL ES EL MISMO AL TIPO DE LLAMADA.
 			   #LUEGO VER LAS OTRAS VERIFICACIONES
-				if ( [[ $tipoDeLlamadaUmbral == $tipoLLamada ]] && ([[ $codigoDestino == $codPais ]] || 
-					[[ $codigoDestino == "" ]]) ) ||
-				   ( ([[ $tipoDeLlamadaUmbral == $tipoLLamada ]] || [[ $tipoDeLlamadaUmbral == $tipoLLamada ]]) &&			 					     ([[ $codigoDestino == $codAreaB ]] || 
-					[[ $codigoDestino == "" ]]) ) ; then
+				if [[ $tipoDeLlamadaUmbral == $tipoLLamada ]]; then
+					if ( [[ $tipoDeLlamadaUmbral == "DDI" ]] && ( [[ $codigoDestino == $codPais ]] || [[ $codigoDestino == "" ]] ) ) ||
+				   	   ( ( [[ $tipoDeLlamadaUmbral == "DDN" ]] || [[ $tipoDeLlamadaUmbral == "LOC" ]] ) &&			 					     
+				  	   ( [[ $codigoDestino == $codAreaB ]] || [[ $codigoDestino == "" ]] ) ) ; then
 						let contadorDeLlamadasSospechosas=contadorDeLlamadasSospechosas+1
 						idUmbral=$(echo "$registro" | cut -d';' -f1) 
 						idAgente=$(echo "$regristroDelArchivoDeLLamadas" | cut -d';' -f1) 
@@ -189,6 +189,10 @@ function verificarSiHayAlgunUmbralActivo {
 						registroAEscribir="$primerRenglon$segundoRenglon$tercerRengln"
 						grabarLlamadaSospechosa "$registroAEscribir"
 						return 1
+					else
+						let contadorDeLlamadasNoSospechosas=contadorDeLlamadasNoSospechosas+1
+						return 1
+					fi
 				else
 					let contadorDeLlamadasNoSospechosas=contadorDeLlamadasNoSospechosas+1
 					return 1				
