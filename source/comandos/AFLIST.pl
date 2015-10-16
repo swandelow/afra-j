@@ -41,6 +41,10 @@ my $RUTA_CIUDADES = "$PATH_MAEDIR" . "/CdA.mae";
 my $RUTA_PAISES = "$PATH_MAEDIR" . "/CdP.mae";
 my $RUTA_UMBRALES = "$PATH_MAEDIR" . "/umbral.tab";
 
+# Por defecto el directorio input de las consultas
+# será el directorio de llamadas sospechosas, output de AFUMB.
+$INPUT_DIR = $PROCDIR;
+
 my $extensionArchivo = "000";
 my $archivoAGuardar = "$RUTA_REPODIR/$extensionArchivo";
 
@@ -1232,6 +1236,15 @@ sub mostrarMenuYPedirOpcion{
 	return $salidaElegida;
 }
 
+sub obtenerFiltrosOficinas {
+	eko("introducir oficina(as) separadas por espacio:");
+
+	$oficinas = <STDIN>;
+	chomp($oficinas);	
+
+	return split( /\s+/, $oficinas);
+}
+
 #esto me va a devolver el nombre de los archivos que estoy buscando.
 # $1 recibe el tipo de filtro
 # $2 la lista de filtros.
@@ -1281,6 +1294,73 @@ sub obtenerArchivosAProcesar{
     return @archivosParaConsultar;
 }
 
+
+# Filtra array de archivos de acuerdo al tipo de filtro y  array de filtros
+# LOS ARRAYS SE DEBEN PASAR POR REFERENCIA SINO NO FUNCIONA!
+sub filtrarArchivos {
+	my ($archivos, $filtros, $tipoFiltro) = @_;
+
+	my @resultado;
+
+	if ($tipoFiltro eq "ANIOMES") {
+		#eko("filtrando por aniomes!");
+		foreach $archivo (@$archivos) {
+			($oficina, $aniomes) = split("_", $archivo);
+
+			foreach $filtro (@$filtros) {
+				#eko("filtro: $filtro");
+				#eko("oficina: $aniomes");
+				if ($filtro eq $aniomes) {
+					push @resultado, $archivo;
+				}
+			}
+		}
+	} elsif ($tipoFiltro eq "OFICINAS") {
+		#eko("filtrando por oficinas!");
+		foreach $archivo (@$archivos) {
+			($oficina, $aniomes) = split("_", $archivo);
+
+			foreach $filtro (@$filtros) {
+				#eko("filtro: $filtro");
+				#eko("oficina: $oficina");
+				if ($filtro eq $oficina) {
+					#eko("match: $filtro $oficina");
+					push @resultado, $archivo;
+				}
+			}
+		}
+
+	} elsif ($tipoFiltro eq "SUBLLAMADAS") {
+		foreach $archivo (@$archivos) {
+			($prefix, $sufix) = split('\.', $archivo);
+			foreach $filtro (@$filtros) {
+				#eko("oficina: $oficina");
+				if ($filtro eq $sufix) {
+					push @resultado, $archivo;
+				}
+			}
+		}
+	} else {
+		eko("Tipo de filtro invalido.");
+			return; 
+	}
+
+	return @resultado;
+}
+
+sub obtenerArchivos {
+	eko("obteniendo archivos a procesar");
+	my @archivosParaConsultar;
+	my ($inputDir, $tipoFiltro, @arrayFiltros) = @_;
+
+	#eko("arrayFiltros: @arrayFiltros");
+	@archivos = obtenerTodosLosArchivos($inputDir);
+
+	@archivosParaConsultar = filtrarArchivos(\@archivos, \@arrayFiltros, $tipoFiltro);
+
+	return @archivosParaConsultar;
+}
+
 # me devuelve la opcion de la salida elegida.
 sub mostrarFormasDeConsultarLlamadasSospechosas(){
 	eko("==========================================================");
@@ -1313,18 +1393,120 @@ sub mostrarFormasDeConsultarLlamadasSospechosas(){
 	return $salidaElegida;
 }
 
-sub pedirAnioMes{
+# me devuelve la opcion de la salida elegida.
+sub mostrarFormasDeConsultarSubLlamadas {
+	eko("===========================================================");
+	eko("==== Consultas de subllamadas =============================");
+	eko("=                                                         =");
+	eko("=   Seleccione la opcion deseada:                         =");
+	eko("=     1) Todos los archivos de subllamadas.               =");
+	eko("=     2) Seleccionar archivos de subllamadas.             =");
+	eko("=                                                         =");
+	eko("===========================================================");
+
+	$opcionValida = 0;
+	while ($opcionValida == 0){
+		$salidaElegida = <STDIN>;
+		chomp($salidaElegida);	
+		if($salidaElegida eq "1" || $salidaElegida eq "2"){
+			$opcionValida = 1;	
+		}
+		else{
+			informarComandoErroneo();
+		}
+	}
+
+	return $salidaElegida;
+}
+
+#Checkea si el directorio pasado por argumento está vacio.
+sub esDirectorioVacio {
+    opendir(DIR, shift) or die $!;
+    my @files = grep { !m/\A\.{1,2}\Z/} readdir(DIR);
+    closedir(DIR);
+    @files ? 0 : 1;
+}
+
+# Retorna el path del directorio input para las consultas.
+# - Si existen archivos de subllamadas, se solicita al usuario elegir el input deseado
+# 	y se retorna el path al directorio correspondiente. 
+# - Si no existen, devuelve el directorio de llamadas sospechosas (default).
+sub obtenerInputConsultas {
+	my $dirSubLlamadasVacio = esDirectorioVacio($RUTA_REPODIR);
+
+	if($dirSubLlamadasVacio) {
+		eko("No existen archivos de subllamadas. Default input.");
+		return ($PROCDIR, 1);
+	} else {
+		while(1) {
+			eko("Seleccione input de consultas.");
+			eko("1) Realizar consultas en archivos de llamadas sospechosas.");
+			eko("2) Realizar consultas en archivos de subllamadas.");
+
+			$inputSeleccionado = <STDIN>;
+			chomp($inputSeleccionado);
+
+			if    ($inputSeleccionado == 1) { return ($PROCDIR, 1); }
+			elsif ($inputSeleccionado == 2) { return ($RUTA_REPODIR, 2); }
+			else { eko("Ingrese una opción valida por favor."); }
+		}
+	}
+}
+
+sub obtenerFiltrosAnioMes {
 	eko("introducir aniomes(es) separadas por espacio:");
 
 	$aniomes = <STDIN>;
 	chomp($aniomes);	
 
-	my @aniomeses = split( /\s+/, $aniomes);
+	return split( /\s+/, $aniomes);
+}
 
+
+sub pedirAnioMes{
 	
-	@archivosAProcesar = obtenerArchivosAProcesar("ANIOMES", @aniomeses);
+	@filtrosAnioMes = obtenerFiltrosAnioMes;
+	@archivos = obtenerArchivos($inputConsultas, "ANIOMES", @filtrosAnioMes);
+	while(1) {
+		eko("Archivos: @archivos");
+		eko("");
+		eko("1) Filtrar por oficinas.");
+		eko("2) Realizar consulta.");
 
-	mostrarOpcionesDeFiltros(@archivosAProcesar);
+		$opcionSeleccionada = <STDIN>;
+		chomp($opcionSeleccionada);
+		if ($opcionSeleccionada == 1) {
+			@filtrosOficinas = obtenerFiltrosOficinas;
+			@archivos = filtrarArchivos(\@archivos, \@filtrosOficinas, "OFICINAS");
+			eko("Archivos: @archivos");
+
+			mostrarOpcionesDeFiltros(@archivos);
+		} elsif ($opcionSeleccionada == 2) {
+			mostrarOpcionesDeFiltros(@archivos);
+		} else {
+			eko("Ingrese una opción valida por favor."); eko("");
+		}
+	}
+}
+
+sub pedirSubLlamadas {
+	my @archivos = @_;
+
+	eko("Archivos: @archivos");
+
+	eko("introducir sufijo(s) de subllamadas separados por espacio:");
+
+	$inputFiltroSubllamadas = <STDIN>;
+	chomp($inputFiltroSubllamadas);	
+
+	my @filtrosSubLlamadas = split( /\s+/, $inputFiltroSubllamadas);
+
+
+	@archivos = filtrarArchivos(\@archivos, \@filtrosSubLlamadas, "SUBLLAMADAS");
+
+	eko("Archivos: @archivos");
+
+	mostrarOpcionesDeFiltros(@archivos);
 }
 
 sub pedirAnioMesEstadisticas{
@@ -1361,24 +1543,54 @@ sub obtenerTodosLosArchivosDeSospechas{
     }else{
 		mostrarOpcionesDeFiltrosEstadisticas(@archivosAProcesar);
     }
-	
-	
 }
 
-sub pedirOficinas{
-	eko("introducir oficina(as) separadas por espacio:");
+sub obtenerTodosLosArchivos {
+	my ($inputDir) = @_;
+	my @archivosAProcesar;
 
-	$oficinas = <STDIN>;
-	chomp($oficinas);	
+	opendir(dfh, $inputDir) or die $!;
+	while (my $file = readdir(dfh)) {
 
-	my @aOficinas = split( /\s+/, $oficinas);
+        # Use a regular expression to ignore files beginning with a period
+        next if ($file =~ m/^\./);
+        # Si es un directorio no se agrega como archivo a procesar.
+        $fullPath = $inputDir."/".$file;
+        next if (-d $fullPath);
 
+        push @archivosAProcesar, $file;
+    }
 
-	@archivosAProcesar = obtenerArchivosAProcesar("OFICINAS", @aOficinas);
-
-
-	mostrarOpcionesDeFiltros(@archivosAProcesar);
+    return @archivosAProcesar;
 }
+
+
+sub pedirOficinas {
+	@filtrosOficinas = obtenerFiltrosOficinas;
+	@archivos = obtenerArchivos($inputConsultas, "OFICINAS", @filtrosOficinas);
+	while(1) {
+		eko("Archivos: @archivos");
+		eko("");
+		eko("1) Filtrar por aniomes.");
+		eko("2) Realizar consulta.");
+		$opcionSeleccionada = <STDIN>;
+		chomp($opcionSeleccionada);
+
+		if ($opcionSeleccionada == 1) {
+			@filtrosAnioMes = obtenerFiltrosAnioMes;
+			@archivos = filtrarArchivos(\@archivos, \@filtrosAnioMes, "ANIOMES");
+			eko("Archivos: @archivos");
+
+			mostrarOpcionesDeFiltros(@archivos);
+		} elsif ($opcionSeleccionada == 2) {
+
+			mostrarOpcionesDeFiltros(@archivos);
+		} else {
+			eko("Ingrese una opción valida por favor."); eko("");
+		}	
+	}
+}
+
 
 sub pedirOficinasEstadisticas{
 	eko("introducir oficina(as) separadas por espacio:");
@@ -1414,29 +1626,67 @@ sub mostrarMenuEstadisticas{
 	}
 }
 
-sub mostrarMenuConsultas{
-	# eko("Mostrando menu consltas");
+sub menuConsultasLlamadasSospechosas {
+	my $pathInput = @_[0];
+	
 	$opcionElegida = mostrarFormasDeConsultarLlamadasSospechosas;
 
-	# eko("ACA LA OPCION ES $opcionElegida");
-	if ($opcionElegida eq "1"){
+	if ($opcionElegida eq "1") {
+		@archivos = obtenerTodosLosArchivos($pathInput);
+		eko("Archivos: @archivos");
 
-		obtenerTodosLosArchivosDeSospechas(1);
-	} elsif ($opcionElegida eq "2"){
+		mostrarOpcionesDeFiltros(@archivos);
+
+	} elsif ($opcionElegida eq "2") {
 		pedirOficinas;
-	} elsif ($opcionElegida eq "3"){
+
+	} elsif ($opcionElegida eq "3") {
 		pedirAnioMes;
-	} elsif ($opcionElegida eq "4"){
 
 	} else{
 
 	}
 }
 
+sub menuConsultasSubLlamadas {
+	my $pathInput = @_[0];
+
+	@archivos = obtenerTodosLosArchivos($pathInput);
+
+	my $opcionElegida = mostrarFormasDeConsultarSubLlamadas;
+
+	if ($opcionElegida eq "1") {
+		eko("Archivos: @archivos");
+
+		mostrarOpcionesDeFiltros(@archivos);
+
+	} elsif ($opcionElegida eq "2") {
+		
+		pedirSubLlamadas(@archivos);
+	} else {
+
+	}
+}
+
+sub mostrarMenuConsultas{
+	
+	my ($inputConsultas, $tipoInput) = obtenerInputConsultas();
+
+	eko("inputConsultas: $inputConsultas");
+	#eko("tipoInput: $tipoInput");
+	
+	if ($tipoInput eq 1) {
+		menuConsultasLlamadasSospechosas($inputConsultas);
+
+	} elsif ($tipoInput eq 2) {
+		menuConsultasSubLlamadas($inputConsultas);
+	} else {
+
+	}
+
+}
+
 sub mostrarEstadisticas{
-
-
-
 
 	eko("La central con mayor cantidad de llamadas sospechosas es: ");
 	eko("Ranking de centrales"); #mostrar codigo y descripcion de central.
@@ -1515,7 +1765,3 @@ if (! $AFRAENV eq ''){
 	# no inicIALIzado
 	eko("El ambiente no esta inicializado, ejecutar AFINI");
 }
-
-
-
-
