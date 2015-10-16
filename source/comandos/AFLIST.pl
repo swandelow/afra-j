@@ -1330,6 +1330,16 @@ sub filtrarArchivos {
 			}
 		}
 
+	} elsif ($tipoFiltro eq "SUBLLAMADAS") {
+		foreach $archivo (@$archivos) {
+			($prefix, $sufix) = split('\.', $archivo);
+			foreach $filtro (@$filtros) {
+				#eko("oficina: $oficina");
+				if ($filtro eq $sufix) {
+					push @resultado, $archivo;
+				}
+			}
+		}
 	} else {
 		eko("Tipo de filtro invalido.");
 			return; 
@@ -1480,12 +1490,23 @@ sub pedirAnioMes{
 }
 
 sub pedirSubLlamadas {
+	my @archivos = @_;
+
+	eko("Archivos: @archivos");
+
 	eko("introducir sufijo(s) de subllamadas separados por espacio:");
 
-	$inputSufijos = <STDIN>;
-	chomp($inputSufijos);	
+	$inputFiltroSubllamadas = <STDIN>;
+	chomp($inputFiltroSubllamadas);	
 
-	my @sufijos = split( /\s+/, $inputSufijos);
+	my @filtrosSubLlamadas = split( /\s+/, $inputFiltroSubllamadas);
+
+
+	@archivos = filtrarArchivos(\@archivos, \@filtrosSubLlamadas, "SUBLLAMADAS");
+
+	eko("Archivos: @archivos");
+
+	mostrarOpcionesDeFiltros(@archivos);
 }
 
 sub pedirAnioMesEstadisticas{
@@ -1630,17 +1651,18 @@ sub menuConsultasLlamadasSospechosas {
 sub menuConsultasSubLlamadas {
 	my $pathInput = @_[0];
 
+	@archivos = obtenerTodosLosArchivos($pathInput);
+
 	my $opcionElegida = mostrarFormasDeConsultarSubLlamadas;
 
 	if ($opcionElegida eq "1") {
-		@archivos = obtenerTodosLosArchivos($pathInput);
 		eko("Archivos: @archivos");
 
 		mostrarOpcionesDeFiltros(@archivos);
 
 	} elsif ($opcionElegida eq "2") {
 		
-		pedirSubLlamadas;
+		pedirSubLlamadas(@archivos);
 	} else {
 
 	}
@@ -1743,7 +1765,3 @@ if (! $AFRAENV eq ''){
 	# no inicIALIzado
 	eko("El ambiente no esta inicializado, ejecutar AFINI");
 }
-
-
-
-
