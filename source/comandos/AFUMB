@@ -89,7 +89,8 @@ function grabarLlamadaSospechosa(){
 	lineaAGrabar=$1
 	nombreArchivoAGenerarSospechoso=$oficina'_'$anioLlamadaMesLlamada
 	cd $PROCDIR
-	echo "$lineaAGrabar" >> "$nombreArchivoAGenerarSospechoso" 
+	echo "$lineaAGrabar" >> "$nombreArchivoAGenerarSospechoso"
+	let contadorDeLlamadasSospechosas=contadorDeLlamadasSospechosas+1
 }
 
 #determino el tipo de llamada. HAY QUE PASARLE EL REGISTRO QUE SE ESTA PROCESANDO COMO PARAMETRO!
@@ -153,15 +154,14 @@ function verificarSiHayAlgunUmbralActivo {
 			codigoArea=$(echo "$registro" | cut -d';' -f2) 
 			numeroDeLineaOrigen=$(echo "$registro" | cut -d';' -f3) 
 			tipoDeLlamadaUmbral=$(echo "$registro" | cut -d';' -f4) 
-			codigoDestino=$(echo "$registro" | cut -d';' -f5) 
-			if ([[ $tope < $tiempoDeConversacion ]]) && 
-			   ([ $codigoArea == $codArea ]) &&
-			   ([ $numeroDeLineaOrigen == $numLineaA ]) ; then
-				if [[ $tipoDeLlamadaUmbral == $tipoLLamada ]]; then
+			codigoDestino=$(echo "$registro" | cut -d';' -f5)
+			if ( [[ $tope -lt $tiempoDeConversacion ]] && 
+			   [ $codigoArea == $codArea ] &&
+			   [ $numeroDeLineaOrigen == $numLineaA ] ); then
+			   if [[ $tipoDeLlamadaUmbral == $tipoLLamada ]]; then
 					if ( [[ $tipoDeLlamadaUmbral == "DDI" ]] && ( [[ $codigoDestino == $codPais ]] || [[ $codigoDestino == "" ]] ) ) ||
 				   	   ( ( [[ $tipoDeLlamadaUmbral == "DDN" ]] || [[ $tipoDeLlamadaUmbral == "LOC" ]] ) &&			 					     
 				  	   ( [[ $codigoDestino == $codAreaB ]] || [[ $codigoDestino == "" ]] ) ) ; then
-						let contadorDeLlamadasSospechosas=contadorDeLlamadasSospechosas+1
 						idUmbral=$(echo "$registro" | cut -d';' -f1) 
 						idAgente=$(echo "$regristroDelArchivoDeLLamadas" | cut -d';' -f1) 
 						registroDelAgente=`grep "$idAgente" "$MAEDIR/agentes.mae"`
