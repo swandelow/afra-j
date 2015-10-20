@@ -641,6 +641,7 @@ sub mostrarResultados{
 	}
 }
 
+=pod
 sub pedirFiltroCentral{
 	eko("Introducir ID(s) de la central:");
 
@@ -682,7 +683,248 @@ sub pedirFiltroCentral{
   	# Me devuelve la leng mas 1.
   	# eko("La long del array es $#array")
 }
+=cut
 
+sub pedirCentrales {
+	eko("Introducir ID(s) de la(s) central(es):");
+	my $filtros_centrales = <STDIN>;
+	chomp($filtros_centrales);	
+	my @filtros_centrales_array = split( /\s+/, $filtros_centrales);
+	#print join(", ", @filtros_centrales_array);
+	return @filtros_centrales_array;	
+}
+
+sub pedirAgentes {
+	eko("Introducir ID(s) de agente(s):");
+	my $filtros_agentes = <STDIN>;
+	chomp($filtros_agentes);	
+	my @filtros_agentes_array = split( /\s+/, $filtros_agentes);	
+	return @filtros_agentes_array;
+}
+
+sub pedirUmbrales {
+	eko("Introducir ID(s) de umbral(es):");
+	my $filtros_umbrales = <STDIN>;
+	chomp($filtros_umbrales);	
+	my @filtros_umbrales_array = split( /\s+/, $filtros_umbrales);	
+	return @filtros_umbrales_array;
+}
+
+sub pedirTiposLlamada {
+	eko("Introducir tipo(s) de llamada(s):");
+	eko("[ DDI / DDN / LOC ]");
+	my $opcionValida = 0;
+	while ($opcionValida == 0){
+		my $filtros_tipos_llamada = <STDIN>;
+		chomp($filtros_tipos_llamada);	
+		if ($filtros_tipos_llamada eq "") {
+			last;
+		}
+		my @aFiltros = split( /\s+/, $filtros_tipos_llamada);
+		for my $i (0..$#aFiltros){
+			if ( ($aFiltros[$i] eq "DDI") || ($aFiltros[$i] eq "LOC") || 
+			($aFiltros[$i] eq "DDN") ){
+				$opcionValida = 1;
+				last;
+			}
+		}
+		if ($opcionValida == 1){
+			#esta todo bien
+		} else{
+			eko("Debe pasar algun parametro valido");
+		}
+	}
+	my @filtros_tipos_llamada_array = split( /\s+/, $filtros_tipos_llamada);
+	return @filtros_tipos_llamada_array;
+}
+
+sub pedirIntervalo {
+	eko("Introducir el intervalo de duración separado por un espacio:");
+	my $opcionValida = 0;
+	while ($opcionValida == 0){
+		my $filtros_intervalo = <STDIN>;
+		chomp($filtros_intervalo);
+		if ($filtros_intervalo eq "") {
+			last;
+		}
+		my @intervalo = split( /\s+/, $filtros_intervalo);
+		# eko("@intervalo");
+		# si no tiene 2 parametros es invalido
+		if ($#intervalo eq 1){
+			# eko("cantidad erronea de parametros");
+			if ( looks_like_number($intervalo[0]) && looks_like_number($intervalo[1]) ){
+				# si los 2 son numeros vamos bien.
+				# eko("Los 2 parecen numeros");
+				# ahora vemos que sea un intervalo valido.
+				if( ($intervalo[1] - $intervalo[0]) > 0){
+					eko($intervalo[1] - $intervalo[0]);
+					$opcionValida = 1;
+				}
+			}
+		}
+	}
+	return @intervalo;	
+}
+
+sub pedirNumerosA {
+	eko("Introducir número(s) A: ");
+	my $filtros_numeros_a = <STDIN>;
+	chomp($filtros_numeros_a);	
+	my @filtros_numeros_a_array = split( /\s+/, $filtros_numeros_a);
+	return @filtros_numeros_a_array; 	
+}
+
+sub pedirFiltros {
+
+	my (@archivos) = @_;
+	my %resultados;
+
+	my $filtro_no_vacio = 0;
+	while ($filtro_no_vacio == 0) {
+		@filtros_centrales = &pedirCentrales;
+		@filtros_agentes = &pedirAgentes;
+		@filtros_umbrales = &pedirUmbrales;
+		@filtros_tipos_llamada = &pedirTiposLlamada;
+		@filtros_intervalo = &pedirIntervalo;
+		@filtros_numeros_a = &pedirNumerosA;
+
+		if ((@filtros_centrales == 0) && (@filtros_agentes == 0) && (@filtros_umbrales == 0) 
+			&& (@filtros_tipos_llamada == 0) && (@filtros_intervalo == 0) && (@filtros_numeros_a == 0)) {
+			eko("Debe indicar por lo menos un filtro.\n");
+		} else {
+			$filtro_no_vacio = 1;
+		}
+	}
+
+	#ACA EMPIEZA LA DIVERSIÓN (?)
+
+  	for my $a (0..$#archivos){
+  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
+  		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
+		while($linea = <ENT>){
+			chomp($linea);
+			#todas las lineas son inválidas hasta que se demuestre lo contrario.
+			$esValido = 0;
+			
+			#FILTRO POR CENTRALES
+			if (@filtros_centrales) {
+				#eko("++++ FILTRANDO POR CENTRALES ++++");
+				$esValido = 0;
+				$idCentral = obtenerCampo("$linea", "$ID_CENTRAL");
+				for my $i (0..$#filtros_centrales){
+					if ($idCentral eq $filtros_centrales[$i]){
+						$esValido = 1;
+						last;
+					} 
+				}
+				if ($esValido == 0) {
+					#El registro no cumple con el filtro, paso al siguiente registro
+					next;
+				}
+			}
+
+			#FILTRO POR AGENTES
+			if (@filtros_agentes > 0) {
+				#eko("++++ FILTRANDO POR AGENTES ++++");
+				$esValido = 0;
+				$idAgente = obtenerCampo("$linea", "$ID_AGENTE");
+				for my $i (0..$#filtros_agentes){
+					if ($idAgente eq $filtros_agentes[$i]){
+						$esValido = 1;
+						last;
+					} 
+				}
+				if ($esValido == 0) {
+					#El registro no cumple con el filtro, paso al siguiente registro
+					next;
+				}
+			}
+
+			#FILTRO POR UMBRAL
+			if (@filtros_umbrales > 0) {
+				eko("++++ FILTRANDO POR UMBRALES ++++");
+				$esValido = 0;
+				$idUmbral = obtenerCampo("$linea", "$ID_UMBRAL");
+				for my $i (0..$#filtros_umbrales){
+					if ($idUmbral eq $filtros_umbrales[$i]){
+						$esValido = 1;
+						last;
+					} 
+				}
+				if ($esValido == 0) {
+					#El registro no cumple con el filtro, paso al siguiente registro
+					next;
+				}
+			}
+
+			#FILTRO POR TIPO LLAMADA
+			if (@filtros_tipos_llamada > 0) {
+				eko("++++ FILTRANDO POR TIPO DE LLAMADA ++++");
+				$esValido = 0;
+				$tipoLlamada = obtenerCampo("$linea", "$TIPO_LLAMDA");
+				for my $i (0..$#filtros_tipos_llamada){
+					if ($tipoLlamada eq $filtros_tipos_llamada[$i]){
+						$esValido = 1;
+						last;
+					} 
+				}
+				if ($esValido == 0) {
+					#El registro no cumple con el filtro, paso al siguiente registro
+					next;
+				}
+			}
+
+			#FILTRO POR DURACION LLAMADA
+			if (@filtros_intervalo > 0) {
+				eko("++++ FILTRANDO POR DURACIÓN LLAMADA ++++");
+				$esValido = 0;
+				$tiempoLlamada = obtenerCampo("$linea", "$TIEMPO_CONV");
+				if ($tiempoLlamada > $filtros_intervalo[0] && $tiempoLlamada < $filtros_intervalo[1]){
+					$esValido = 1;
+				}
+				if ($esValido == 0) {
+					#El registro no cumple con el filtro, paso al siguiente registro
+					next;
+				}
+			}
+			
+			#FILTRO POR NUMERO A
+			if (@filtros_numeros_a > 0) {
+				eko("++++ FILTRANDO POR NÚMERO A ++++");
+				$esValido = 0;
+				$codArea = obtenerCampo("$linea", "$AREA_NUM_A");
+				$numeroOrigen = obtenerCampo("$linea", "$NUMERO_ORIGEN");
+				$numeroA = $codArea.$numeroOrigen;
+				for my $i (0..$#filtros_numeros_a){
+					if ($numeroA eq $filtros_numeros_a[$i]){
+						$esValido = 1;
+						last;
+					} 
+				}
+				if ($esValido == 0) {
+					#El registro no cumple con el filtro, paso al siguiente registro
+					next;
+				}
+			}
+
+
+			#El registro cumplió con todos los filtros, lo almaceno
+			if ($esValido == 1){
+				$claveHash = obtenerClaveHash($linea);
+				$resultados{$claveHash} = $linea;
+			}
+		}
+		close(ENT);
+  	}
+
+
+  	mostrarResultadosHash(%resultados);
+	# eko("Afuera");
+
+  	
+  	# Me devuelve la leng mas 1.
+  	# eko("La long del array es $#array")
+}
 
 sub pedirFiltroCentralHash{
 	eko("Introducir ID(s) de la central:");
@@ -1042,14 +1284,16 @@ sub pedirFiltroNumeroA{
 sub mostrarOpcionesDeFiltros{
 
 	# Si no se recibieron parametros es porque va a usar todos los archivos.
-	$numParams = @_;
-
+	#$numParams = @_;
 	# eko("se recibieron $numParams parametros");
 
 	my (@archivosRecibidos) = @_;
 
-	$opcion = mostrarOpciones;
+	#$opcion = mostrarOpciones;
 
+	&pedirFiltros(@archivosRecibidos);
+
+=pod
 	if ($opcion eq "a"){
 		# eko("opc a");
 		pedirFiltroCentralHash(@archivosRecibidos);
@@ -1071,6 +1315,7 @@ sub mostrarOpcionesDeFiltros{
 	} elsif ($opcion eq "g"){
 		# eko("opc g");
 	}
+=cut
 }
 
 sub mostrarOpcionesDeFiltrosEstadisticas{
@@ -1195,9 +1440,9 @@ sub mostrarAyuda(){
 	eko("==========================================================");
 	eko("=======================AFLIST=============================");
 	eko("==========================================================");
-	eko("=  -w  para activar la opcion de guardado                =");
+	eko("=  -w para activar la opción de guardado                 =");
 	eko("=  -r para realizar consultas sobre llamadas sospechosas =");
-	eko("=  -s para visualizar estadisticas                       =");
+	eko("=  -s para visualizar estadísticas                       =");
 	eko("=  -h para acceder a este menu                           =");
 	eko("==========================================================");
 	eko("==========================================================");
@@ -1209,11 +1454,11 @@ sub mostrarMenuYPedirOpcion{
 	eko("==========================================================");
 	eko("=======================AFLIST=============================");
 	eko("==========================================================");
-	eko("=  w  para activar/desactivar la grabacion de consultas ==");
+	eko("=  w  para activar/desactivar la grabación de consultas ==");
 	eko("=  r  para realizar consultas sobre llamadas sospechosas =");
-	eko("=  s  para visualizar estadisticas                       =");
+	eko("=  s  para visualizar estadísticas                       =");
 	eko("=                                                        =");
-	eko("=  q  para terminar la ejecucion                          =");
+	eko("=  q  para terminar la ejecución                         =");
 	eko("==========================================================");
 	eko("==========================================================");
 	eko("==========================================================");
