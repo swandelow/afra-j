@@ -605,29 +605,33 @@ sub setearFiltros{
 
 # recibe por parametro un hash, lo ordena usando el comparador de hashes
 # y muestra los registros.
-sub mostrarResultadosHash{
+sub mostrarResultadosHash {
 
-	#eko("mostrar clave hash");
 	my (%resultados) = @_;
 
 	@keys = sort { comparadorHashes($resultados{$a}, $resultados{$b}) } keys%resultados;
 	@values = @resultados{@keys};
 
-	#eko("hash: Long de keys $#keys");
-	#eko("hash: Long del values $#values");
+	my $arraySize = @values;
 
 	if ($#keys < 0){
 		mostrarQueryVacia;
 	}
 
-	for my $i (0..$#keys){
-		if ($ESTADO_GRABACION == 1){
+	if ($ESTADO_GRABACION == 1) {
+		for my $i (0..$#keys){
 			grabarConsultaEnArchivo("$values[$i]");
-		} else {
+		}
+		eko("Cantidad de resultados: $arraySize");
+		eko("");
+		eko("Se han grabado los resultados de la consulta en el archivo: subllamadas.$rand1");
+		eko("");
+	} else {
+		for my $i (0..$#keys){
 			eko($values[$i]);
 		}
-		
 	}
+
 }
 
 sub mostrarResultados{
