@@ -53,7 +53,7 @@ my $rand1 = int(rand(1000));
 my $randEstadisticas = int(rand(1000000));
 
 my $rutaConsulta = "$RUTA_REPODIR/subllamadas.$rand1";
-my $rutaEstadistica = "$RUTA_REPODIR/subllamadas.$randEstadisticas";
+my $rutaEstadistica = "$RUTA_REPODIR/subllamadas_estadisticas.$randEstadisticas";
 
 
 
