@@ -627,9 +627,12 @@ sub mostrarResultadosHash {
 		eko("Se han grabado los resultados de la consulta en el archivo: subllamadas.$rand1");
 		eko("");
 	} else {
+		eko("Cantidad de resultados: $arraySize");
+		eko("");
 		for my $i (0..$#keys){
 			eko($values[$i]);
 		}
+		eko("");
 	}
 
 }
