@@ -75,14 +75,14 @@ my $rutaEstadistica = "$RUTA_REPODIR/subllamadas.$randEstadisticas";
 # }
 sub grabarEstadisticaEnArchivo{
 	my ($entry) = @_;
-	open(my $fh, '>', $rutaEstadistica);
+	open(my $fh, '>>', $rutaEstadistica);
 	print $fh "$entry\n";
 	close $fh;
 }
 
 sub grabarConsultaEnArchivo{
 	my ($entry) = @_;
-	open(my $fh, '>', $rutaConsulta);
+	open(my $fh, '>>', $rutaConsulta);
 	print $fh "$entry\n";
 	close $fh;	
 }
@@ -613,8 +613,8 @@ sub mostrarResultadosHash{
 	@keys = sort { comparadorHashes($resultados{$a}, $resultados{$b}) } keys%resultados;
 	@values = @resultados{@keys};
 
-	#eko("Long del array $#keys");
-	#eko("Long del values $#values");
+	#eko("hash: Long de keys $#keys");
+	#eko("hash: Long del values $#values");
 
 	if ($#keys < 0){
 		mostrarQueryVacia;
