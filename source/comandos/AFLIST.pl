@@ -225,7 +225,7 @@ sub mostrarAgentesMasSospechosos{
 	my %hashAgentes;
 
 	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR" . "/archivos[$a]";
+  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
 
   		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
