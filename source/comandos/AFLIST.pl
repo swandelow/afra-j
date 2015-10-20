@@ -715,26 +715,24 @@ sub pedirTiposLlamada {
 	eko("[ DDI / DDN / LOC ]");
 	my $opcionValida = 0;
 	while ($opcionValida == 0){
-		my $filtros_tipos_llamada = <STDIN>;
-		chomp($filtros_tipos_llamada);	
+		$filtros_tipos_llamada = <STDIN>;
+		chomp($filtros_tipos_llamada);
+		@filtros_tipos_llamada_array = split( /\s+/, $filtros_tipos_llamada);
 		if ($filtros_tipos_llamada eq "") {
 			last;
 		}
-		my @aFiltros = split( /\s+/, $filtros_tipos_llamada);
-		for my $i (0..$#aFiltros){
-			if ( ($aFiltros[$i] eq "DDI") || ($aFiltros[$i] eq "LOC") || 
-			($aFiltros[$i] eq "DDN") ){
+		print join(", ", @filtros_tipos_llamada_array);
+		for my $i (0..$#filtros_tipos_llamada_array){
+			if ( ($filtros_tipos_llamada_array[$i] eq "DDI") || ($filtros_tipos_llamada_array[$i] eq "LOC") || ($filtros_tipos_llamada_array[$i] eq "DDN") ){
 				$opcionValida = 1;
 				last;
 			}
 		}
-		if ($opcionValida == 1){
-			#esta todo bien
-		} else{
+		if ($opcionValida == 0){
 			eko("Debe pasar algun parametro valido");
 		}
 	}
-	my @filtros_tipos_llamada_array = split( /\s+/, $filtros_tipos_llamada);
+	print join(", ", @filtros_tipos_llamada_array);
 	return @filtros_tipos_llamada_array;
 }
 
@@ -744,11 +742,10 @@ sub pedirIntervalo {
 	while ($opcionValida == 0){
 		my $filtros_intervalo = <STDIN>;
 		chomp($filtros_intervalo);
+		@intervalo = split( /\s+/, $filtros_intervalo);
 		if ($filtros_intervalo eq "") {
 			last;
 		}
-		my @intervalo = split( /\s+/, $filtros_intervalo);
-		# eko("@intervalo");
 		# si no tiene 2 parametros es invalido
 		if ($#intervalo eq 1){
 			# eko("cantidad erronea de parametros");
@@ -842,7 +839,7 @@ sub pedirFiltros {
 
 			#FILTRO POR UMBRAL
 			if (@filtros_umbrales > 0) {
-				eko("++++ FILTRANDO POR UMBRALES ++++");
+				#eko("++++ FILTRANDO POR UMBRALES ++++");
 				$esValido = 0;
 				$idUmbral = obtenerCampo("$linea", "$ID_UMBRAL");
 				for my $i (0..$#filtros_umbrales){
@@ -859,7 +856,7 @@ sub pedirFiltros {
 
 			#FILTRO POR TIPO LLAMADA
 			if (@filtros_tipos_llamada > 0) {
-				eko("++++ FILTRANDO POR TIPO DE LLAMADA ++++");
+				#eko("++++ FILTRANDO POR TIPO DE LLAMADA ++++");
 				$esValido = 0;
 				$tipoLlamada = obtenerCampo("$linea", "$TIPO_LLAMDA");
 				for my $i (0..$#filtros_tipos_llamada){
@@ -876,7 +873,7 @@ sub pedirFiltros {
 
 			#FILTRO POR DURACION LLAMADA
 			if (@filtros_intervalo > 0) {
-				eko("++++ FILTRANDO POR DURACIÓN LLAMADA ++++");
+				#eko("++++ FILTRANDO POR DURACIÓN LLAMADA ++++");
 				$esValido = 0;
 				$tiempoLlamada = obtenerCampo("$linea", "$TIEMPO_CONV");
 				if ($tiempoLlamada > $filtros_intervalo[0] && $tiempoLlamada < $filtros_intervalo[1]){
@@ -890,7 +887,7 @@ sub pedirFiltros {
 			
 			#FILTRO POR NUMERO A
 			if (@filtros_numeros_a > 0) {
-				eko("++++ FILTRANDO POR NÚMERO A ++++");
+				#eko("++++ FILTRANDO POR NÚMERO A ++++");
 				$esValido = 0;
 				$codArea = obtenerCampo("$linea", "$AREA_NUM_A");
 				$numeroOrigen = obtenerCampo("$linea", "$NUMERO_ORIGEN");
