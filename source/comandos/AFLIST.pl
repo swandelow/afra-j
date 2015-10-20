@@ -9,6 +9,7 @@ use Scalar::Util qw(looks_like_number);
 # Con la generacion de estadsitcas del AFLIST.
 #
 
+
 $ESTADO_GRABACION = 0;
 # Siempre saco los datos de las llamadas sospechosas
 
@@ -30,7 +31,7 @@ my $FECHA_ARCHIVO = 11;
 
 
 my $PROCDIR = $ENV{'PROCDIR'};
-
+$INPUT_CONSULTAS_GLOBAL = $PROCDIR;
 #Setear la ruta a los archivos de sospechas.
 my $PATH_MAEDIR = $ENV{'MAEDIR'};
 
@@ -796,7 +797,8 @@ sub pedirFiltros {
 	#ACA EMPIEZA LA DIVERSIÓN (?)
 
   	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
+  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivos[$a]";
+  		#eko("$rutaSospecha");
   		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
@@ -1278,43 +1280,6 @@ sub pedirFiltroNumeroA{
 	mostrarResultadosHash(%resultados);
 }
 
-sub mostrarOpcionesDeFiltros{
-
-	# Si no se recibieron parametros es porque va a usar todos los archivos.
-	#$numParams = @_;
-	# eko("se recibieron $numParams parametros");
-
-	my (@archivosRecibidos) = @_;
-
-	#$opcion = mostrarOpciones;
-
-	&pedirFiltros(@archivosRecibidos);
-
-=pod
-	if ($opcion eq "a"){
-		# eko("opc a");
-		pedirFiltroCentralHash(@archivosRecibidos);
-	} elsif ($opcion eq "b"){
-		# eko("opc b");
-		pedirFiltroAgentes(@archivosRecibidos)	;
-	} elsif ($opcion eq "c"){
-		# eko("opc c");
-		pedirFiltroUmbral(@archivosRecibidos);
-	} elsif ($opcion eq "d"){
-		# eko("opc d");
-		pedirFiltroTipoLlamada(@archivosRecibidos);
-	} elsif ($opcion eq "e"){
-		# eko("opc e");
-		pedirFiltroPorTiempoDeDuracion(@archivosRecibidos);
-	} elsif ($opcion eq "f"){
-		# eko("opc f");
-		pedirFiltroNumeroA(@archivosRecibidos);
-	} elsif ($opcion eq "g"){
-		# eko("opc g");
-	}
-=cut
-}
-
 sub mostrarOpcionesDeFiltrosEstadisticas{
 
 	# Si no se recibieron parametros es porque va a usar todos los archivos.
@@ -1722,9 +1687,9 @@ sub pedirAnioMes{
 			@archivos = filtrarArchivos(\@archivos, \@filtrosOficinas, "OFICINAS");
 			eko("Archivos: @archivos");
 
-			mostrarOpcionesDeFiltros(@archivos);
+			pedirFiltros(@archivos);
 		} elsif ($opcionSeleccionada == 2) {
-			mostrarOpcionesDeFiltros(@archivos);
+			pedirFiltros(@archivos);
 		} else {
 			eko("Ingrese una opción valida por favor."); eko("");
 		}
@@ -1747,8 +1712,8 @@ sub pedirSubLlamadas {
 	@archivos = filtrarArchivos(\@archivos, \@filtrosSubLlamadas, "SUBLLAMADAS");
 
 	eko("Archivos: @archivos");
-
-	mostrarOpcionesDeFiltros(@archivos);
+	#PASAR REPODIR
+	pedirFiltros(@archivos);
 }
 
 sub pedirAnioMesEstadisticas{
@@ -1781,7 +1746,7 @@ sub obtenerTodosLosArchivosDeSospechas{
     }
 
     if ($opc == 1){
-		mostrarOpcionesDeFiltros(@archivosAProcesar);
+		pedirFiltros(@archivosAProcesar);
     }else{
 		mostrarOpcionesDeFiltrosEstadisticas(@archivosAProcesar);
     }
@@ -1823,10 +1788,10 @@ sub pedirOficinas {
 			@archivos = filtrarArchivos(\@archivos, \@filtrosAnioMes, "ANIOMES");
 			eko("Archivos: @archivos");
 
-			mostrarOpcionesDeFiltros(@archivos);
+			pedirFiltros(@archivos);
 		} elsif ($opcionSeleccionada == 2) {
 
-			mostrarOpcionesDeFiltros(@archivos);
+			pedirFiltros(@archivos);
 		} else {
 			eko("Ingrese una opción valida por favor."); eko("");
 		}	
@@ -1877,7 +1842,7 @@ sub menuConsultasLlamadasSospechosas {
 		@archivos = obtenerTodosLosArchivos($pathInput);
 		eko("Archivos: @archivos");
 
-		mostrarOpcionesDeFiltros(@archivos);
+		pedirFiltros(@archivos);
 
 	} elsif ($opcionElegida eq "2") {
 		pedirOficinas;
@@ -1900,7 +1865,7 @@ sub menuConsultasSubLlamadas {
 	if ($opcionElegida eq "1") {
 		eko("Archivos: @archivos");
 
-		mostrarOpcionesDeFiltros(@archivos);
+		pedirFiltros(@archivos);
 
 	} elsif ($opcionElegida eq "2") {
 		
@@ -1913,6 +1878,7 @@ sub menuConsultasSubLlamadas {
 sub mostrarMenuConsultas{
 	
 	my ($inputConsultas, $tipoInput) = obtenerInputConsultas();
+	$INPUT_CONSULTAS_GLOBAL = $inputConsultas;
 
 	eko("inputConsultas: $inputConsultas");
 	#eko("tipoInput: $tipoInput");
