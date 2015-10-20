@@ -1534,7 +1534,7 @@ sub chequearCantidadArgumentos{
 		if ($primerArgumento eq "-h"){
 			mostrarAyuda();
 		}elsif ($primerArgumento eq "-w"){
-			# eko ("-w selecionada");
+			manejarEstadoDeGrabacion;
 			menuMain;
 		}elsif ($primerArgumento eq "-r"){
 			mostrarMenuConsultas;
