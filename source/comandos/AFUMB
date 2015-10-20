@@ -143,27 +143,26 @@ function determinarTipoDeLlamada(){
 
 #Se fija si hay alguna llamada sospechosa y de ser así, la graba. Además setea los contadores.
 function verificarSiHayAlgunUmbralActivo {
+	cd $BINDIR
 	regristroDelArchivoDeLLamadas=$line 
 	listaDeRegistrosDeNumeroOrigen=`grep $numLineaA  "$MAEDIR/umbral.tab"`	
-
-	for registro in $listaDeRegistrosDeNumeroOrigen
-	do 
-		estadoUmbral=$(echo "$registro" | cut -d';' -f7) #Obtengo el estado del umbral.
+	for registroU in $listaDeRegistrosDeNumeroOrigen; do 	
+		estadoUmbral=$(echo "$registroU" | cut -d';' -f7) #Obtengo el estado del umbral.
 		if [ $estadoUmbral == "Activo" ]; then
 			let contadorDeLlamadasConUmbral=contadorDeLlamadasConUmbral+1
-			tope=$(echo "$registro" | cut -d';' -f6) 
-			codigoArea=$(echo "$registro" | cut -d';' -f2) 
-			numeroDeLineaOrigen=$(echo "$registro" | cut -d';' -f3) 
-			tipoDeLlamadaUmbral=$(echo "$registro" | cut -d';' -f4) 
-			codigoDestino=$(echo "$registro" | cut -d';' -f5)
+			tope=$(echo "$registroU" | cut -d';' -f6) 
+			codigoArea=$(echo "$registroU" | cut -d';' -f2) 
+			numeroDeLineaOrigen=$(echo "$registroU" | cut -d';' -f3) 
+			tipoDeLlamadaUmbral=$(echo "$registroU" | cut -d';' -f4) 
+			codigoDestino=$(echo "$registroU" | cut -d';' -f5)
 			if ( [[ $tope -lt $tiempoDeConversacion ]] && 
 			   [ $codigoArea == $codArea ] &&
 			   [ $numeroDeLineaOrigen == $numLineaA ] ); then
-			   if [[ $tipoDeLlamadaUmbral == $tipoLLamada ]]; then
+			   if [[ $tipoDeLlamadaUmbral == $tipoLLamada ]]; then 	
 					if ( [[ $tipoDeLlamadaUmbral == "DDI" ]] && ( [[ $codigoDestino == $codPais ]] || [[ $codigoDestino == "" ]] ) ) ||
 				   	   ( ( [[ $tipoDeLlamadaUmbral == "DDN" ]] || [[ $tipoDeLlamadaUmbral == "LOC" ]] ) &&			 					     
-				  	   ( [[ $codigoDestino == $codAreaB ]] || [[ $codigoDestino == "" ]] ) ) ; then
-						idUmbral=$(echo "$registro" | cut -d';' -f1) 
+				  	   ( [[ $codigoDestino -eq $codAreaB ]] || [[ $codigoDestino == "" ]] ) ) ; then 
+						idUmbral=$(echo "$registroU" | cut -d';' -f1) 
 						idAgente=$(echo "$regristroDelArchivoDeLLamadas" | cut -d';' -f1) 
 						registroDelAgente=`grep "$idAgente" "$MAEDIR/agentes.mae"`
 						oficina=$(echo "$registroDelAgente" | cut -d';' -f4)
@@ -187,18 +186,18 @@ function verificarSiHayAlgunUmbralActivo {
 						tercerRengln=";$codPaisNumeroB;$codAreaNumeroB;$numeroLineaB;$fechaFormatoArchivoInput"	
 						registroAEscribir="$primerRenglon$segundoRenglon$tercerRengln"
 						grabarLlamadaSospechosa "$registroAEscribir"
-						return 1
+						continue
 					else
 						let contadorDeLlamadasNoSospechosas=contadorDeLlamadasNoSospechosas+1
-						return 1
+						continue
 					fi
 				else
 					let contadorDeLlamadasNoSospechosas=contadorDeLlamadasNoSospechosas+1
-					return 1				
+					continue				
 				fi				
 			else
 				let contadorDeLlamadasNoSospechosas=contadorDeLlamadasNoSospechosas+1
-				return 1
+				continue
 			fi
 		fi
 	done
