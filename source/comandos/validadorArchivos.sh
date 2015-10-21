@@ -84,10 +84,33 @@ function validarRegistroLlamados(){
  	fi
 
  	# ver que sea menor que 31
-	if [ $mes -ge 31 ]; then
+	if [ $dia -ge 31 ]; then
 		return 2
 	fi
 
+
+	# mes x es tiene 31 dias.
+	# mes x+1 tiene 30
+	# mes 2 tiene 29
+	let MODULE=($mes%2)
+
+	# me fijo que si es febrero tenga 29 dias como maximo
+	if [ $mes -eq 2 ]; then
+		if [ $dia -gt 29 ]; then
+			return 2
+		fi
+	#mes par -> maximo 30 dias
+	elif [ $MODULE -eq 0]; then
+		if [ $dia -gt 30 ]; then
+			return 2
+		fi	
+
+	#mes inpar -> maximo 31 dias
+	elif [ $MODULE -eq 1]; then
+		if [ $dia -gt 31 ]; then
+			return 2
+		fi
+	fi
 
 	# agarro los primeros 4 digitos
 	anio=${diaMesAnio::4}
