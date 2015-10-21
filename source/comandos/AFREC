@@ -33,11 +33,15 @@ ciclo=1
 while [ 0 ]
 do
 	log "Ejecutando ciclo nro. $ciclo." "INFO"
+
+	# save and change IFS 
+	OLDIFS=$IFS
+	IFS=$'\n'
 	
 	for i in `ls "$NOVEDIR"`
 	do
 		rutaArchivo="$NOVEDIR/$i"
-		validarRegistroLlamados $rutaArchivo
+		validarRegistroLlamados "$rutaArchivo"
 		resultado="$?"
 		#log "Resultado validacion: $resultado"
 		if [ $resultado -eq 0 ]
@@ -49,6 +53,10 @@ do
 			logRechazados $i $resultado
 		fi
 	done
+
+	# restore it 
+	IFS=$OLDIFS
+
 	
 	cantidadAceptados=`ls -1 "$ACEPDIR" | wc -l`
 	
