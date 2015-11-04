@@ -127,7 +127,7 @@ sub mostrarCentralMasSospechosas{
 	my %hashCentrales;
 
 	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
+  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivos[$a]";
 
   		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
@@ -148,8 +148,12 @@ sub mostrarCentralMasSospechosas{
 	my @keys = sort { $hashCentrales{$b} <=> $hashCentrales{$a} } keys%hashCentrales;
 	my @values = @hashCentrales{@keys};
 
+	my $puestos_a_mostrar=4;
+	if ($puestos_a_mostrar > $#keys) {
+		$puestos_a_mostrar=$#keys;
+	}
 	# ya tengo todo ordenado, me faltaria obtener el codigo y la descripcion.
-	for my $i (0..$#keys){
+	for my $i (0..$puestos_a_mostrar){
 		$entry ="$keys[$i] #$values[$i] apariciones -> ".`grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
 
 		if ($ESTADO_GRABACION == 0){
@@ -177,7 +181,7 @@ sub mostrarRankingDeUmbrales{
 	my %hashUmbrales;
 
 	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
+  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivos[$a]";
 
   	 	# eko("RUTA SOSPECHOSA $rutaSospecha" );
 		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
@@ -196,7 +200,11 @@ sub mostrarRankingDeUmbrales{
 	my @keys = sort { $hashUmbrales{$b} <=> $hashUmbrales{$a} } keys%hashUmbrales;
 	my @values = @hashUmbrales{@keys};
 
-	for my $i (0..$#keys){
+	my $puestos_a_mostrar=4;
+	if ($puestos_a_mostrar > $#keys) {
+		$puestos_a_mostrar=$#keys;
+	}
+	for my $i (0..$puestos_a_mostrar){
 		# el enunciado pedia ignorar umbrales 
 		if ($values[$i] > 1){
 			$entry= "ID UMBRAL: $keys[$i] ->  #$values[$i] apariciones";
@@ -217,7 +225,7 @@ sub mostrarRankingDeUmbrales{
 sub mostrarAgentesMasSospechosos{
 
 	eko2("---------------------------------------");
-	eko2("-----------Agentes mas sospechosos--------------------------");
+	eko2("-----------Agentes más sospechosos--------------------------");
 	eko2("---------------------------------------");
 
 	my (@archivos) = @_;
@@ -225,7 +233,7 @@ sub mostrarAgentesMasSospechosos{
 	my %hashAgentes;
 
 	for my $a (0..$#archivos){
-  		$rutaSospecha = "$PROCDIR" . "/$archivos[$a]";
+  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivos[$a]";
 
   		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
@@ -246,10 +254,13 @@ sub mostrarAgentesMasSospechosos{
 	my @keys = sort { $hashAgentes{$b} <=> $hashAgentes{$a} } keys%hashAgentes;
 	my @values = @hashAgentes{@keys};
 
+	my $puestos_a_mostrar=4;
+	if ($puestos_a_mostrar > $#keys) {
+		$puestos_a_mostrar=$#keys;
+	}
+	
 	# ya tengo todo ordenado, me faltaria obtener el codigo y la descripcion.
-	for my $i (0..$#keys){
-
-		
+	for my $i (0..$puestos_a_mostrar){
 		# print ("$keys[$i]  -> #$values[$i] apariciones -> ");
 		# print `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f5`;
 		$mail = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f5`;
@@ -269,30 +280,30 @@ sub mostrarAgentesMasSospechosos{
 
 sub mostrarOficinaMasSospechosa{
 
-eko2("---------------------------------------");
-eko2("-------------Oficinas mas sospechosas--------------------");
-eko2("---------------------------------------");
+	eko2("---------------------------------------");
+	eko2("-------------Oficinas más sospechosas--------------------");
+	eko2("---------------------------------------");
 
-my (@archivos) = @_;
+	my (@archivos) = @_;
 
-my %hashAgentes;
+	my %hashAgentes;
 
-for my $a (0..$#archivos){
-	$rutaSospecha = "$PROCDIR/$archivos[$a]";
+	for my $a (0..$#archivos){
+		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL/$archivos[$a]";
 
-	# eko("RUTA SOSPECHOSA $rutaSospecha" );
+		# eko("RUTA SOSPECHOSA $rutaSospecha" );
 
-	open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
-	while($linea = <ENT>){
-		chomp($linea);
-		$idAgente = obtenerCampo2("$linea", "$ID_AGENTE");
+		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
+		while($linea = <ENT>){
+			chomp($linea);
+			$idAgente = obtenerCampo2("$linea", "$ID_AGENTE");
 
-		# Incremento el contador.
-		$hashAgentes{$idAgente}++;
+			# Incremento el contador.
+			$hashAgentes{$idAgente}++;
+		}
+
+		close(ENT);
 	}
-
-	close(ENT);
-}
 
 
 	# Despues del while ya voy a tener en el hash todas las ocurrencias de cada central
@@ -311,9 +322,12 @@ for my $a (0..$#archivos){
 	@keys = sort { $hashOficinas{$b} <=> $hashOficinas{$a} } keys%hashOficinas;
 	@values = @hashOficinas{@keys};
 
-
+	my $puestos_a_mostrar=4;
+	if ($puestos_a_mostrar > $#keys) {
+		$puestos_a_mostrar=$#keys;
+	}
 	# ya tengo todo ordenado, me faltaria obtener el codigo y la descripcion.
-	for my $i (0..$#keys){
+	for my $i (0..$puestos_a_mostrar){
 		$entry = "Oficina $keys[$i] -> $values[$i] apariciones";
 		# eko2("Oficina $keys[$i] -> $values[$i] apariciones");
 		if ($ESTADO_GRABACION == 0){
@@ -328,19 +342,19 @@ for my $a (0..$#archivos){
 
 sub mostrardDestinoMasSospechoso{
 
-eko2("---------------------------------------");
-eko2("-------------Destinos mas sospechosos--------------------");
-eko2("---------------------------------------");
+	eko2("---------------------------------------");
+	eko2("-------------Destinos más sospechosos--------------------");
+	eko2("---------------------------------------");
 
-# En esta variable voy a ir acumulando los contadores de los destinos.
-my (@archivos) = @_;
+	# En esta variable voy a ir acumulando los contadores de los destinos.
+	my (@archivos) = @_;
 
-my %hashDestinos;
-my %hashCodigoPais;
-my %hashCodigoArea;
+	my %hashDestinos;
+	my %hashCodigoPais;
+	my %hashCodigoArea;
 
 		for my $a (0..$#archivos){
-  			$rutaSospecha = "$PROCDIR/" . "$archivos[$a]";
+  			$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL/" . "$archivos[$a]";
 
   			# eko("RUTA SOSPECHOSA $rutaSospecha" );
 			open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
@@ -418,64 +432,6 @@ my %hashCodigoArea;
 }
 
 
-# eko2 ("inicio ejecucion");
-
-# mostrarCentralMasSospechosas;
-
-# mostrarAgentesMasSospechosos;
-
-# mostrarOficinaMasSospechosa;
-
-# mostrardDestinoMasSospechoso;
-
-# mostrarRankingDeUmbrales;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Filtros a ser aplicados.
-my @filtrosCentral;
-
-
 # Hace un print del mensaje recibido por parametro.
 # Le agrega el \n al final para que sea mas facil.
 
@@ -516,46 +472,13 @@ sub obtenerClaveHash{
 	return ("$idCentral;$idAgente;$duracionLlamada;$numeroDestino");
 }
 
-sub mostrarOpciones{
-	eko("Opciones posibles:");
-	eko("A) Setear filtro(s) de Centrales");
-	eko("B) Setear filtro(s) para Agentes");
-	eko("C) Setear filtro(s) por umbral");
-	eko("D) Setear filtro(s) para Tipos de llamadas");
-	eko("E) Setear filtro(s) para Tiempos de conversaciones");
-	eko("F) Setear filtro(s) para el Numero A");
-	eko("------------------------------------------------------");
-	eko("G) Mostrar resultados");
-	eko("------------------------------------------------------");
-	eko("Aclaracion: al elegir una opcion se borran los filtros anteriores");
-	eko("------------------------------------------------------");
-
-	$opcionValida = 0;
-	while ($opcionValida == 0){
-		$salidaElegida = <STDIN>;
-		chomp($salidaElegida);	
-		if($salidaElegida eq "a" || $salidaElegida eq "b" || $salidaElegida eq "c"
-		|| $salidaElegida eq "d" || $salidaElegida eq "e" || $salidaElegida eq "f"
-		|| $salidaElegida eq "g")
-		{
-			$opcionValida = 1;			
-		}
-		else{
-			informarComandoErroneo();
-		
-		}
-	}
-
-	return $salidaElegida;
-}
-
 sub mostrarOpcionesEstadisticas{
 	eko("Opciones posibles:");
-	eko("A) Ranking de Centrales");
-	eko("B) Ranking de Agentes con mas llamados sospechosos");
-	eko("C) Ranking de oficinas con mas llamados sospechosos");
-	eko("D) Ranking de destinos de llamados sospechosos");
-	eko("E) Ranking de umbrales");
+	eko("a) Ranking de centrales");
+	eko("b) Ranking de agentes con más llamados sospechosos");
+	eko("c) Ranking de oficinas con más llamados sospechosos");
+	eko("d) Ranking de destinos de llamados sospechosos");
+	eko("e) Ranking de umbrales");
 	eko("------------------------------------------------------");
 
 	$opcionValida = 0;
@@ -566,10 +489,8 @@ sub mostrarOpcionesEstadisticas{
 		|| $salidaElegida eq "d" || $salidaElegida eq "e" )
 		{
 			$opcionValida = 1;			
-		}
-		else{
+		} else{
 			informarComandoErroneo();
-		
 		}
 	}
 
@@ -577,30 +498,17 @@ sub mostrarOpcionesEstadisticas{
 }
 
 sub informarComandoErroneo{
-	eko("Error! Seleccionar una opcion valida.");
+	eko("Error! Seleccionar una opción válida.");
 }
 
 sub mostrarQueryVacia{
-	eko("La query no devolvio registros validos");
+	eko("La query no devolvió registros válidos.");
 }
 
 sub obtenerCampo{
 	my ($registro, $campo) = @_;
 	@campos = split(";",$registro);
 	return $campos[$campo];
-}
-
-
-# Recibe un registro (en formato csv seguramente) y lo muestro de forma humana.
-sub mostrarResultado{
-	my ($registro) = @_;
-
-}
-
-# param 1: el tipo de filtro a aplicar (ej central, agente, etc)
-# param 2: el array.
-sub setearFiltros{
-
 }
 
 # recibe por parametro un hash, lo ordena usando el comparador de hashes
@@ -636,19 +544,6 @@ sub mostrarResultadosHash {
 	}
 
 }
-
-sub mostrarResultados{
-	my (@resultados) = @_;
-
-	if ($#resultados < 0){
-		mostrarQueryVacia;
-		return 0;
-	}
-	for my $i (0..$#resultados){
-		eko("$resultados[$i]");
-	}
-}
-
 
 sub pedirCentrales {
 	eko("Introducir ID(s) de la(s) central(es):");
@@ -889,33 +784,12 @@ sub pedirFiltros {
   	# eko("La long del array es $#array")
 }
 
-
-sub mostrarMensajeRangoInvalido{
-	eko("Rango invalido! Intentar nuevamente");
-}
-
-
 sub mostrarOpcionesDeFiltrosEstadisticas{
-
 	# Si no se recibieron parametros es porque va a usar todos los archivos.
 	$numParams = @_;
-
 	# eko("se recibieron $numParams parametros");
-
 	my (@archivosRecibidos) = @_;
-
 	$opcion = mostrarOpcionesEstadisticas;
-
-
-# mostrarCentralMasSospechosas;
-
-# mostrarAgentesMasSospechosos;
-
-# mostrarOficinaMasSospechosa;
-
-# mostrardDestinoMasSospechoso;
-
-# mostrarRankingDeUmbrales;
 
 	if ($opcion eq "a"){
 		# eko("opc a");
@@ -935,41 +809,10 @@ sub mostrarOpcionesDeFiltrosEstadisticas{
 	}
 }
 
-
-
-
-
-
-
-# Hace un print del mensaje recibido por parametro.
-# Le agrega el \n al final para que sea mas facil.
-
-
-
-	# sub imprimir{
-
-	# 	#veo la cantidad de parametros recibidos
-	# 	my $n = scalar(@_);
-
-	# 	#esto me agarra solo el primer parametro.
-	# 	my ($name) = @_;
-
-	# 	# esto me deja los 2 primeros parametros en el asunto
-	# 	my ($name, $frase) = @_;
-
-
-	# 	print "Se pasaron $n parametros \n";
-	# 	print "$name \n";
-	# 	print "$frase \n";
-	# }
-
-
 # si esta activado, lo desactivo.
 # y viceversa
 sub manejarEstadoDeGrabacion{
 	if ($ESTADO_GRABACION == 0){
-
-		#aca estoy activando la grabacion.
 		$ESTADO_GRABACION = 1;
 	} else {
 		$ESTADO_GRABACION = 0;
@@ -985,11 +828,11 @@ sub mostrarEstadoDeGrabacion{
 }
 
 sub mostrarMsgInstr{
-	eko("Instruccion invalida.");
+	eko("Instrucción inválida.");
 	eko("Usa -h para una lista de posibles instrucciones");
 }
 
-sub mostrarAyuda(){
+sub mostrarAyuda{
 	eko("==========================================================");
 	eko("=======================AFLIST=============================");
 	eko("==========================================================");
@@ -1035,7 +878,7 @@ sub mostrarMenuYPedirOpcion{
 }
 
 sub obtenerFiltrosOficinas {
-	eko("introducir oficina(as) separadas por espacio:");
+	eko("Introducir oficina(s) separadas por espacio:");
 
 	$oficinas = <STDIN>;
 	chomp($oficinas);	
@@ -1048,17 +891,16 @@ sub obtenerFiltrosOficinas {
 # $2 la lista de filtros.
 sub obtenerArchivosAProcesar{
 
-	eko("obteniendo archivos a procesar");
+	eko("Obteniendo archivos a procesar");
 	my @archivosParaConsultar;
 	my ($tipoFiltro, @arrayFiltros) = @_;
 
 
   	# $rutaSospecha = "$PROCDIR/$archivos[$a]";
-	my $dir = "$PROCDIR/";
+	my $dir = "$INPUT_CONSULTAS_GLOBAL/";
     opendir(DIR, $dir) or die $!;
 
     while (my $file = readdir(DIR)) {
-
         # Use a regular expression to ignore files beginning with a period
         next if ($file =~ m/^\./);
 
@@ -1069,7 +911,7 @@ sub obtenerArchivosAProcesar{
         	for my $i (0..$#arrayFiltros){
         		if ($arrayFiltros[$i] eq $campos[1]){
 
-        			eko("Pusheando $file al array con ANIOMES");
+        			#eko("Pusheando $file al array con ANIOMES");
         			push @archivosParaConsultar, $file;
 
         			last;
@@ -1078,7 +920,7 @@ sub obtenerArchivosAProcesar{
         } else{
         	for my $i (0..$#arrayFiltros){
         		if ($arrayFiltros[$i] eq $campos[0]){
-        			eko("Pusheando $file al array con OFCINAS");
+        			#eko("Pusheando $file al array con OFCINAS");
         			push @archivosParaConsultar, $file;
 
         			last;
@@ -1150,10 +992,8 @@ sub obtenerArchivos {
 	eko("obteniendo archivos a procesar");
 	my @archivosParaConsultar;
 	my ($inputDir, $tipoFiltro, @arrayFiltros) = @_;
-
 	#eko("arrayFiltros: @arrayFiltros");
 	@archivos = obtenerTodosLosArchivos($inputDir);
-
 	@archivosParaConsultar = filtrarArchivos(\@archivos, \@arrayFiltros, $tipoFiltro);
 
 	return @archivosParaConsultar;
@@ -1164,10 +1004,10 @@ sub mostrarFormasDeConsultarLlamadasSospechosas(){
 	eko("==========================================================");
 	eko("====Consultas de llamadas sospechosas ====================");
 	eko("=                                                        =");
-	eko("=   Seleccione la opcion deseada:                        =");
-	eko("=     1) consultar sobre reg de llamadas sospechosas     =");
-	eko("=     2) introducir nombre de oficina para consultar     =");
-	eko("=     3) introducir aniomes                              =");
+	eko("=   Seleccione la opción deseada:                        =");
+	eko("=     1) Consultar sobre reg de llamadas sospechosas     =");
+	eko("=     2) Introducir nombre de oficina para consultar     =");
+	eko("=     3) Introducir aniomes                              =");
 	eko("=                                                        =");
 	eko("==========================================================");
 
@@ -1196,7 +1036,7 @@ sub mostrarFormasDeConsultarSubLlamadas {
 	eko("===========================================================");
 	eko("==== Consultas de subllamadas =============================");
 	eko("=                                                         =");
-	eko("=   Seleccione la opcion deseada:                         =");
+	eko("=   Seleccione la opción deseada:                         =");
 	eko("=     1) Todos los archivos de subllamadas.               =");
 	eko("=     2) Seleccionar archivos de subllamadas.             =");
 	eko("=                                                         =");
@@ -1237,7 +1077,7 @@ sub obtenerInputConsultas {
 		return ($PROCDIR, 1);
 	} else {
 		while(1) {
-			eko("Seleccione input de consultas.");
+			eko("Seleccione input de consultas:");
 			eko("1) Realizar consultas en archivos de llamadas sospechosas.");
 			eko("2) Realizar consultas en archivos de subllamadas.");
 
@@ -1264,26 +1104,24 @@ sub obtenerFiltrosAnioMes {
 sub pedirAnioMes{
 	
 	@filtrosAnioMes = obtenerFiltrosAnioMes;
-	@archivos = obtenerArchivos($inputConsultas, "ANIOMES", @filtrosAnioMes);
-	while(1) {
+	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "ANIOMES", @filtrosAnioMes);
+	eko("Archivos: @archivos");
+	eko("");
+	eko("1) Filtrar por oficinas.");
+	eko("2) Realizar consulta.");
+
+	$opcionSeleccionada = <STDIN>;
+	chomp($opcionSeleccionada);
+	if ($opcionSeleccionada == 1) {
+		@filtrosOficinas = obtenerFiltrosOficinas;
+		@archivos = filtrarArchivos(\@archivos, \@filtrosOficinas, "OFICINAS");
 		eko("Archivos: @archivos");
-		eko("");
-		eko("1) Filtrar por oficinas.");
-		eko("2) Realizar consulta.");
 
-		$opcionSeleccionada = <STDIN>;
-		chomp($opcionSeleccionada);
-		if ($opcionSeleccionada == 1) {
-			@filtrosOficinas = obtenerFiltrosOficinas;
-			@archivos = filtrarArchivos(\@archivos, \@filtrosOficinas, "OFICINAS");
-			eko("Archivos: @archivos");
-
-			pedirFiltros(@archivos);
-		} elsif ($opcionSeleccionada == 2) {
-			pedirFiltros(@archivos);
-		} else {
-			eko("Ingrese una opción valida por favor."); eko("");
-		}
+		pedirFiltros(@archivos);
+	} elsif ($opcionSeleccionada == 2) {
+		pedirFiltros(@archivos);
+	} else {
+		eko("Ingrese una opción valida por favor."); eko("");
 	}
 }
 
@@ -1322,7 +1160,7 @@ sub pedirAnioMesEstadisticas{
 }
 
 sub obtenerTodosLosArchivosDeSospechas{
-	my $dir = "$PROCDIR";
+	my $dir = "$INPUT_CONSULTAS_GLOBAL";
 	my @archivosAProcesar;
 
 	my ($opc) = @_;
@@ -1365,33 +1203,30 @@ sub obtenerTodosLosArchivos {
 
 sub pedirOficinas {
 	@filtrosOficinas = obtenerFiltrosOficinas;
-	@archivos = obtenerArchivos($inputConsultas, "OFICINAS", @filtrosOficinas);
-	while(1) {
+	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "OFICINAS", @filtrosOficinas);
+	eko("Archivos: @archivos");
+	eko("");
+	eko("1) Filtrar por aniomes.");
+	eko("2) Realizar consulta.");
+	$opcionSeleccionada = <STDIN>;
+	chomp($opcionSeleccionada);
+
+	if ($opcionSeleccionada == 1) {
+		@filtrosAnioMes = obtenerFiltrosAnioMes;
+		@archivos = filtrarArchivos(\@archivos, \@filtrosAnioMes, "ANIOMES");
 		eko("Archivos: @archivos");
-		eko("");
-		eko("1) Filtrar por aniomes.");
-		eko("2) Realizar consulta.");
-		$opcionSeleccionada = <STDIN>;
-		chomp($opcionSeleccionada);
+		pedirFiltros(@archivos);
+	} elsif ($opcionSeleccionada == 2) {
 
-		if ($opcionSeleccionada == 1) {
-			@filtrosAnioMes = obtenerFiltrosAnioMes;
-			@archivos = filtrarArchivos(\@archivos, \@filtrosAnioMes, "ANIOMES");
-			eko("Archivos: @archivos");
-
-			pedirFiltros(@archivos);
-		} elsif ($opcionSeleccionada == 2) {
-
-			pedirFiltros(@archivos);
-		} else {
-			eko("Ingrese una opción valida por favor."); eko("");
-		}	
+		pedirFiltros(@archivos);
+	} else {
+		eko("Ingrese una opción valida por favor."); eko("");
 	}
 }
 
 
 sub pedirOficinasEstadisticas{
-	eko("introducir oficina(as) separadas por espacio:");
+	eko("introducir oficina(s) separadas por espacio:");
 
 	$oficinas = <STDIN>;
 	chomp($oficinas);	
@@ -1407,21 +1242,17 @@ sub pedirOficinasEstadisticas{
 
 
 sub mostrarMenuEstadisticas{
-	$opcionElegida = mostrarFormasDeConsultarLlamadasSospechosas;
+	my ($inputConsultas, $tipoInput) = obtenerInputConsultas();
+	$INPUT_CONSULTAS_GLOBAL = $inputConsultas;
+	#$opcionElegida = mostrarFormasDeConsultarLlamadasSospechosas;
 
-	#eko("ACA LA OPCION ES $opcionElegida");
-	if ($opcionElegida eq "1"){
-		#va a la parte de las querys con todos los achivos
+	#if ($opcionElegida eq "1"){
 		obtenerTodosLosArchivosDeSospechas(0);
-	} elsif ($opcionElegida eq "2"){
-		pedirOficinasEstadisticas;
-	} elsif ($opcionElegida eq "3"){
-		pedirAnioMesEstadisticas;
-	} elsif ($opcionElegida eq "4"){
-
-	} else{
-
-	}
+	#} elsif ($opcionElegida eq "2"){
+	#	pedirOficinasEstadisticas;
+	#} elsif ($opcionElegida eq "3"){
+	#	pedirAnioMesEstadisticas;
+	#}
 }
 
 sub menuConsultasLlamadasSospechosas {
@@ -1437,12 +1268,8 @@ sub menuConsultasLlamadasSospechosas {
 
 	} elsif ($opcionElegida eq "2") {
 		pedirOficinas;
-
 	} elsif ($opcionElegida eq "3") {
 		pedirAnioMes;
-
-	} else{
-
 	}
 }
 
@@ -1471,32 +1298,14 @@ sub mostrarMenuConsultas{
 	my ($inputConsultas, $tipoInput) = obtenerInputConsultas();
 	$INPUT_CONSULTAS_GLOBAL = $inputConsultas;
 
-	eko("inputConsultas: $inputConsultas");
-	#eko("tipoInput: $tipoInput");
+	eko("Input de consultas: $inputConsultas");
 	
 	if ($tipoInput eq 1) {
 		menuConsultasLlamadasSospechosas($inputConsultas);
-
 	} elsif ($tipoInput eq 2) {
 		menuConsultasSubLlamadas($inputConsultas);
-	} else {
-
 	}
-
 }
-
-sub mostrarEstadisticas{
-
-	eko("La central con mayor cantidad de llamadas sospechosas es: ");
-	eko("Ranking de centrales"); #mostrar codigo y descripcion de central.
-	eko("La oficina con mayor cantidad de llamadas sospechosas es: ");
-	eko("El agente con mayor cantidad de llamadas sospechosas es: ");
-	eko("Ranking de agentes: "); #ID del agente, mail y oficina a la cual pertenece
-	eko("El destino con mayor cantidad de llamadas sospechosas es: ");
-	eko("Ranking de destinos: "); #mostrar codigo y nombre pais/provincia/ciudad.
-	eko("Ranking de umbrales:"); #filtrar los que tengan menos de 2 llamadas.
-}
-
 
 sub menuMain{
 	$deberiaEjecutarme = 1;
@@ -1505,7 +1314,7 @@ sub menuMain{
 		$opcion = mostrarMenuYPedirOpcion;
 
 		if ($opcion eq "h"){
-			mostrarAyuda();
+			mostrarAyuda;
 		}elsif ($opcion eq "w"){
 			manejarEstadoDeGrabacion;
 		}elsif ($opcion eq "r"){
@@ -1532,7 +1341,7 @@ sub chequearCantidadArgumentos{
 		# vamos a ver si es un argumento valido.
 		$primerArgumento = "$ARGV[0]";
 		if ($primerArgumento eq "-h"){
-			mostrarAyuda();
+			mostrarAyuda;
 		}elsif ($primerArgumento eq "-w"){
 			manejarEstadoDeGrabacion;
 			menuMain;

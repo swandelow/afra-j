@@ -520,6 +520,14 @@ function complete_install {
 	exit
 }
 
+function check_log_directory {
+	if [ ! -d "$CONFDIR" ]; then
+		mkdir -p "$CONFDIR"
+	fi
+}
+
+#En caso de que no exista, se crea el directorio de log
+check_log_directory
 #Completar instalacion si es necesario
 complete_install
 #Chequeo de Perl
