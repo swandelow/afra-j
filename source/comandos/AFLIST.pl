@@ -364,6 +364,7 @@ sub mostrardDestinoMasSospechoso{
 				$destinoSospechoso = obtenerCampo2("$linea", "$NUMERO_DESTINO");
 				$codigoArea = obtenerCampo2("$linea", "$COD_AREA_B");
 				$codigoPais = obtenerCampo2("$linea", "$CODIGO_PAIS_B");
+				$compound_key = "$codigoPais_$codigoArea";
 
 				# eko2($codigoPais);
 				# eko2($codigoArea);
@@ -371,22 +372,22 @@ sub mostrardDestinoMasSospechoso{
 				# si el codigo del pais del no esta vacio, tengo que sacar el nombre del archivo
 				# maestro de los paises.
 				if ($codigoPais eq ''){
-					$hashCodigoPais{$destinoSospechoso} = 0;
+					$hashCodigoPais{$compound_key} = 0;
 				} else {
-					$hashCodigoPais{$destinoSospechoso} = $codigoPais;
+					$hashCodigoPais{$compound_key} = $codigoPais;
 				}
 
 				# si el codigo de area es distinto de 0, tneo que buscar el nombre en el archivo
 				# maestro de los codigos de los paises.
 				if ($codigoArea eq ''){
-					$hashCodigoArea{$destinoSospechoso} = 0;
+					$hashCodigoArea{$compound_key} = 0;
 				} else {
-					$hashCodigoArea{$destinoSospechoso} = $codigoArea;
+					$hashCodigoArea{$compound_key} = $codigoArea;
 				}
 
 
 				# Incremento el contador	.
-				$hashDestinos{$destinoSospechoso}++;
+				$hashDestinos{$compound_key}++;
 			}
 			close(ENT);
 	}
@@ -398,34 +399,28 @@ sub mostrardDestinoMasSospechoso{
 	my @keys = sort { $hashDestinos{$b} <=> $hashDestinos{$a} } keys%hashDestinos;
 	my @values = @hashDestinos{@keys};
 
-	for my $i (0..$#keys){
-		print ("$keys[$i] #$values[$i] apariciones ");
+	my $puestos_a_mostrar=4;
+	if ($puestos_a_mostrar > $#keys) {
+		$puestos_a_mostrar=$#keys;
+	}
+	for my $i (0..$puestos_a_mostrar){
+		print ("$values[$i] apariciones ");
 
 		# Aca tengo que fijarme si la ciudad es local o no es local.
 		# para esto me fijo en cualquiera de los dos hashes auxiliares 
 		# y comparo contra 0. Si el primero es 0, entonces la llamada 
 		# no es local/internacional
-
+		$entry;
 		if ($hashCodigoPais{$keys[$i]} != 0){
-			$entry = " Codigo: $hashCodigoPais{$keys[$i]}  "." Nombre: ".
-			`grep "$hashCodigoPais{$keys[$i]}" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
-			# eko2(" Codigo: $hashCodigoPais{$keys[$i]}  ");
-			# print(" Nombre: ");
-			# print `grep "$hashCodigoPais{$keys[$i]}" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;;
+			$entry = " Codigo país: $hashCodigoPais{$keys[$i]}  "." Nombre: ".`grep "$hashCodigoPais{$keys[$i]}" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
 		} else {
-			$entry = " Codigo: $hashCodigoArea{$keys[$i]}  "." Nombre: "." Nombre: ".`grep "$hashCodigoArea{$keys[$i]}" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
-			# print(" Codigo: $hashCodigoArea{$keys[$i]}  ");
-			# print(" Nombre: ");
-			# print `grep "$hashCodigoArea{$keys[$i]}" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;;
-
-			if ($ESTADO_GRABACION == 0){
-				eko($entry);	
-			} else {
-				grabarEstadisticaEnArchivo("$entry");
-			}
-
+			$entry = " Codigo área: $hashCodigoArea{$keys[$i]}  "." Nombre: ".`grep "$hashCodigoArea{$keys[$i]}" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
 		}
-		# print `grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2 \n`;
+		if ($ESTADO_GRABACION == 0){
+			eko($entry);	
+		} else {
+			grabarEstadisticaEnArchivo("$entry");
+		}
 	}
 
 	imprimirSeparador;
