@@ -109,51 +109,21 @@ sub obtenerCampo2{
 	return $campos[$campo];
 }
 
+sub displayHashCentrales {
 
-# 1- Analizar todos los registros de llamadas sospechosas e ir acumulando
-# en el contador de cada central.
-# 2- Hacer un sort de las claves DESC.
-# 3- Hacer un match con el archivo de las centrales para mostrar el codigo y
-# su descripcion.
+	my (%hash) = @_;
+	my $puestos_a_mostrar = 4;
+	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
+	my @keys = sort { $hash{$b} <=> $hash{$a} } keys %hash;
+	my @values = @hash{@keys};
 
-# ya sabemos de ante mano que existe la central en el archivo de centrales
-sub mostrarCentralMasSospechosas{
-
-	my (@archivos) = @_;
-
-	eko2("---------------------------------------");
-	eko2("------------CENTRALES SOSPECHOSAS---------------------");
-	eko2("---------------------------------------");
-	my %hashCentrales;
-
-	for my $a (0..$#archivos){
-  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivos[$a]";
-
-  		# eko("RUTA SOSPECHOSA $rutaSospecha" );
-
-		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
-		while($linea = <ENT>){
-			chomp($linea);
-			$idCentral = obtenerCampo2("$linea", "$ID_CENTRAL");
-
-			# Incremento el contador.
-			$hashCentrales{$idCentral}++;
-		}
-	}
-
-	close(ENT);
-
-
-	# Despues del while ya voy a tener en el hash todas las ocurrencias de cada central
-	my @keys = sort { $hashCentrales{$b} <=> $hashCentrales{$a} } keys%hashCentrales;
-	my @values = @hashCentrales{@keys};
-
-	my $puestos_a_mostrar=4;
 	if ($puestos_a_mostrar > $#keys) {
-		$puestos_a_mostrar=$#keys;
+		$puestos_a_mostrar = $#keys;
 	}
-	# ya tengo todo ordenado, me faltaria obtener el codigo y la descripcion.
-	for my $i (0..$puestos_a_mostrar){
+
+	#eko("puestos_a_mostrar: $puestos_a_mostrar");
+
+	for my $i (0..$puestos_a_mostrar) {
 		$entry ="$keys[$i] #$values[$i] apariciones -> ".`grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
 
 		if ($ESTADO_GRABACION == 0){
@@ -162,9 +132,76 @@ sub mostrarCentralMasSospechosas{
 			grabarEstadisticaEnArchivo("$entry");
 		}
 	 	
-		# print ("$keys[$i] #$values[$i] apariciones -> ");
-		# print `grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
-		imprimirSeparador;
+		imprimirSeparador;	
+	}
+}
+
+
+# 1- Analizar todos los registros de llamadas sospechosas e ir acumulando
+# en el contador de cada central.
+# 2- Hacer un sort de las claves DESC.
+# 3- Hacer un match con el archivo de las centrales para mostrar el codigo y
+# su descripcion.
+
+# ya sabemos de ante mano que existe la central en el archivo de centrales
+sub mostrarCentralMasSospechosas {
+
+	my (@archivos) = @_;
+
+	eko2("---------------------------------------");
+	eko2("----- CENTRALES SOSPECHOSAS -----------");
+	eko2("---------------------------------------");
+	
+	my %hashCentrales;
+	my %hashTiempoConversacion;
+
+	foreach $archivo (@archivos) {
+  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivo";
+
+  		#eko("rutaSospecha: $rutaSospecha");
+
+		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
+		while($linea = <ENT>){
+			chomp($linea);
+			$idCentral = obtenerCampo2("$linea", "$ID_CENTRAL");
+			$tiempoConversacion = obtenerCampo2("$linea", "$TIEMPO_CONV");
+
+			# Incremento el contador de llamadas sospechosas.
+			$hashCentrales{$idCentral}++;
+			# Acumulo tiempos de conversación.
+			$hashTiempoConversacion{$idCentral} += $tiempoConversacion;
+		}
+		close(ENT);
+	}
+
+	# Selecciona el tipo de ranking que se quiere mostrar.
+	my $input_invalido = 1;
+	while($input_invalido) {
+		eko("Seleccione que tipo de ranking desea:");
+		eko("1) Ranking por cantidad de llamadas.");
+		eko("2) Ranking por tiempos de conversación.");
+		eko("3) Ambos rankings.");
+
+		$inputSeleccionado = <STDIN>;
+		chomp($inputSeleccionado);
+
+		if ($inputSeleccionado == 1) {
+			$input_invalido = 0;
+			displayHashCentrales(%hashCentrales);
+		} elsif ($inputSeleccionado == 2) {
+			$input_invalido = 0;
+			displayHashCentrales(%hashTiempoConversacion);
+		} elsif ($inputSeleccionado == 3) {
+			$input_invalido = 0;
+			eko("RANKING POR CANTIDAD DE LLAMADAS.");
+			eko("");
+			displayHashCentrales(%hashCentrales);
+			eko("RANKING POR TIEMPOS DE CONVERSACIÓN.");
+			eko("");
+			displayHashCentrales(%hashTiempoConversacion);
+		} else {
+			eko("Ingrese una opción valida por favor."); 
+		}
 	}
 }
 
@@ -787,19 +824,14 @@ sub mostrarOpcionesDeFiltrosEstadisticas{
 	$opcion = mostrarOpcionesEstadisticas;
 
 	if ($opcion eq "a"){
-		# eko("opc a");
 		mostrarCentralMasSospechosas(@archivosRecibidos);
 	} elsif ($opcion eq "b"){
-		# eko("opc b");
 		mostrarAgentesMasSospechosos(@archivosRecibidos)	;
 	} elsif ($opcion eq "c"){
-		# eko("opc c");
 		mostrarOficinaMasSospechosa(@archivosRecibidos);
 	} elsif ($opcion eq "d"){
-		# eko("opc d");
 		mostrardDestinoMasSospechoso(@archivosRecibidos);
 	} elsif ($opcion eq "e"){
-		# eko("opc e");
 		mostrarRankingDeUmbrales(@archivosRecibidos);
 	}
 }
