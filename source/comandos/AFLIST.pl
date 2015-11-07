@@ -873,12 +873,21 @@ sub mostrarMenuYPedirOpcion{
 }
 
 sub obtenerFiltrosOficinas {
-	eko("Introducir oficina(s) separadas por espacio:");
+	$filtros_no_ingresados = 1;
+	while ($filtros_no_ingresados) {
+		eko("Introducir oficina(s) separadas por espacio:");
 
-	$oficinas = <STDIN>;
-	chomp($oficinas);	
-
-	return split( /\s+/, $oficinas);
+		$oficinas = <STDIN>;
+		chomp($oficinas);
+		@filtros = split( /\s+/, $oficinas);
+		$size = @filtros;
+		if ($size < 1) {
+			eko("Debe ingresar al menos un nombre de oficina.");
+			eko("");
+		} else {
+			return @filtros;
+		}
+	}
 }
 
 #esto me va a devolver el nombre de los archivos que estoy buscando.
@@ -1087,12 +1096,22 @@ sub obtenerInputConsultas {
 }
 
 sub obtenerFiltrosAnioMes {
-	eko("introducir aniomes(es) separadas por espacio:");
+	$filtros_no_ingresados = 1;
+	while ($filtros_no_ingresados) {
 
-	$aniomes = <STDIN>;
-	chomp($aniomes);	
+		eko("Introducir aniomes(es) separadas por espacio:");
 
-	return split( /\s+/, $aniomes);
+		$aniomes = <STDIN>;
+		chomp($aniomes);
+		@filtros =split( /\s+/, $aniomes);
+		$size = @filtros;
+		if ($size < 1) {
+			eko("Debe ingresar al menos una fecha aniomes.");
+			eko("");
+		} else {
+			return @filtros;
+		}
+	}
 }
 
 
