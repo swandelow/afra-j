@@ -30,11 +30,11 @@ $. AFINI <path_dir_grupo06>
 
 AFINI dará la opción de ejecutar el sistema. En caso negativo, se puede comenzar la ejecución con el comando Arrancar:
 
-$./Arrancar 
+$Arrancar 
 
 Para detener la ejecución del sistema ejecutar el comando Detener:
 
-$./Detener
+$Detener
 
 Para realizar consultas sobre los archivos de llamadas sospechosas utilizar el comando AFLIST.pl. Puede recibir los siguientes parámetros:
 	-h (ayuda)
