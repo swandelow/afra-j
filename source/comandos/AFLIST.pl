@@ -52,29 +52,16 @@ my $extensionArchivo = "000";
 my $archivoAGuardar = "$RUTA_REPODIR/$extensionArchivo";
 
 my $rand1 = int(rand(1000));
-my $randEstadisticas = int(rand(1000000));
-
 my $rutaConsulta = "$RUTA_REPODIR/subllamadas.$rand1";
-my $rutaEstadistica = "$RUTA_REPODIR/subllamadas_estadisticas.$randEstadisticas";
 
 
+sub eko {
+	# Hace un print del mensaje recibido por parametro.
+	# Le agrega el \n al final para que sea mas facil.
+	my ($msg) = @_;
+	print "$msg \n";
+}
 
-
-# 	unless(open FILE, '>'.$rutaConsulta) {
-#     	# Die with error message 
-#     	# if we can't open it.
-#     	die "\nError escribiendo archivo $rutaConsulta\n";
-
-#     	close $rutaConsulta;
-# 	}
-
-# 	unless(open FILE, '>'.$rutaEstadistica) {
-#     	# Die with error message 
-#     	# if we can't open it.
-#     	die "\nError escribiendo archivo $rutaEstadistica\n";
-
-#     	close $rutaEstadistica;
-# }
 sub crearNombreArchivoEstadisticas {
 	# Pide nombre al usuario y le agrega sufijo random para evitar nombres duplicados.
 	while(1) {
@@ -93,16 +80,10 @@ sub crearNombreArchivoEstadisticas {
 }
 
 sub grabarEstadistica {
+	# Recibe el registro y nombre de archivo donde grabarlo.
 	my ($nombre_archivo, $entry) = @_;
 	my $path_archivo = "$RUTA_ESTADISTICAS". "/$nombre_archivo"; 
 	open(my $fh, '>>', $path_archivo);
-	print $fh "$entry\n";
-	close $fh;
-}
-
-sub grabarEstadisticaEnArchivo {
-	my ($entry) = @_;
-	open(my $fh, '>>', $rutaEstadistica);
 	print $fh "$entry\n";
 	close $fh;
 }
@@ -114,17 +95,8 @@ sub grabarConsultaEnArchivo{
 	close $fh;	
 }
 
-
-
-# Hace un print del primer parametro.
-sub eko2{
-
-	my ($msg) = @_;
-	print "$msg \n";
-}
-
 sub imprimirSeparador{
-	eko2("---------------------");
+	eko("---------------------");
 }
 # Le paso el nombre del campo del registro que quiero obtener.
 
@@ -136,13 +108,15 @@ sub obtenerCampo2{
 	return $campos[$campo];
 }
 
-sub displayHashCentrales {
-
-	my (%hash) = @_;
+sub displayHash {
+	# Recibe referencia a un hash y una funcion que construye
+	# el registro a mostrar por pantalla o grabar.
+	my ($href, $fref) = @_;
 	my $puestos_a_mostrar = $CANT_RANKING;
 	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
-	my @keys = sort { $hash{$b} <=> $hash{$a} } keys %hash;
-	my @values = @hash{@keys};
+
+	my @keys = sort { $href->{$b} <=> $href->{$a} } keys %$href;
+	my @values = @$href{@keys};   
 
 	if ($puestos_a_mostrar > $#keys) {
 		$puestos_a_mostrar = $#keys;
@@ -151,116 +125,66 @@ sub displayHashCentrales {
 	if ($ESTADO_GRABACION == 0) {
 		# Imprimo por pantalla los resultados del ranking.
 		for my $i (0..$puestos_a_mostrar) {
-			$nombre_central = `grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
-			chomp($nombre_central);
-			$entry ="$keys[$i] -> $values[$i].". " $nombre_central";
+			$entry = $fref->("$keys[$i]", "$values[$i]");
 			eko($entry);	
 		}
-	 	
-		imprimirSeparador;
+		imprimirSeparador();
+
 	} else {
 		# Guardo en un archivo el resultado del ranking.
 		my $nombre_archivo = crearNombreArchivoEstadisticas();
 
 		for my $i (0..$puestos_a_mostrar) {
-			$nombre_central = `grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
-			chomp($nombre_central);
-			$entry ="$keys[$i] -> $values[$i].". " $nombre_central";
+			$entry = $fref->("$keys[$i]", "$values[$i]");
 
 			grabarEstadistica($nombre_archivo, $entry);
 		}
 
 		eko("Se grabó el ranking en archivo: $nombre_archivo");
 	 	
-		imprimirSeparador;	
+		imprimirSeparador();	
 	}
 }
 
-sub displayHashAgentes {
+sub buildEntryCentrales {
+	my ($key, $value) = @_;
+	$nombre_central = `grep "$key" -R $RUTA_CENTRALES | cut -d';' -f2`;
+	chomp($nombre_central);
+	$entry ="$key -> $value.". " $nombre_central";
+	return $entry;
+}
 
+sub displayHashCentrales {
 	my (%hash) = @_;
-	my $puestos_a_mostrar = $CANT_RANKING;
-	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
-	my @keys = sort { $hash{$b} <=> $hash{$a} } keys %hash;
-	my @values = @hash{@keys};
+	displayHash(\%hash, \&buildEntryCentrales);
+}
 
-	if ($puestos_a_mostrar > $#keys) {
-		$puestos_a_mostrar = $#keys;
-	}
+sub buildEntryAgentes {
+	my ($key, $value) = @_;
+	$mail = `grep "$key" -R $RUTA_AGENTES | cut -d';' -f5`;
+	$oficina = `grep "$key" -R $RUTA_AGENTES | cut -d';' -f4`;
+	# necesario quitar el salto del linea por cuestiones de display.
+	chomp($mail);
+	chomp($oficina);
 
-	if ($ESTADO_GRABACION == 0) {
-		# Imprimo por pantalla los resultados del ranking.
-		for my $i (0..$puestos_a_mostrar) {
-			$mail = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f5`;
-			$oficina = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f4`;
+	$entry="$key -> $value."." Mail: $mail."." Oficina: $oficina.";
+	return $entry;
+} 
 
-			# necesario quitar el salto del linea por cuestiones de display.
-			chomp($mail);
-			chomp($oficina);
+sub displayHashAgentes {
+	my (%hash) = @_;
+	displayHash(\%hash, \&buildEntryAgentes);
+}
 
-			$entry="$keys[$i]  -> #$values[$i] -> "."Mail: $mail"." oficina: $oficina";
-			eko($entry);	
-		}
-	 	
-		imprimirSeparador;
-	} else {
-		# Guardo en un archivo el resultado del ranking.
-		my $nombre_archivo = crearNombreArchivoEstadisticas();
-
-		for my $i (0..$puestos_a_mostrar) {
-			$mail = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f5`;
-			$oficina = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f4`;
-
-			# necesario quitar el salto del linea por cuestiones de display.
-			chomp($mail);
-			chomp($oficina);
-
-			$entry="$keys[$i]  -> #$values[$i] -> "."Mail: $mail"." oficina: $oficina";
-
-			grabarEstadistica($nombre_archivo, $entry);
-		}
-
-		eko("Se grabó el ranking en archivo: $nombre_archivo");
-	 	
-		imprimirSeparador;	
-	}
+sub buildEntryOficinas {
+	my ($key, $value) = @_;
+	$entry = "Oficina $key -> $value.";
+	return $entry;
 }
 
 sub displayHashOficinas {
-
 	my (%hash) = @_;
-	my $puestos_a_mostrar = $CANT_RANKING;
-	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
-	my @keys = sort { $hash{$b} <=> $hash{$a} } keys %hash;
-	my @values = @hash{@keys};
-
-	if ($puestos_a_mostrar > $#keys) {
-		$puestos_a_mostrar = $#keys;
-	}
-
-	if ($ESTADO_GRABACION == 0) {
-		# Imprimo por pantalla los resultados del ranking.
-		for my $i (0..$puestos_a_mostrar) {
-			$entry = "Oficina $keys[$i] -> $values[$i].";
-
-			eko($entry);	
-		}
-	 	
-		imprimirSeparador;
-	} else {
-		# Guardo en un archivo el resultado del ranking.
-		my $nombre_archivo = crearNombreArchivoEstadisticas();
-
-		for my $i (0..$puestos_a_mostrar) {
-			$entry = "Oficina $keys[$i] -> $values[$i].";
-
-			grabarEstadistica($nombre_archivo, $entry);
-		}
-
-		eko("Se grabó el ranking en archivo: $nombre_archivo");
-	 	
-		imprimirSeparador;	
-	}
+	displayHash(\%hash, \&buildEntryOficinas);
 }
 
 # 1- Analizar todos los registros de llamadas sospechosas e ir acumulando
@@ -274,9 +198,9 @@ sub mostrarCentralMasSospechosas {
 
 	my (@archivos) = @_;
 
-	eko2("---------------------------------------");
-	eko2("----- CENTRALES SOSPECHOSAS -----------");
-	eko2("---------------------------------------");
+	eko("---------------------------------------");
+	eko("----- CENTRALES SOSPECHOSAS -----------");
+	eko("---------------------------------------");
 	
 	my %hashCentrales;
 	my %hashTiempoConversacion;
@@ -334,9 +258,9 @@ sub mostrarCentralMasSospechosas {
 
 # no mostrarlo si tiene solo 1 llamada.
 sub mostrarRankingDeUmbrales{
-	eko2("---------------------------------------");
-	eko2("------- RANKING DE UMBRALES -----------");
-	eko2("---------------------------------------");
+	eko("---------------------------------------");
+	eko("------- RANKING DE UMBRALES -----------");
+	eko("---------------------------------------");
 
 	my (@archivos) = @_;
 
@@ -397,9 +321,9 @@ sub mostrarRankingDeUmbrales{
 
 sub mostrarAgentesMasSospechosos {
 
-	eko2("---------------------------------------");
-	eko2("------ Agentes más sospechosos --------");
-	eko2("---------------------------------------");
+	eko("---------------------------------------");
+	eko("------ Agentes más sospechosos --------");
+	eko("---------------------------------------");
 
 	my (@archivos) = @_;
 
@@ -456,9 +380,9 @@ sub mostrarAgentesMasSospechosos {
 
 sub mostrarOficinaMasSospechosa {
 
-	eko2("----------------------------------------");
-	eko2("------- Oficinas más sospechosas -------");
-	eko2("----------------------------------------");
+	eko("----------------------------------------");
+	eko("------- Oficinas más sospechosas -------");
+	eko("----------------------------------------");
 
 	my (@archivos) = @_;
 
@@ -515,11 +439,42 @@ sub mostrarOficinaMasSospechosa {
 	}
 }
 
+sub buildEntryDestinosSospechosos {
+	my ($key, $value, $href_cod_area, $href_cod_pais) = @_;
+
+	my $nro_destino = $key;
+	my $conteo = $value;
+
+	my $cod_area = $href_cod_area->{$nro_destino};
+	my $cod_pais = $href_cod_pais->{$nro_destino};
+
+	$entry = "Nro. de linea: $nro_destino -> $conteo. ";
+
+	# Si existe, agrego información del área	
+	if ($cod_area) {
+		my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
+		chomp($nombre_area);
+		my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
+
+		$entry = $entry.$detalle_area;
+	}
+	# Si existe, agrego información del país
+	if ($cod_pais) {
+		my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
+		chomp($nombre_pais);
+		my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
+	
+		$entry = $entry.$detalle_pais;
+	}
+
+	return $entry;
+}
+
 sub mostrardDestinoMasSospechoso {
 
-	eko2("----------------------------------------");
-	eko2("------- Destinos más sospechosos -------");
-	eko2("----------------------------------------");
+	eko("----------------------------------------");
+	eko("------- Destinos más sospechosos -------");
+	eko("----------------------------------------");
 
 	# En esta variable voy a ir acumulando los contadores de los destinos.
 	my (@archivos) = @_;
@@ -561,31 +516,7 @@ sub mostrardDestinoMasSospechoso {
 	if ($ESTADO_GRABACION == 0) {
 		# Imprimo por pantalla los resultados del ranking.
 		for my $i (0..$puestos_a_mostrar) {
-			my $nro_destino = $keys[$i];
-			my $conteo = $values[$i];
-
-			my $cod_area = $hashCodigoArea{$nro_destino};
-			my $cod_pais = $hashCodigoPais{$nro_destino};
-
-			$entry = "Nro. de linea: $nro_destino -> $conteo. ";
-
-			# Si existe, agrego información del área	
-			if ($cod_area) {
-				my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
-				chomp($nombre_area);
-				my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
-
-				$entry = $entry.$detalle_area;
-			}
-
-			# Si existe, agrego información del país
-			if ($cod_pais) {
-				my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
-				chomp($nombre_pais);
-				my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
-
-				$entry = $entry.$detalle_pais;
-			}
+			$entry = buildEntryDestinosSospechosos("$keys[$i]", "$values[$i]", \%hashCodigoArea, \%hashCodigoPais);
 
 			eko($entry);	
 		}
@@ -596,31 +527,7 @@ sub mostrardDestinoMasSospechoso {
 		my $nombre_archivo = crearNombreArchivoEstadisticas();
 
 		for my $i (0..$puestos_a_mostrar) {
-			my $nro_destino = $keys[$i];
-			my $conteo = $values[$i];
-
-			my $cod_area = $hashCodigoArea{$nro_destino};
-			my $cod_pais = $hashCodigoPais{$nro_destino};
-
-			$entry = "Nro. de linea: $nro_destino -> $conteo. ";
-
-			# Si existe, agrego información del área	
-			if ($cod_area) {
-				my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
-				chomp($nombre_area);
-				my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
-
-				$entry = $entry.$detalle_area;
-			}
-
-			# Si existe, agrego información del país
-			if ($cod_pais) {
-				my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
-				chomp($nombre_pais);
-				my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
-
-				$entry = $entry.$detalle_pais;
-			}
+			$entry = buildEntryDestinosSospechosos("$keys[$i]", "$values[$i]", \%hashCodigoArea, \%hashCodigoPais);
 
 			grabarEstadistica($nombre_archivo, $entry);
 		}
@@ -630,16 +537,6 @@ sub mostrardDestinoMasSospechoso {
 		imprimirSeparador;	
 	}
 }
-
-
-# Hace un print del mensaje recibido por parametro.
-# Le agrega el \n al final para que sea mas facil.
-
-sub eko{
-	my ($msg) = @_;
-	print "$msg \n";
-}
-
 
 # Se fija cual tiene una duracion mas larga
 # Se usara para el sort.
