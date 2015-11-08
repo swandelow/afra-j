@@ -365,21 +365,34 @@ sub mostrarRankingDeUmbrales{
 	if ($puestos_a_mostrar > $#keys) {
 		$puestos_a_mostrar=$#keys;
 	}
-	for my $i (0..$puestos_a_mostrar){
-		# el enunciado pedia ignorar umbrales 
-		if ($values[$i] > 1){
-			$entry= "ID UMBRAL: $keys[$i] ->  #$values[$i].";
 
-			# ESCRIBIR EN ARCHIVO.
-			if ($ESTADO_GRABACION == 0){
-				eko($entry);	
-			} else {
-				grabarEstadisticaEnArchivo("$entry");
+	if ($ESTADO_GRABACION == 0) {
+		# Imprimo por pantalla los resultados del ranking.
+		for my $i (0..$puestos_a_mostrar) {
+			if ($values[$i] > 1) {
+				$entry= "ID UMBRAL: $keys[$i] ->  #$values[$i].";
+
+				eko($entry);
+			}	
+		}
+	 	
+		imprimirSeparador;
+	} else {
+		# Guardo en un archivo el resultado del ranking.
+		my $nombre_archivo = crearNombreArchivoEstadisticas();
+
+		for my $i (0..$puestos_a_mostrar) {
+			if ($values[$i] > 1) {
+				$entry= "ID UMBRAL: $keys[$i] ->  #$values[$i].";
+
+				grabarEstadistica($nombre_archivo, $entry);
 			}
 		}
-	}
 
-	imprimirSeparador;
+		eko("Se grabó el ranking en archivo: $nombre_archivo");
+	 	
+		imprimirSeparador;	
+	}
 }
 
 sub mostrarAgentesMasSospechosos {
