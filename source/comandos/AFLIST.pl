@@ -1,9 +1,10 @@
 #!/usr/bin/perl
 
 # use warnings;
-
 use Scalar::Util qw(looks_like_number);
 
+my $BINDIR = $ENV{'BINDIR'};
+require "$BINDIR/utils.pl";
 ############################################################################################
 # En este archivo van a estar todas las funciones que tienen que ver
 # Con la generacion de estadsitcas del AFLIST.
@@ -31,7 +32,7 @@ my $FECHA_ARCHIVO = 11;
 
 
 my $PROCDIR = $ENV{'PROCDIR'};
-$INPUT_CONSULTAS_GLOBAL = $PROCDIR;
+my $INPUT_CONSULTAS_GLOBAL = $PROCDIR;
 #Setear la ruta a los archivos de sospechas.
 my $PATH_MAEDIR = $ENV{'MAEDIR'};
 
@@ -50,14 +51,6 @@ $INPUT_DIR = $PROCDIR;
 
 my $rand1 = int(rand(1000));
 my $rutaConsulta = "$RUTA_REPODIR/subllamadas.$rand1";
-
-
-sub eko {
-	# Hace un print del mensaje recibido por parametro.
-	# Le agrega el \n al final para que sea mas facil.
-	my ($msg) = @_;
-	print "$msg \n";
-}
 
 sub crearNombreArchivoEstadisticas {
 	# Pide nombre al usuario y le agrega sufijo random para evitar nombres duplicados.
@@ -864,11 +857,6 @@ sub pedirFiltros {
 
 
   	mostrarResultadosHash(%resultados);
-	# eko("Afuera");
-
-  	
-  	# Me devuelve la leng mas 1.
-  	# eko("La long del array es $#array")
 }
 
 sub mostrarOpcionesDeFiltrosEstadisticas{
@@ -1149,14 +1137,6 @@ sub mostrarFormasDeConsultarSubLlamadas {
 	}
 
 	return $salidaElegida;
-}
-
-#Checkea si el directorio pasado por argumento está vacio.
-sub esDirectorioVacio {
-    opendir(DIR, shift) or die $!;
-    my @files = grep { !m/\A\.{1,2}\Z/} readdir(DIR);
-    closedir(DIR);
-    @files ? 0 : 1;
 }
 
 # Retorna el path del directorio input para las consultas.
