@@ -545,38 +545,76 @@ sub mostrardDestinoMasSospechoso {
 		$puestos_a_mostrar = $#keys;
 	}
 
-	for my $i (0..$puestos_a_mostrar) {
-		my $nro_destino = $keys[$i];
-		my $conteo = $values[$i];
+	if ($ESTADO_GRABACION == 0) {
+		# Imprimo por pantalla los resultados del ranking.
+		for my $i (0..$puestos_a_mostrar) {
+			my $nro_destino = $keys[$i];
+			my $conteo = $values[$i];
 
-		my $cod_area = $hashCodigoArea{$nro_destino};
-		my $cod_pais = $hashCodigoPais{$nro_destino};
+			my $cod_area = $hashCodigoArea{$nro_destino};
+			my $cod_pais = $hashCodigoPais{$nro_destino};
 
-		$entry = "Nro. de linea: $nro_destino -> $conteo. ";
+			$entry = "Nro. de linea: $nro_destino -> $conteo. ";
 
-		# Si existe, agrego información del área	
-		if ($cod_area) {
-			my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
-			chomp($nombre_area);
-			my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
+			# Si existe, agrego información del área	
+			if ($cod_area) {
+				my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
+				chomp($nombre_area);
+				my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
 
-			$entry = $entry.$detalle_area;
-		}
+				$entry = $entry.$detalle_area;
+			}
 
-		# Si existe, agrego información del país
-		if ($cod_pais) {
-			my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
-			chomp($nombre_pais);
-			my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
+			# Si existe, agrego información del país
+			if ($cod_pais) {
+				my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
+				chomp($nombre_pais);
+				my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
 
-			$entry = $entry.$detalle_pais;
-		}
+				$entry = $entry.$detalle_pais;
+			}
 
-		if ($ESTADO_GRABACION == 0){
 			eko($entry);	
-		} else {
-			grabarEstadisticaEnArchivo("$entry");
 		}
+	 	
+		imprimirSeparador;
+	} else {
+		# Guardo en un archivo el resultado del ranking.
+		my $nombre_archivo = crearNombreArchivoEstadisticas();
+
+		for my $i (0..$puestos_a_mostrar) {
+			my $nro_destino = $keys[$i];
+			my $conteo = $values[$i];
+
+			my $cod_area = $hashCodigoArea{$nro_destino};
+			my $cod_pais = $hashCodigoPais{$nro_destino};
+
+			$entry = "Nro. de linea: $nro_destino -> $conteo. ";
+
+			# Si existe, agrego información del área	
+			if ($cod_area) {
+				my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
+				chomp($nombre_area);
+				my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
+
+				$entry = $entry.$detalle_area;
+			}
+
+			# Si existe, agrego información del país
+			if ($cod_pais) {
+				my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
+				chomp($nombre_pais);
+				my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
+
+				$entry = $entry.$detalle_pais;
+			}
+
+			grabarEstadistica($nombre_archivo, $entry);
+		}
+
+		eko("Se grabó el ranking en archivo: $nombre_archivo");
+	 	
+		imprimirSeparador;	
 	}
 }
 
