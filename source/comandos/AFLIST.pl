@@ -122,7 +122,7 @@ sub displayHashCentrales {
 	}
 
 	for my $i (0..$puestos_a_mostrar) {
-		$entry ="$keys[$i] #$values[$i] apariciones -> ".`grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
+		$entry ="$keys[$i] #$values[$i] -> ".`grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
 
 		if ($ESTADO_GRABACION == 0){
 			eko($entry);	
@@ -150,13 +150,87 @@ sub displayHashAgentes {
 		$mail = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f5`;
 		$oficina = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f4`;
 
-		$entry="$keys[$i]  -> #$values[$i] apariciones -> "."Mail: $mail"."oficina: $oficina";
+		# necesario quitar el salto del linea por cuestiones de display.
+		chomp($mail);
+		chomp($oficina);
+
+		$entry="$keys[$i]  -> #$values[$i] -> "."Mail: $mail"." oficina: $oficina";
 		if ($ESTADO_GRABACION == 0){
 			eko($entry);	
 		} else {
 			grabarEstadisticaEnArchivo("$entry");
 		}
 		imprimirSeparador;
+	}
+}
+
+sub displayHashOficinas {
+
+	my (%hash) = @_;
+	my $puestos_a_mostrar = 4;
+	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
+	my @keys = sort { $hash{$b} <=> $hash{$a} } keys %hash;
+	my @values = @hash{@keys};
+
+	if ($puestos_a_mostrar > $#keys) {
+		$puestos_a_mostrar = $#keys;
+	}
+
+	for my $i (0..$puestos_a_mostrar){
+		$entry = "Oficina $keys[$i] -> $values[$i].";
+		if ($ESTADO_GRABACION == 0){
+			eko($entry);	
+		} else {
+			grabarEstadisticaEnArchivo("$entry");
+		}
+
+		imprimirSeparador;
+	}
+}
+
+sub displayHashDestinos {
+
+	my (%destinos, %codigos_area, %codigos_pais) = @_;
+	my $puestos_a_mostrar = 4;
+	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
+	my @keys = sort { $destinos{$b} <=> $destinos{$a} } keys %destinos;
+	my @values = @hash{@keys};
+
+	if ($puestos_a_mostrar > $#keys) {
+		$puestos_a_mostrar = $#keys;
+	}
+
+	for my $i (0..$puestos_a_mostrar) {
+		my $nro_destino = $keys[$i];
+
+		my $cod_pais = $codigos_pais{$nro_destino};
+		my $cod_area = $codigos_area{$nro_destino};
+
+		$entry = "Nro. de linea: $nro_destino -> values[$i]. ";
+
+		# Si existe, agrego información del área	
+		if ($cod_area) {
+			my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
+			chomp($nombre_area);
+			my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
+
+			$entry = $entry.$detalle_area;
+		}
+
+		# Si existe, agrego información del país
+		if ($cod_pais) {
+			my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
+			chomp($nombre_pais);
+			my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
+
+			$entry = $entry.$detalle_pais;
+		}
+
+		if ($ESTADO_GRABACION == 0){
+			eko($entry);	
+		} else {
+			grabarEstadisticaEnArchivo("$entry");
+		}
 	}
 }
 
@@ -283,7 +357,7 @@ sub mostrarRankingDeUmbrales{
 	imprimirSeparador;
 }
 
-sub mostrarAgentesMasSospechosos{
+sub mostrarAgentesMasSospechosos {
 
 	eko2("---------------------------------------");
 	eko2("------ Agentes más sospechosos --------");
@@ -342,152 +416,143 @@ sub mostrarAgentesMasSospechosos{
 	}
 }
 
-sub mostrarOficinaMasSospechosa{
+sub mostrarOficinaMasSospechosa {
 
-	eko2("---------------------------------------");
-	eko2("-------------Oficinas más sospechosas--------------------");
-	eko2("---------------------------------------");
+	eko2("----------------------------------------");
+	eko2("------- Oficinas más sospechosas -------");
+	eko2("----------------------------------------");
 
 	my (@archivos) = @_;
 
-	my %hashAgentes;
+	my %hashOficinas;
+	my %hashTiempoConversacion;
 
-	for my $a (0..$#archivos){
-		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL/$archivos[$a]";
+	foreach $archivo (@archivos) {
+		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL/$archivo";
 
-		# eko("RUTA SOSPECHOSA $rutaSospecha" );
-
-		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
+		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 			$idAgente = obtenerCampo2("$linea", "$ID_AGENTE");
+			$tiempoConversacion = obtenerCampo2("$linea", "$TIEMPO_CONV");
 
-			# Incremento el contador.
-			$hashAgentes{$idAgente}++;
+			$oficina = `grep "$idAgente" -R $RUTA_AGENTES | cut -d';' -f4`;
+			chomp($oficina);
+
+			# Incremento el contador de cada oficina.
+			$hashOficinas{$oficina}++;
+			$hashTiempoConversacion{$oficina} += $tiempoConversacion;
 		}
-
 		close(ENT);
 	}
 
+	# Selecciona el tipo de ranking que se quiere mostrar.
+	my $input_invalido = 1;
+	while($input_invalido) {
+		eko("Seleccione que tipo de ranking desea:");
+		eko("1) Ranking por cantidad de llamadas.");
+		eko("2) Ranking por tiempos de conversación.");
+		eko("3) Ambos rankings.");
 
-	# Despues del while ya voy a tener en el hash todas las ocurrencias de cada central
-	# no haria falta ordenar aca pero ya fue.
-	my @keys = sort { $hashAgentes{$b} <=> $hashAgentes{$a} } keys%hashAgentes;
-	my @values = @hashAgentes{@keys};
+		$inputSeleccionado = <STDIN>;
+		chomp($inputSeleccionado);
 
-	# tengo que extraer la oficina de cada agente e ir acumulando...
-	my %hashOficinas;
-	
-	for my $i (0..$#keys){
-		$oficina = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f4`;
-		$hashOficinas{$oficina}++;
-	}
-
-	@keys = sort { $hashOficinas{$b} <=> $hashOficinas{$a} } keys%hashOficinas;
-	@values = @hashOficinas{@keys};
-
-	my $puestos_a_mostrar=4;
-	if ($puestos_a_mostrar > $#keys) {
-		$puestos_a_mostrar=$#keys;
-	}
-	# ya tengo todo ordenado, me faltaria obtener el codigo y la descripcion.
-	for my $i (0..$puestos_a_mostrar){
-		$entry = "Oficina $keys[$i] -> $values[$i] apariciones";
-		# eko2("Oficina $keys[$i] -> $values[$i] apariciones");
-		if ($ESTADO_GRABACION == 0){
-			eko($entry);	
+		if ($inputSeleccionado == 1) {
+			$input_invalido = 0;
+			displayHashOficinas(%hashOficinas);
+		} elsif ($inputSeleccionado == 2) {
+			$input_invalido = 0;
+			displayHashOficinas(%hashTiempoConversacion);
+		} elsif ($inputSeleccionado == 3) {
+			$input_invalido = 0;
+			eko("RANKING POR CANTIDAD DE LLAMADAS.");
+			eko("");
+			displayHashOficinas(%hashOficinas);
+			eko("RANKING POR TIEMPOS DE CONVERSACIÓN.");
+			eko("");
+			displayHashOficinas(%hashTiempoConversacion);
 		} else {
-			grabarEstadisticaEnArchivo("$entry");
+			eko("Ingrese una opción valida por favor."); 
 		}
-
-		imprimirSeparador;
 	}
 }
 
-sub mostrardDestinoMasSospechoso{
+sub mostrardDestinoMasSospechoso {
 
-	eko2("---------------------------------------");
-	eko2("-------------Destinos más sospechosos--------------------");
-	eko2("---------------------------------------");
+	eko2("----------------------------------------");
+	eko2("------- Destinos más sospechosos -------");
+	eko2("----------------------------------------");
 
 	# En esta variable voy a ir acumulando los contadores de los destinos.
 	my (@archivos) = @_;
 
-	my %hashDestinos;
+	my %hashLineaDestino;
 	my %hashCodigoPais;
 	my %hashCodigoArea;
 
-		for my $a (0..$#archivos){
-  			$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL/" . "$archivos[$a]";
+	foreach $archivo (@archivos) {
+  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL/" . "$archivo";
 
-  			# eko("RUTA SOSPECHOSA $rutaSospecha" );
-			open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
-			while($linea = <ENT>){
-				# eko("$a en el for");
-				chomp($linea);
-				$destinoSospechoso = obtenerCampo2("$linea", "$NUMERO_DESTINO");
-				$codigoArea = obtenerCampo2("$linea", "$COD_AREA_B");
-				$codigoPais = obtenerCampo2("$linea", "$CODIGO_PAIS_B");
-				$compound_key = "$codigoPais_$codigoArea";
+		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
+		while($linea = <ENT>){
+			chomp($linea);
+			$destinoSospechoso = obtenerCampo2("$linea", "$NUMERO_DESTINO");
+			$codigoPais = obtenerCampo2("$linea", "$CODIGO_PAIS_B");
+			$codigoArea = obtenerCampo2("$linea", "$COD_AREA_B");
 
-				# eko2($codigoPais);
-				# eko2($codigoArea);
+			# Incremento contador de llamadas al nro de linea destino.
+			$hashLineaDestino{$destinoSospechoso}++;
+			#  Si existe en el registro, almaceno el codigo de pais del nro destino.
+			$hashCodigoPais{$destinoSospechoso} = $codigoPais if ($codigoPais ne '');
+			#  Si existe en el registro, almaceno el codigo de area del nro destino.
+			$hashCodigoArea{$destinoSospechoso} = $codigoArea if ($codigoArea ne '');
 
-				# si el codigo del pais del no esta vacio, tengo que sacar el nombre del archivo
-				# maestro de los paises.
-				if ($codigoPais eq ''){
-					$hashCodigoPais{$compound_key} = 0;
-				} else {
-					$hashCodigoPais{$compound_key} = $codigoPais;
-				}
-
-				# si el codigo de area es distinto de 0, tneo que buscar el nombre en el archivo
-				# maestro de los codigos de los paises.
-				if ($codigoArea eq ''){
-					$hashCodigoArea{$compound_key} = 0;
-				} else {
-					$hashCodigoArea{$compound_key} = $codigoArea;
-				}
-
-
-				# Incremento el contador	.
-				$hashDestinos{$compound_key}++;
-			}
-			close(ENT);
-	}
-	
-	# eko("despjes del for");
-
-
-	# Despues del while ya voy a tener en el hash todas las ocurrencias de cada destino
-	my @keys = sort { $hashDestinos{$b} <=> $hashDestinos{$a} } keys%hashDestinos;
-	my @values = @hashDestinos{@keys};
-
-	my $puestos_a_mostrar=4;
-	if ($puestos_a_mostrar > $#keys) {
-		$puestos_a_mostrar=$#keys;
-	}
-	for my $i (0..$puestos_a_mostrar){
-		print ("$values[$i] apariciones ");
-
-		# Aca tengo que fijarme si la ciudad es local o no es local.
-		# para esto me fijo en cualquiera de los dos hashes auxiliares 
-		# y comparo contra 0. Si el primero es 0, entonces la llamada 
-		# no es local/internacional
-		$entry;
-		if ($hashCodigoPais{$keys[$i]} != 0){
-			$entry = " Codigo país: $hashCodigoPais{$keys[$i]}  "." Nombre: ".`grep "$hashCodigoPais{$keys[$i]}" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
-		} else {
-			$entry = " Codigo área: $hashCodigoArea{$keys[$i]}  "." Nombre: ".`grep "$hashCodigoArea{$keys[$i]}" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
 		}
+		close(ENT);
+	}
+
+	my $puestos_a_mostrar = 4;
+	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
+	my @keys = sort { $hashLineaDestino{$b} <=> $hashLineaDestino{$a} } keys %hashLineaDestino;
+	my @values = @hashLineaDestino{@keys};
+
+	if ($puestos_a_mostrar > $#keys) {
+		$puestos_a_mostrar = $#keys;
+	}
+
+	for my $i (0..$puestos_a_mostrar) {
+		my $nro_destino = $keys[$i];
+		my $conteo = $values[$i];
+
+		my $cod_area = $hashCodigoArea{$nro_destino};
+		my $cod_pais = $hashCodigoPais{$nro_destino};
+
+		$entry = "Nro. de linea: $nro_destino -> $conteo. ";
+
+		# Si existe, agrego información del área	
+		if ($cod_area) {
+			my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
+			chomp($nombre_area);
+			my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
+
+			$entry = $entry.$detalle_area;
+		}
+
+		# Si existe, agrego información del país
+		if ($cod_pais) {
+			my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
+			chomp($nombre_pais);
+			my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
+
+			$entry = $entry.$detalle_pais;
+		}
+
 		if ($ESTADO_GRABACION == 0){
 			eko($entry);	
 		} else {
 			grabarEstadisticaEnArchivo("$entry");
 		}
 	}
-
-	imprimirSeparador;
 }
 
 
