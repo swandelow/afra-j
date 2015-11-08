@@ -290,6 +290,7 @@ function create_dirs {
 	mkdir -p "$PROCDIR"
 	mkdir -p "$PROCDIR"/proc
 	mkdir -p "$REPODIR"
+	mkdir -p "$REPODIR"/estadisticas
 	mkdir -p "$LOGDIR"
 	mkdir -p "$RECHDIR"
 	mkdir -p "$RECHDIR"/llamadas
