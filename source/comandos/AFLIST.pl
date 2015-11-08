@@ -42,6 +42,7 @@ my $RUTA_CIUDADES = "$PATH_MAEDIR" . "/CdA.mae";
 my $RUTA_PAISES = "$PATH_MAEDIR" . "/CdP.mae";
 my $RUTA_UMBRALES = "$PATH_MAEDIR" . "/umbral.tab";
 
+my $CANT_RANKING = 4;
 # Por defecto el directorio input de las consultas
 # será el directorio de llamadas sospechosas, output de AFUMB.
 $INPUT_DIR = $PROCDIR;
@@ -112,7 +113,7 @@ sub obtenerCampo2{
 sub displayHashCentrales {
 
 	my (%hash) = @_;
-	my $puestos_a_mostrar = 4;
+	my $puestos_a_mostrar = $CANT_RANKING;
 	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
 	my @keys = sort { $hash{$b} <=> $hash{$a} } keys %hash;
 	my @values = @hash{@keys};
@@ -137,7 +138,7 @@ sub displayHashCentrales {
 sub displayHashAgentes {
 
 	my (%hash) = @_;
-	my $puestos_a_mostrar = 4;
+	my $puestos_a_mostrar = $CANT_RANKING;
 	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
 	my @keys = sort { $hash{$b} <=> $hash{$a} } keys %hash;
 	my @values = @hash{@keys};
@@ -167,7 +168,7 @@ sub displayHashAgentes {
 sub displayHashOficinas {
 
 	my (%hash) = @_;
-	my $puestos_a_mostrar = 4;
+	my $puestos_a_mostrar = $CANT_RANKING;
 	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
 	my @keys = sort { $hash{$b} <=> $hash{$a} } keys %hash;
 	my @values = @hash{@keys};
@@ -286,7 +287,7 @@ sub mostrarRankingDeUmbrales{
 	my @keys = sort { $hashUmbrales{$b} <=> $hashUmbrales{$a} } keys % hashUmbrales;
 	my @values = @hashUmbrales{@keys};
 
-	my $puestos_a_mostrar = 4;
+	my $puestos_a_mostrar = $CANT_RANKING;
 	if ($puestos_a_mostrar > $#keys) {
 		$puestos_a_mostrar=$#keys;
 	}
@@ -461,7 +462,7 @@ sub mostrardDestinoMasSospechoso {
 		close(ENT);
 	}
 
-	my $puestos_a_mostrar = 4;
+	my $puestos_a_mostrar = $CANT_RANKING;
 	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
 	my @keys = sort { $hashLineaDestino{$b} <=> $hashLineaDestino{$a} } keys %hashLineaDestino;
 	my @values = @hashLineaDestino{@keys};
