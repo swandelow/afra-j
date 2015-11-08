@@ -188,21 +188,41 @@ sub displayHashAgentes {
 		$puestos_a_mostrar = $#keys;
 	}
 
-	for my $i (0..$puestos_a_mostrar) {
-		$mail = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f5`;
-		$oficina = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f4`;
+	if ($ESTADO_GRABACION == 0) {
+		# Imprimo por pantalla los resultados del ranking.
+		for my $i (0..$puestos_a_mostrar) {
+			$mail = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f5`;
+			$oficina = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f4`;
 
-		# necesario quitar el salto del linea por cuestiones de display.
-		chomp($mail);
-		chomp($oficina);
+			# necesario quitar el salto del linea por cuestiones de display.
+			chomp($mail);
+			chomp($oficina);
 
-		$entry="$keys[$i]  -> #$values[$i] -> "."Mail: $mail"." oficina: $oficina";
-		if ($ESTADO_GRABACION == 0){
+			$entry="$keys[$i]  -> #$values[$i] -> "."Mail: $mail"." oficina: $oficina";
 			eko($entry);	
-		} else {
-			grabarEstadisticaEnArchivo("$entry");
 		}
+	 	
 		imprimirSeparador;
+	} else {
+		# Guardo en un archivo el resultado del ranking.
+		my $nombre_archivo = crearNombreArchivoEstadisticas();
+
+		for my $i (0..$puestos_a_mostrar) {
+			$mail = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f5`;
+			$oficina = `grep "$keys[$i]" -R $RUTA_AGENTES | cut -d';' -f4`;
+
+			# necesario quitar el salto del linea por cuestiones de display.
+			chomp($mail);
+			chomp($oficina);
+
+			$entry="$keys[$i]  -> #$values[$i] -> "."Mail: $mail"." oficina: $oficina";
+
+			grabarEstadistica($nombre_archivo, $entry);
+		}
+
+		eko("Se grabó el ranking en archivo: $nombre_archivo");
+	 	
+		imprimirSeparador;	
 	}
 }
 
