@@ -36,6 +36,7 @@ $INPUT_CONSULTAS_GLOBAL = $PROCDIR;
 my $PATH_MAEDIR = $ENV{'MAEDIR'};
 
 my $RUTA_REPODIR = $ENV{'REPODIR'};
+my $RUTA_ESTADISTICAS = "$RUTA_REPODIR" . "/estadisticas";
 my $RUTA_CENTRALES = "$PATH_MAEDIR" . "/CdC.mae";
 my $RUTA_AGENTES = "$PATH_MAEDIR" . "/agentes.mae";
 my $RUTA_CIUDADES = "$PATH_MAEDIR" . "/CdA.mae";
@@ -74,7 +75,32 @@ my $rutaEstadistica = "$RUTA_REPODIR/subllamadas_estadisticas.$randEstadisticas"
 
 #     	close $rutaEstadistica;
 # }
-sub grabarEstadisticaEnArchivo{
+sub crearNombreArchivoEstadisticas {
+	# Pide nombre al usuario y le agrega sufijo random para evitar nombres duplicados.
+	while(1) {
+		eko("Ingrese nombre de archivo donde se grabarán las estadísticas:");
+		$input = <STDIN>;
+		chomp($input);
+		if ($input eq '') { 
+			eko("Ingrese un nombre por favor.");
+			eko("");
+		} else {
+			my $sufijo_random = int(rand(1000000));
+			my $nombre = "$input.$sufijo_random";
+			return $nombre;
+		}	
+	}
+}
+
+sub grabarEstadistica {
+	my ($nombre_archivo, $entry) = @_;
+	my $path_archivo = "$RUTA_ESTADISTICAS". "/$nombre_archivo"; 
+	open(my $fh, '>>', $path_archivo);
+	print $fh "$entry\n";
+	close $fh;
+}
+
+sub grabarEstadisticaEnArchivo {
 	my ($entry) = @_;
 	open(my $fh, '>>', $rutaEstadistica);
 	print $fh "$entry\n";
@@ -122,14 +148,29 @@ sub displayHashCentrales {
 		$puestos_a_mostrar = $#keys;
 	}
 
-	for my $i (0..$puestos_a_mostrar) {
-		$entry ="$keys[$i] #$values[$i] -> ".`grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
-
-		if ($ESTADO_GRABACION == 0){
+	if ($ESTADO_GRABACION == 0) {
+		# Imprimo por pantalla los resultados del ranking.
+		for my $i (0..$puestos_a_mostrar) {
+			$nombre_central = `grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
+			chomp($nombre_central);
+			$entry ="$keys[$i] -> $values[$i].". " $nombre_central";
 			eko($entry);	
-		} else {
-			grabarEstadisticaEnArchivo("$entry");
 		}
+	 	
+		imprimirSeparador;
+	} else {
+		# Guardo en un archivo el resultado del ranking.
+		my $nombre_archivo = crearNombreArchivoEstadisticas();
+
+		for my $i (0..$puestos_a_mostrar) {
+			$nombre_central = `grep "$keys[$i]" -R $RUTA_CENTRALES | cut -d';' -f2`;
+			chomp($nombre_central);
+			$entry ="$keys[$i] -> $values[$i].". " $nombre_central";
+
+			grabarEstadistica($nombre_archivo, $entry);
+		}
+
+		eko("Se grabó el ranking en archivo: $nombre_archivo");
 	 	
 		imprimirSeparador;	
 	}
@@ -1013,10 +1054,10 @@ sub obtenerArchivosAProcesar{
     return @archivosParaConsultar;
 }
 
-
-# Filtra array de archivos de acuerdo al tipo de filtro y  array de filtros
-# LOS ARRAYS SE DEBEN PASAR POR REFERENCIA SINO NO FUNCIONA!
 sub filtrarArchivos {
+	# Filtra array de archivos de acuerdo al tipo de filtro y  array de filtros
+	# LOS ARRAYS SE DEBEN PASAR POR REFERENCIA SINO NO FUNCIONA!
+
 	my ($archivos, $filtros, $tipoFiltro) = @_;
 
 	my @resultado;
@@ -1068,7 +1109,10 @@ sub filtrarArchivos {
 }
 
 sub obtenerArchivos {
-	eko("obteniendo archivos a procesar");
+	# Recibe path del directorio input, tipo de filtro
+	# y una lista de patrones para filtrar los archivos del directorio.
+
+	eko("Obteniendo archivos a procesar");
 	my @archivosParaConsultar;
 	my ($inputDir, $tipoFiltro, @arrayFiltros) = @_;
 	#eko("arrayFiltros: @arrayFiltros");
