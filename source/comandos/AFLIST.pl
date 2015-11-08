@@ -238,15 +238,28 @@ sub displayHashOficinas {
 		$puestos_a_mostrar = $#keys;
 	}
 
-	for my $i (0..$puestos_a_mostrar){
-		$entry = "Oficina $keys[$i] -> $values[$i].";
-		if ($ESTADO_GRABACION == 0){
+	if ($ESTADO_GRABACION == 0) {
+		# Imprimo por pantalla los resultados del ranking.
+		for my $i (0..$puestos_a_mostrar) {
+			$entry = "Oficina $keys[$i] -> $values[$i].";
+
 			eko($entry);	
-		} else {
-			grabarEstadisticaEnArchivo("$entry");
+		}
+	 	
+		imprimirSeparador;
+	} else {
+		# Guardo en un archivo el resultado del ranking.
+		my $nombre_archivo = crearNombreArchivoEstadisticas();
+
+		for my $i (0..$puestos_a_mostrar) {
+			$entry = "Oficina $keys[$i] -> $values[$i].";
+
+			grabarEstadistica($nombre_archivo, $entry);
 		}
 
-		imprimirSeparador;
+		eko("Se grabó el ranking en archivo: $nombre_archivo");
+	 	
+		imprimirSeparador;	
 	}
 }
 
