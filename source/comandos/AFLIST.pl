@@ -188,53 +188,6 @@ sub displayHashOficinas {
 	}
 }
 
-sub displayHashDestinos {
-
-	my (%destinos, %codigos_area, %codigos_pais) = @_;
-	my $puestos_a_mostrar = 4;
-	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
-	my @keys = sort { $destinos{$b} <=> $destinos{$a} } keys %destinos;
-	my @values = @hash{@keys};
-
-	if ($puestos_a_mostrar > $#keys) {
-		$puestos_a_mostrar = $#keys;
-	}
-
-	for my $i (0..$puestos_a_mostrar) {
-		my $nro_destino = $keys[$i];
-
-		my $cod_pais = $codigos_pais{$nro_destino};
-		my $cod_area = $codigos_area{$nro_destino};
-
-		$entry = "Nro. de linea: $nro_destino -> values[$i]. ";
-
-		# Si existe, agrego información del área	
-		if ($cod_area) {
-			my $nombre_area = `grep "$cod_area" -m 1 -R $RUTA_CIUDADES | cut -d';' -f1`;
-			chomp($nombre_area);
-			my $detalle_area = "Cod. de área: $cod_area, Area: $nombre_area. ";
-
-			$entry = $entry.$detalle_area;
-		}
-
-		# Si existe, agrego información del país
-		if ($cod_pais) {
-			my $nombre_pais = `grep "$cod_pais" -m 1 -R $RUTA_PAISES | cut -d';' -f2`;
-			chomp($nombre_pais);
-			my $detalle_pais = "Cod. de país: $cod_pais, País: $nombre_pais.";
-
-			$entry = $entry.$detalle_pais;
-		}
-
-		if ($ESTADO_GRABACION == 0){
-			eko($entry);	
-		} else {
-			grabarEstadisticaEnArchivo("$entry");
-		}
-	}
-}
-
-
 # 1- Analizar todos los registros de llamadas sospechosas e ir acumulando
 # en el contador de cada central.
 # 2- Hacer un sort de las claves DESC.
@@ -305,21 +258,19 @@ sub mostrarCentralMasSospechosas {
 
 
 # no mostrarlo si tiene solo 1 llamada.
-# TODO: falta ver que carajo hacer con los umbrales
 sub mostrarRankingDeUmbrales{
 	eko2("---------------------------------------");
-	eko2("------------RANKING DE UMBRALES---------------------");
+	eko2("------- RANKING DE UMBRALES -----------");
 	eko2("---------------------------------------");
 
 	my (@archivos) = @_;
 
 	my %hashUmbrales;
 
-	for my $a (0..$#archivos){
-  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivos[$a]";
+	foreach $archivo (@archivos) {
+  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivo";
 
-  	 	# eko("RUTA SOSPECHOSA $rutaSospecha" );
-		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
+		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
 			$idUmbral = obtenerCampo2("$linea", "$ID_UMBRAL");
@@ -332,17 +283,17 @@ sub mostrarRankingDeUmbrales{
 
 
 	# Despues del while ya voy a tener en el hash todas las ocurrencias de cada central
-	my @keys = sort { $hashUmbrales{$b} <=> $hashUmbrales{$a} } keys%hashUmbrales;
+	my @keys = sort { $hashUmbrales{$b} <=> $hashUmbrales{$a} } keys % hashUmbrales;
 	my @values = @hashUmbrales{@keys};
 
-	my $puestos_a_mostrar=4;
+	my $puestos_a_mostrar = 4;
 	if ($puestos_a_mostrar > $#keys) {
 		$puestos_a_mostrar=$#keys;
 	}
 	for my $i (0..$puestos_a_mostrar){
 		# el enunciado pedia ignorar umbrales 
 		if ($values[$i] > 1){
-			$entry= "ID UMBRAL: $keys[$i] ->  #$values[$i] apariciones";
+			$entry= "ID UMBRAL: $keys[$i] ->  #$values[$i].";
 
 			# ESCRIBIR EN ARCHIVO.
 			if ($ESTADO_GRABACION == 0){
@@ -350,7 +301,6 @@ sub mostrarRankingDeUmbrales{
 			} else {
 				grabarEstadisticaEnArchivo("$entry");
 			}
-			# print `grep "$keys[$i]" -R $RUTA_UMBRALES | cut -d';' -f2`;	
 		}
 	}
 
