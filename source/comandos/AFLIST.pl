@@ -48,9 +48,6 @@ my $CANT_RANKING = 4;
 # será el directorio de llamadas sospechosas, output de AFUMB.
 $INPUT_DIR = $PROCDIR;
 
-my $extensionArchivo = "000";
-my $archivoAGuardar = "$RUTA_REPODIR/$extensionArchivo";
-
 my $rand1 = int(rand(1000));
 my $rutaConsulta = "$RUTA_REPODIR/subllamadas.$rand1";
 
@@ -102,7 +99,7 @@ sub imprimirSeparador{
 
 # Primer parametro: El registro entero.
 # Segundo parametro: El campo.
-sub obtenerCampo2{
+sub obtenerCampo {
 	my ($registro, $campo) = @_;
 	@campos = split(";",$registro);
 	return $campos[$campo];
@@ -213,8 +210,8 @@ sub mostrarCentralMasSospechosas {
 		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
-			$idCentral = obtenerCampo2("$linea", "$ID_CENTRAL");
-			$tiempoConversacion = obtenerCampo2("$linea", "$TIEMPO_CONV");
+			$idCentral = obtenerCampo("$linea", "$ID_CENTRAL");
+			$tiempoConversacion = obtenerCampo("$linea", "$TIEMPO_CONV");
 
 			# Incremento el contador de llamadas sospechosas.
 			$hashCentrales{$idCentral}++;
@@ -272,7 +269,7 @@ sub mostrarRankingDeUmbrales{
 		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
-			$idUmbral = obtenerCampo2("$linea", "$ID_UMBRAL");
+			$idUmbral = obtenerCampo("$linea", "$ID_UMBRAL");
 
 			# Incremento el contador.
 			$hashUmbrales{$idUmbral}++;
@@ -336,8 +333,8 @@ sub mostrarAgentesMasSospechosos {
 		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
-			$idAgente = obtenerCampo2("$linea", "$ID_AGENTE");
-			$tiempoConversacion = obtenerCampo2("$linea", "$TIEMPO_CONV");
+			$idAgente = obtenerCampo("$linea", "$ID_AGENTE");
+			$tiempoConversacion = obtenerCampo("$linea", "$TIEMPO_CONV");
 
 			# Incremento el contador.
 			$hashAgentes{$idAgente}++;
@@ -395,8 +392,8 @@ sub mostrarOficinaMasSospechosa {
 		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
-			$idAgente = obtenerCampo2("$linea", "$ID_AGENTE");
-			$tiempoConversacion = obtenerCampo2("$linea", "$TIEMPO_CONV");
+			$idAgente = obtenerCampo("$linea", "$ID_AGENTE");
+			$tiempoConversacion = obtenerCampo("$linea", "$TIEMPO_CONV");
 
 			$oficina = `grep "$idAgente" -R $RUTA_AGENTES | cut -d';' -f4`;
 			chomp($oficina);
@@ -489,9 +486,9 @@ sub mostrardDestinoMasSospechoso {
 		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
 		while($linea = <ENT>){
 			chomp($linea);
-			$destinoSospechoso = obtenerCampo2("$linea", "$NUMERO_DESTINO");
-			$codigoPais = obtenerCampo2("$linea", "$CODIGO_PAIS_B");
-			$codigoArea = obtenerCampo2("$linea", "$COD_AREA_B");
+			$destinoSospechoso = obtenerCampo("$linea", "$NUMERO_DESTINO");
+			$codigoPais = obtenerCampo("$linea", "$CODIGO_PAIS_B");
+			$codigoArea = obtenerCampo("$linea", "$COD_AREA_B");
 
 			# Incremento contador de llamadas al nro de linea destino.
 			$hashLineaDestino{$destinoSospechoso}++;
@@ -602,16 +599,9 @@ sub mostrarQueryVacia{
 	eko("La query no devolvió registros válidos.");
 }
 
-sub obtenerCampo{
-	my ($registro, $campo) = @_;
-	@campos = split(";",$registro);
-	return $campos[$campo];
-}
-
-# recibe por parametro un hash, lo ordena usando el comparador de hashes
-# y muestra los registros.
 sub mostrarResultadosHash {
-
+	# Recibe por parametro un hash, lo ordena usando el comparador de hashes
+	# y muestra los registros.
 	my (%resultados) = @_;
 
 	@keys = sort { comparadorHashes($resultados{$a}, $resultados{$b}) } keys%resultados;
@@ -1446,7 +1436,6 @@ sub menuMain{
 
 sub chequearCantidadArgumentos{
 	$numArgs = @ARGV;
-
 
 	#Si no recibo exactamente un parametro le muestro el mensaje de -h
 	if ( $numArgs != 1) {
