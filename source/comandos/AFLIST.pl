@@ -965,54 +965,6 @@ sub obtenerFiltrosOficinas {
 	}
 }
 
-#esto me va a devolver el nombre de los archivos que estoy buscando.
-# $1 recibe el tipo de filtro
-# $2 la lista de filtros.
-sub obtenerArchivosAProcesar{
-
-	eko("Obteniendo archivos a procesar");
-	my @archivosParaConsultar;
-	my ($tipoFiltro, @arrayFiltros) = @_;
-
-
-  	# $rutaSospecha = "$PROCDIR/$archivos[$a]";
-	my $dir = "$INPUT_CONSULTAS_GLOBAL/";
-    opendir(DIR, $dir) or die $!;
-
-    while (my $file = readdir(DIR)) {
-        # Use a regular expression to ignore files beginning with a period
-        next if ($file =~ m/^\./);
-
-		@campos = split("_",$file);
-
-        if ( $tipoFiltro eq "ANIOMES"){
-        	
-        	for my $i (0..$#arrayFiltros){
-        		if ($arrayFiltros[$i] eq $campos[1]){
-
-        			#eko("Pusheando $file al array con ANIOMES");
-        			push @archivosParaConsultar, $file;
-
-        			last;
-        		} 
-        	}
-        } else{
-        	for my $i (0..$#arrayFiltros){
-        		if ($arrayFiltros[$i] eq $campos[0]){
-        			#eko("Pusheando $file al array con OFCINAS");
-        			push @archivosParaConsultar, $file;
-
-        			last;
-        		} 
-        	}
-        }
-    }
-
-    closedir(DIR);
-
-    return @archivosParaConsultar;
-}
-
 sub filtrarArchivos {
 	# Filtra array de archivos de acuerdo al tipo de filtro y  array de filtros
 	# LOS ARRAYS SE DEBEN PASAR POR REFERENCIA SINO NO FUNCIONA!
@@ -1186,7 +1138,9 @@ sub obtenerFiltrosAnioMes {
 
 
 sub pedirAnioMes {
-	
+	# Filtra los archivos input de acuerdo al aniomes(es) ingresado(s)
+	# y luego ejecuta la función que recibe como parametro.
+	my ($fref) = @_;
 	@filtrosAnioMes = obtenerFiltrosAnioMes;
 	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "ANIOMES", @filtrosAnioMes);
 	eko("Archivos: @archivos");
@@ -1201,9 +1155,9 @@ sub pedirAnioMes {
 		@archivos = filtrarArchivos(\@archivos, \@filtrosOficinas, "OFICINAS");
 		eko("Archivos: @archivos");
 
-		pedirFiltros(@archivos);
+		$fref->(@archivos);
 	} elsif ($opcionSeleccionada == 2) {
-		pedirFiltros(@archivos);
+		$fref->(@archivos);
 	} else {
 		eko("Ingrese una opción valida por favor."); eko("");
 	}
@@ -1247,29 +1201,6 @@ sub pedirSubLlamadasEstadisticas {
 	eko("Archivos: @archivos");
 	#PASAR REPODIR
 	mostrarOpcionesDeFiltrosEstadisticas(@archivos);
-}
-
-sub pedirAnioMesEstadisticas {
-	@filtrosAnioMes = obtenerFiltrosAnioMes;
-	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "ANIOMES", @filtrosAnioMes);
-	eko("Archivos: @archivos");
-	eko("");
-	eko("1) Filtrar por oficinas.");
-	eko("2) Realizar consulta.");
-
-	$opcionSeleccionada = <STDIN>;
-	chomp($opcionSeleccionada);
-	if ($opcionSeleccionada == 1) {
-		@filtrosOficinas = obtenerFiltrosOficinas;
-		@archivos = filtrarArchivos(\@archivos, \@filtrosOficinas, "OFICINAS");
-		eko("Archivos: @archivos");
-
-		mostrarOpcionesDeFiltrosEstadisticas(@archivos);
-	} elsif ($opcionSeleccionada == 2) {
-		mostrarOpcionesDeFiltrosEstadisticas(@archivos);
-	} else {
-		eko("Ingrese una opción valida por favor."); eko("");
-	}
 }
 
 sub obtenerTodosLosArchivos {
@@ -1331,7 +1262,7 @@ sub mostrarMenuEstadisticasLlamadasSospechosas {
 		pedirOficinas(\&mostrarOpcionesDeFiltrosEstadisticas);
 	} elsif ($opcionElegida eq 3) {
 		# filtrar archivos input por nombre de oficina
-		pedirAnioMesEstadisticas;
+		pedirAnioMes(\&mostrarOpcionesDeFiltrosEstadisticas);
 	}
 }
 
@@ -1378,7 +1309,7 @@ sub menuConsultasLlamadasSospechosas {
 	} elsif ($opcionElegida eq "2") {
 		pedirOficinas(\&pedirFiltros);
 	} elsif ($opcionElegida eq "3") {
-		pedirAnioMes;
+		pedirAnioMes(\&pedirFiltros);
 	}
 }
 
