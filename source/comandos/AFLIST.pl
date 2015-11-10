@@ -1012,8 +1012,9 @@ sub mostrarFormasDeConsultarSubLlamadas {
 # - Si no existen, devuelve el directorio de llamadas sospechosas (default).
 sub obtenerInputConsultas {
 	my $dirSubLlamadasVacio = esDirectorioVacio($RUTA_REPODIR);
+	my $hayArchivosSubllamadas = hayArchivosDeSubllamadas($RUTA_REPODIR);
 
-	if($dirSubLlamadasVacio) {
+	if($dirSubLlamadasVacio || !$hayArchivosSubllamadas) {
 		eko("No existen archivos de subllamadas. Default input.");
 		return ($PROCDIR, 1);
 	} else {

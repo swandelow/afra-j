@@ -6,6 +6,17 @@ sub eko {
     print "$msg \n";
 }
 
+sub esHashVacio {
+	my ($href) = @_;	
+	if (%{$href}) {
+		# tiene elementos
+		return 0;
+	} else {
+		# tiene elementos
+		return 1;
+	}
+}
+
 sub esDirectorioVacio {
 	# Recibe el path de un directorio y verifica si está vacio.
 
@@ -13,6 +24,14 @@ sub esDirectorioVacio {
     my @files = grep { !m/\A\.{1,2}\Z/ } readdir(DIR);
     closedir(DIR);
     @files ? 0 : 1;
+}
+
+sub hayArchivosDeSubllamadas {
+	# Recibe el path de un directorio y verifica si archivos del tipo subllamadas.xxx.
+    opendir(DIR, shift) or die $!;
+    my @files = grep { m/subllamadas.*/ } readdir(DIR);
+    closedir(DIR);
+    @files ? 1 : 0;
 }
 
 sub obtenerCampo {
