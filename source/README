@@ -23,10 +23,10 @@ grupo06/
 	- sospechosas/
 	- reportes/
 
-Para inicializar el ambiente del sistema AFRA-J se debe ejecutar el comando AFINI, posicionado en el directorio donde se hayan dejado los scripts (grupo06/bin):
+Para inicializar el ambiente del sistema AFRA-J se debe ejecutar el comando AFINI. 
+Pasar como parametro el path al directorio grupo06. 
 
-$cd grupo06/bin
-$. AFINI <path_dir_grupo06> 
+$. grupo06/bin/AFINI <path_dir_grupo06> 
 
 AFINI dará la opción de ejecutar el sistema. En caso negativo, se puede comenzar la ejecución con el comando Arrancar:
 
