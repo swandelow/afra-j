@@ -35,7 +35,7 @@ inputPath=$1
 outputPath=$2
 logFile=""
 
-duplicatePath="./duplicados"
+duplicatePath="$outputPath/duplicados"
 
 if [ $# -eq 3 ]
 then
@@ -78,7 +78,8 @@ then
 	if [ ! -d "$duplicatePath" ]
 	then
 	
-		mkdir "$duplicatePath" 
+		mkdir "$duplicatePath"
+		chmod +x "$duplicatePath" 
 	fi
 	
 	#obtiene el numero del ultimo archivo del mismo nombre que el que se esta tratando de mover a la carpeta duplicados

@@ -322,7 +322,7 @@ do
 	bash ./GraLog "AFUMB" "Cantidad de llamadas:$contadorDeLlamadas" "INFO" 	
 	bash ./GraLog "AFUMB" "Cantidad de llamadas rechazadas:$contadorDeLlamadasRechazadas" "INFO" 	
 	bash ./GraLog "AFUMB" "Cantidad de llamadas con umbral:$contadorDeLlamadasConUmbral" "INFO" 	
-	bash ./GraLog "AFUMB" "Cantidad de llamadas sin umbral:$contadorDeLlamadasSinUmbral" "INFO" 	
+	#bash ./GraLog "AFUMB" "Cantidad de llamadas sin umbral:$contadorDeLlamadasSinUmbral" "INFO" 	
 	bash ./GraLog "AFUMB" "Cantidad de llamadas sospechosas:$contadorDeLlamadasSospechosas" "INFO" 	
 	bash ./GraLog "AFUMB" "Cantidad de llamadas no sospechosas:$contadorDeLlamadasNoSospechosas" "INFO"	
 	echo " "
