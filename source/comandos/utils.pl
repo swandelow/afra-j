@@ -15,4 +15,9 @@ sub esDirectorioVacio {
     @files ? 0 : 1;
 }
 
+sub verificarArgumentos {
+	$numArgs = @ARGV;
+	mostrarMsgInstr() if ($numArgs != 1);
+}
+
 1; #Requerido por Perl

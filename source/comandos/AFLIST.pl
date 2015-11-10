@@ -1185,7 +1185,7 @@ sub obtenerFiltrosAnioMes {
 }
 
 
-sub pedirAnioMes{
+sub pedirAnioMes {
 	
 	@filtrosAnioMes = obtenerFiltrosAnioMes;
 	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "ANIOMES", @filtrosAnioMes);
@@ -1214,7 +1214,7 @@ sub pedirSubLlamadas {
 
 	eko("Archivos: @archivos");
 
-	eko("introducir sufijo(s) de subllamadas separados por espacio:");
+	eko("Introducir sufijo(s) de subllamadas separados por espacio:");
 
 	$inputFiltroSubllamadas = <STDIN>;
 	chomp($inputFiltroSubllamadas);	
@@ -1229,43 +1229,64 @@ sub pedirSubLlamadas {
 	pedirFiltros(@archivos);
 }
 
-sub pedirAnioMesEstadisticas{
-	eko("introducir aniomes(es) separadas por espacio:");
+sub pedirSubLlamadasEstadisticas {
+	my @archivos = @_;
 
-	$aniomes = <STDIN>;
-	chomp($aniomes);	
+	eko("Archivos: @archivos");
 
-	my @aniomeses = split( /\s+/, $aniomes);
+	eko("Introducir sufijo(s) de subllamadas separados por espacio:");
 
-	
-	@archivosAProcesar = obtenerArchivosAProcesar("ANIOMES", @aniomeses);
+	$inputFiltroSubllamadas = <STDIN>;
+	chomp($inputFiltroSubllamadas);	
 
-	mostrarOpcionesDeFiltrosEstadisticas(@archivosAProcesar);
+	my @filtrosSubLlamadas = split( /\s+/, $inputFiltroSubllamadas);
+
+
+	@archivos = filtrarArchivos(\@archivos, \@filtrosSubLlamadas, "SUBLLAMADAS");
+
+	eko("Archivos: @archivos");
+	#PASAR REPODIR
+	mostrarOpcionesDeFiltrosEstadisticas(@archivos);
 }
 
-sub obtenerTodosLosArchivosDeSospechas{
-	my $dir = "$INPUT_CONSULTAS_GLOBAL";
-	my @archivosAProcesar;
+sub pedirAnioMesEstadisticas {
+	@filtrosAnioMes = obtenerFiltrosAnioMes;
+	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "ANIOMES", @filtrosAnioMes);
+	eko("Archivos: @archivos");
+	eko("");
+	eko("1) Filtrar por oficinas.");
+	eko("2) Realizar consulta.");
 
-	my ($opc) = @_;
-    opendir(DIR, $dir) or die $!;
+	$opcionSeleccionada = <STDIN>;
+	chomp($opcionSeleccionada);
+	if ($opcionSeleccionada == 1) {
+		@filtrosOficinas = obtenerFiltrosOficinas;
+		@archivos = filtrarArchivos(\@archivos, \@filtrosOficinas, "OFICINAS");
+		eko("Archivos: @archivos");
 
-    while (my $file = readdir(DIR)) {
+		mostrarOpcionesDeFiltrosEstadisticas(@archivos);
+	} elsif ($opcionSeleccionada == 2) {
+		mostrarOpcionesDeFiltrosEstadisticas(@archivos);
+	} else {
+		eko("Ingrese una opción valida por favor."); eko("");
+	}
 
-        # Use a regular expression to ignore files beginning with a period
-        next if ($file =~ m/^\./);
 
-        push @archivosAProcesar, $file;
-    }
+	# eko("introducir aniomes(es) separadas por espacio:");
 
-    if ($opc == 1){
-		pedirFiltros(@archivosAProcesar);
-    }else{
-		mostrarOpcionesDeFiltrosEstadisticas(@archivosAProcesar);
-    }
+	# $aniomes = <STDIN>;
+	# chomp($aniomes);	
+
+	# my @aniomeses = split( /\s+/, $aniomes);
+
+	
+	# @archivosAProcesar = obtenerArchivosAProcesar("ANIOMES", @aniomeses);
+
+	# mostrarOpcionesDeFiltrosEstadisticas(@archivosAProcesar);
 }
 
 sub obtenerTodosLosArchivos {
+	# Devuelve una lista con nombres de los archivos en el directorio pasado como argumento.
 	my ($inputDir) = @_;
 	my @archivosAProcesar;
 
@@ -1309,34 +1330,72 @@ sub pedirOficinas {
 }
 
 
-sub pedirOficinasEstadisticas{
-	eko("introducir oficina(s) separadas por espacio:");
+sub pedirOficinasEstadisticas {
+	@filtrosOficinas = obtenerFiltrosOficinas;
+	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "OFICINAS", @filtrosOficinas);
+	eko("Archivos: @archivos");
+	eko("");
+	eko("1) Filtrar por aniomes.");
+	eko("2) Realizar consulta.");
+	$opcionSeleccionada = <STDIN>;
+	chomp($opcionSeleccionada);
 
-	$oficinas = <STDIN>;
-	chomp($oficinas);	
+	if ($opcionSeleccionada == 1) {
+		@filtrosAnioMes = obtenerFiltrosAnioMes;
+		@archivos = filtrarArchivos(\@archivos, \@filtrosAnioMes, "ANIOMES");
+		eko("Archivos: @archivos");
+		mostrarOpcionesDeFiltrosEstadisticas(@archivos);
+	} elsif ($opcionSeleccionada == 2) {
 
-	my @aOficinas = split( /\s+/, $oficinas);
+		mostrarOpcionesDeFiltrosEstadisticas(@archivos);
+	} else {
+		eko("Ingrese una opción valida por favor."); eko("");
+	}
+}
 
+sub mostrarMenuEstadisticasLlamadasSospechosas {
+	my ($opcionElegida) = @_;
 
-	@archivosAProcesar = obtenerArchivosAProcesar("OFICINAS", @aOficinas);
+	if ($opcionElegida eq 1) {
+		# todos los archivos
+		@archivos = obtenerTodosLosArchivos($INPUT_CONSULTAS_GLOBAL); 
+		mostrarOpcionesDeFiltrosEstadisticas(@archivos);		
+	} elsif ($opcionElegida eq 2) {
+		# filtrar archivos input por nombre de oficina
+		pedirOficinasEstadisticas;
+	} elsif ($opcionElegida eq 3) {
+		# filtrar archivos input por nombre de oficina
+		pedirAnioMesEstadisticas;
+	}
+}
 
+sub mostrarMenuEstadisticasSubLlamadas {
+	my ($opcionElegida) = @_;
 
-	mostrarOpcionesDeFiltrosEstadisticas(@archivosAProcesar);
+	@archivos = obtenerTodosLosArchivos($INPUT_CONSULTAS_GLOBAL);
+	
+	if ($opcionElegida eq 1) {
+		# todos los archivos
+		mostrarOpcionesDeFiltrosEstadisticas(@archivos);		
+	} elsif ($opcionElegida eq 2) {
+		# filtrar archivos input por nro sufijo.
+		pedirSubLlamadasEstadisticas(@archivos);
+	}
 }
 
 
-sub mostrarMenuEstadisticas{
+sub mostrarMenuEstadisticas {
+	# Inicia el menú de estadísticas.
 	my ($inputConsultas, $tipoInput) = obtenerInputConsultas();
 	$INPUT_CONSULTAS_GLOBAL = $inputConsultas;
-	#$opcionElegida = mostrarFormasDeConsultarLlamadasSospechosas;
 
-	#if ($opcionElegida eq "1"){
-		obtenerTodosLosArchivosDeSospechas(0);
-	#} elsif ($opcionElegida eq "2"){
-	#	pedirOficinasEstadisticas;
-	#} elsif ($opcionElegida eq "3"){
-	#	pedirAnioMesEstadisticas;
-	#}
+	if ($tipoInput eq 1) {
+		$opcionElegida = mostrarFormasDeConsultarLlamadasSospechosas;
+		mostrarMenuEstadisticasLlamadasSospechosas($opcionElegida);
+	} elsif ($tipoInput eq 2) {
+		$opcionElegida = mostrarFormasDeConsultarSubLlamadas;
+		mostrarMenuEstadisticasSubLlamadas($opcionElegida);
+	}
 }
 
 sub menuConsultasLlamadasSospechosas {
@@ -1372,13 +1431,11 @@ sub menuConsultasSubLlamadas {
 	} elsif ($opcionElegida eq "2") {
 		
 		pedirSubLlamadas(@archivos);
-	} else {
-
 	}
 }
 
-sub mostrarMenuConsultas{
-	
+sub mostrarMenuConsultas {
+	# Inicia el menú de consultas.
 	my ($inputConsultas, $tipoInput) = obtenerInputConsultas();
 	$INPUT_CONSULTAS_GLOBAL = $inputConsultas;
 
