@@ -1270,19 +1270,6 @@ sub pedirAnioMesEstadisticas {
 	} else {
 		eko("Ingrese una opción valida por favor."); eko("");
 	}
-
-
-	# eko("introducir aniomes(es) separadas por espacio:");
-
-	# $aniomes = <STDIN>;
-	# chomp($aniomes);	
-
-	# my @aniomeses = split( /\s+/, $aniomes);
-
-	
-	# @archivosAProcesar = obtenerArchivosAProcesar("ANIOMES", @aniomeses);
-
-	# mostrarOpcionesDeFiltrosEstadisticas(@archivosAProcesar);
 }
 
 sub obtenerTodosLosArchivos {
@@ -1305,8 +1292,10 @@ sub obtenerTodosLosArchivos {
     return @archivosAProcesar;
 }
 
-
 sub pedirOficinas {
+	# Filtra los archivos input de acuerdo a las oficinas ingresadas
+	# y luego ejecuta la función que recibe como parametro.
+	my ($fref) = @_;
 	@filtrosOficinas = obtenerFiltrosOficinas;
 	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "OFICINAS", @filtrosOficinas);
 	eko("Archivos: @archivos");
@@ -1320,34 +1309,11 @@ sub pedirOficinas {
 		@filtrosAnioMes = obtenerFiltrosAnioMes;
 		@archivos = filtrarArchivos(\@archivos, \@filtrosAnioMes, "ANIOMES");
 		eko("Archivos: @archivos");
-		pedirFiltros(@archivos);
+		
+		$fref->(@archivos);
 	} elsif ($opcionSeleccionada == 2) {
 
-		pedirFiltros(@archivos);
-	} else {
-		eko("Ingrese una opción valida por favor."); eko("");
-	}
-}
-
-
-sub pedirOficinasEstadisticas {
-	@filtrosOficinas = obtenerFiltrosOficinas;
-	@archivos = obtenerArchivos($INPUT_CONSULTAS_GLOBAL, "OFICINAS", @filtrosOficinas);
-	eko("Archivos: @archivos");
-	eko("");
-	eko("1) Filtrar por aniomes.");
-	eko("2) Realizar consulta.");
-	$opcionSeleccionada = <STDIN>;
-	chomp($opcionSeleccionada);
-
-	if ($opcionSeleccionada == 1) {
-		@filtrosAnioMes = obtenerFiltrosAnioMes;
-		@archivos = filtrarArchivos(\@archivos, \@filtrosAnioMes, "ANIOMES");
-		eko("Archivos: @archivos");
-		mostrarOpcionesDeFiltrosEstadisticas(@archivos);
-	} elsif ($opcionSeleccionada == 2) {
-
-		mostrarOpcionesDeFiltrosEstadisticas(@archivos);
+		$fref->(@archivos);
 	} else {
 		eko("Ingrese una opción valida por favor."); eko("");
 	}
@@ -1362,7 +1328,7 @@ sub mostrarMenuEstadisticasLlamadasSospechosas {
 		mostrarOpcionesDeFiltrosEstadisticas(@archivos);		
 	} elsif ($opcionElegida eq 2) {
 		# filtrar archivos input por nombre de oficina
-		pedirOficinasEstadisticas;
+		pedirOficinas(\&mostrarOpcionesDeFiltrosEstadisticas);
 	} elsif ($opcionElegida eq 3) {
 		# filtrar archivos input por nombre de oficina
 		pedirAnioMesEstadisticas;
@@ -1410,7 +1376,7 @@ sub menuConsultasLlamadasSospechosas {
 		pedirFiltros(@archivos);
 
 	} elsif ($opcionElegida eq "2") {
-		pedirOficinas;
+		pedirOficinas(\&pedirFiltros);
 	} elsif ($opcionElegida eq "3") {
 		pedirAnioMes;
 	}
