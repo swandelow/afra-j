@@ -16,35 +16,35 @@ $ESTADO_GRABACION = 0;
 
 
 # FORMATO DE LOS REGISTROS:
-my $ID_CENTRAL = 0;
-my $ID_AGENTE = 1;
-my $ID_UMBRAL = 2;
-my $TIPO_LLAMDA =3;
-my $INICIO_LLAMADA = 4;
-my $TIEMPO_CONV = 5;
-my $AREA_NUM_A = 6; 
-my $NUMERO_ORIGEN = 7;
-my $CODIGO_PAIS_B = 8;  # este a veces viene vacio 
-my $COD_AREA_B = 9; # si el anterior es vacio, aca tengo el codigo del area.
-my $NUMERO_DESTINO = 10;
-my $FECHA_ARCHIVO = 11;
+$ID_CENTRAL = 0;
+$ID_AGENTE = 1;
+$ID_UMBRAL = 2;
+$TIPO_LLAMDA =3;
+$INICIO_LLAMADA = 4;
+$TIEMPO_CONV = 5;
+$AREA_NUM_A = 6; 
+$NUMERO_ORIGEN = 7;
+$CODIGO_PAIS_B = 8;  # este a veces viene vacio 
+$COD_AREA_B = 9; # si el anterior es vacio, aca tengo el codigo del area.
+$NUMERO_DESTINO = 10;
+$FECHA_ARCHIVO = 11;
 
 
 
-my $PROCDIR = $ENV{'PROCDIR'};
-my $INPUT_CONSULTAS_GLOBAL = $PROCDIR;
+$PROCDIR = $ENV{'PROCDIR'};
+$INPUT_CONSULTAS_GLOBAL = $PROCDIR;
 #Setear la ruta a los archivos de sospechas.
-my $PATH_MAEDIR = $ENV{'MAEDIR'};
+$PATH_MAEDIR = $ENV{'MAEDIR'};
 
-my $RUTA_REPODIR = $ENV{'REPODIR'};
-my $RUTA_ESTADISTICAS = "$RUTA_REPODIR" . "/estadisticas";
-my $RUTA_CENTRALES = "$PATH_MAEDIR" . "/CdC.mae";
-my $RUTA_AGENTES = "$PATH_MAEDIR" . "/agentes.mae";
-my $RUTA_CIUDADES = "$PATH_MAEDIR" . "/CdA.mae";
-my $RUTA_PAISES = "$PATH_MAEDIR" . "/CdP.mae";
-my $RUTA_UMBRALES = "$PATH_MAEDIR" . "/umbral.tab";
+$RUTA_REPODIR = $ENV{'REPODIR'};
+$RUTA_ESTADISTICAS = "$RUTA_REPODIR" . "/estadisticas";
+$RUTA_CENTRALES = "$PATH_MAEDIR" . "/CdC.mae";
+$RUTA_AGENTES = "$PATH_MAEDIR" . "/agentes.mae";
+$RUTA_CIUDADES = "$PATH_MAEDIR" . "/CdA.mae";
+$RUTA_PAISES = "$PATH_MAEDIR" . "/CdP.mae";
+$RUTA_UMBRALES = "$PATH_MAEDIR" . "/umbral.tab";
 
-my $CANT_RANKING = 4;
+$CANT_RANKING = 4;
 # Por defecto el directorio input de las consultas
 # será el directorio de llamadas sospechosas, output de AFUMB.
 $INPUT_DIR = $PROCDIR;
@@ -83,19 +83,6 @@ sub grabarConsultaEnArchivo{
 	open(my $fh, '>>', $rutaConsulta);
 	print $fh "$entry\n";
 	close $fh;	
-}
-
-sub imprimirSeparador{
-	eko("---------------------");
-}
-# Le paso el nombre del campo del registro que quiero obtener.
-
-# Primer parametro: El registro entero.
-# Segundo parametro: El campo.
-sub obtenerCampo {
-	my ($registro, $campo) = @_;
-	@campos = split(";",$registro);
-	return $campos[$campo];
 }
 
 sub displayHash {
@@ -195,24 +182,9 @@ sub mostrarCentralMasSospechosas {
 	my %hashCentrales;
 	my %hashTiempoConversacion;
 
-	foreach $archivo (@archivos) {
-  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivo";
+	$frefProcesador = procesadorCentralMasSospechosas(\%hashCentrales, \%hashTiempoConversacion);
 
-  		#eko("rutaSospecha: $rutaSospecha");
-
-		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
-		while($linea = <ENT>){
-			chomp($linea);
-			$idCentral = obtenerCampo("$linea", "$ID_CENTRAL");
-			$tiempoConversacion = obtenerCampo("$linea", "$TIEMPO_CONV");
-
-			# Incremento el contador de llamadas sospechosas.
-			$hashCentrales{$idCentral}++;
-			# Acumulo tiempos de conversación.
-			$hashTiempoConversacion{$idCentral} += $tiempoConversacion;
-		}
-		close(ENT);
-	}
+	procesarArchivos($INPUT_CONSULTAS_GLOBAL, \@archivos, $frefProcesador);
 
 	# Selecciona el tipo de ranking que se quiere mostrar.
 	my $input_invalido = 1;
@@ -247,7 +219,7 @@ sub mostrarCentralMasSospechosas {
 
 
 # no mostrarlo si tiene solo 1 llamada.
-sub mostrarRankingDeUmbrales{
+sub mostrarRankingDeUmbrales {
 	eko("---------------------------------------");
 	eko("------- RANKING DE UMBRALES -----------");
 	eko("---------------------------------------");
@@ -256,20 +228,9 @@ sub mostrarRankingDeUmbrales{
 
 	my %hashUmbrales;
 
-	foreach $archivo (@archivos) {
-  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivo";
-
-		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
-		while($linea = <ENT>){
-			chomp($linea);
-			$idUmbral = obtenerCampo("$linea", "$ID_UMBRAL");
-
-			# Incremento el contador.
-			$hashUmbrales{$idUmbral}++;
-		}
-		close(ENT);
-	}
-
+	$frefProcesador = procesardorUmbrales(\%hashUmbrales);
+	
+	procesarArchivos($INPUT_CONSULTAS_GLOBAL, \@archivos, $frefProcesador);
 
 	# Despues del while ya voy a tener en el hash todas las ocurrencias de cada central
 	my @keys = sort { $hashUmbrales{$b} <=> $hashUmbrales{$a} } keys % hashUmbrales;
@@ -320,22 +281,9 @@ sub mostrarAgentesMasSospechosos {
 	my %hashAgentes;
 	my %hashTiempoConversacion;
 
-	foreach $archivo (@archivos) {
-  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL" . "/$archivo";
-
-		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
-		while($linea = <ENT>){
-			chomp($linea);
-			$idAgente = obtenerCampo("$linea", "$ID_AGENTE");
-			$tiempoConversacion = obtenerCampo("$linea", "$TIEMPO_CONV");
-
-			# Incremento el contador.
-			$hashAgentes{$idAgente}++;
-			# Acumulo tiempos de conversación.
-			$hashTiempoConversacion{$idAgente} += $tiempoConversacion;
-		}
-		close(ENT);
-	}
+	$frefProcesador = procesadorAgentesMasSospechosos(\%hashAgentes, \%hashTiempoConversacion);
+	
+	procesarArchivos($INPUT_CONSULTAS_GLOBAL, \@archivos, $frefProcesador);
 
 	# Selecciona el tipo de ranking que se quiere mostrar.
 	my $input_invalido = 1;
@@ -379,24 +327,9 @@ sub mostrarOficinaMasSospechosa {
 	my %hashOficinas;
 	my %hashTiempoConversacion;
 
-	foreach $archivo (@archivos) {
-		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL/$archivo";
-
-		open(ENT,"<$rutaSospecha") || die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
-		while($linea = <ENT>){
-			chomp($linea);
-			$idAgente = obtenerCampo("$linea", "$ID_AGENTE");
-			$tiempoConversacion = obtenerCampo("$linea", "$TIEMPO_CONV");
-
-			$oficina = `grep "$idAgente" -R $RUTA_AGENTES | cut -d';' -f4`;
-			chomp($oficina);
-
-			# Incremento el contador de cada oficina.
-			$hashOficinas{$oficina}++;
-			$hashTiempoConversacion{$oficina} += $tiempoConversacion;
-		}
-		close(ENT);
-	}
+	$frefProcesador = procesadorOficinaMasSospechosa(\%hashOficinas, \%hashTiempoConversacion);
+	
+	procesarArchivos($INPUT_CONSULTAS_GLOBAL, \@archivos, $frefProcesador);
 
 	# Selecciona el tipo de ranking que se quiere mostrar.
 	my $input_invalido = 1;
@@ -466,33 +399,15 @@ sub mostrardDestinoMasSospechoso {
 	eko("------- Destinos más sospechosos -------");
 	eko("----------------------------------------");
 
-	# En esta variable voy a ir acumulando los contadores de los destinos.
 	my (@archivos) = @_;
 
 	my %hashLineaDestino;
 	my %hashCodigoPais;
 	my %hashCodigoArea;
 
-	foreach $archivo (@archivos) {
-  		$rutaSospecha = "$INPUT_CONSULTAS_GLOBAL/" . "$archivo";
-
-		open(ENT,"<$rutaSospecha")|| die "NO SE PUEDE REALIZAR LA CONSULTA. No se encontro el archivo $rutaSospecha \n";
-		while($linea = <ENT>){
-			chomp($linea);
-			$destinoSospechoso = obtenerCampo("$linea", "$NUMERO_DESTINO");
-			$codigoPais = obtenerCampo("$linea", "$CODIGO_PAIS_B");
-			$codigoArea = obtenerCampo("$linea", "$COD_AREA_B");
-
-			# Incremento contador de llamadas al nro de linea destino.
-			$hashLineaDestino{$destinoSospechoso}++;
-			#  Si existe en el registro, almaceno el codigo de pais del nro destino.
-			$hashCodigoPais{$destinoSospechoso} = $codigoPais if ($codigoPais ne '');
-			#  Si existe en el registro, almaceno el codigo de area del nro destino.
-			$hashCodigoArea{$destinoSospechoso} = $codigoArea if ($codigoArea ne '');
-
-		}
-		close(ENT);
-	}
+	$frefProcesador = procesadorDestinoMasSospechoso(\%hashLineaDestino, \%hashCodigoPais, \%hashCodigoArea);
+	
+	procesarArchivos($INPUT_CONSULTAS_GLOBAL, \@archivos, $frefProcesador);
 
 	my $puestos_a_mostrar = $CANT_RANKING;
 	# Ordeno las keys del mapa de acuerdo a su valor correspondiente.
