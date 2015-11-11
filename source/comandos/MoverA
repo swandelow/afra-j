@@ -35,7 +35,21 @@ inputPath=$1
 outputPath=$2
 logFile=""
 
-duplicatePath="$outputPath/duplicados"
+last_char=${outputPath: -1}
+
+log "mover" "outputPath: $outputPath" "INFO"
+
+if [ $last_char -eq '/']
+then
+	duplicatePath="$outputPath"duplicados
+	movePath="$outputPath"
+else
+	movePath="$outputPath"/
+	duplicatePath="$outputPath"/duplicados
+fi
+
+
+log "mover" "duplicatePath: $duplicatePath" "INFO"
 
 if [ $# -eq 3 ]
 then
@@ -43,10 +57,12 @@ then
 fi
 
 
-movePath="$outputPath"
+#movePath="$outputPath"
 
 inputFilename=`echo "$inputPath" | sed 's/^.*\/\(.*\)$/\1/'`
 fullMovePath="$movePath$inputFilename"
+
+log "mover" "fullMovePath: $fullMovePath" "INFO"
 
 #valida que la ruta de origen sea distinta de la ruta de destino
 if [ "$inputPath" == "$fullMovePath" ]
@@ -77,8 +93,9 @@ then
 	#si no existe la carpeta dup la crea
 	if [ ! -d "$duplicatePath" ]
 	then
-	
+		#log "mover" "creando carperta $duplicatePath" "INFO"
 		mkdir "$duplicatePath"
+		#log "mover" "asignando permisos a  carperta $duplicatePath" "INFO"
 		chmod +x "$duplicatePath" 
 	fi
 	
